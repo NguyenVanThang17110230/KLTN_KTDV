@@ -4,3 +4,7 @@
 ### Thành viên trong nhóm:
 + Nguyễn Văn Thắng - 17110230
 + Nguyễn Văn Hà - 17110130
+### Công nghệ sự dụng
++ Frontend: NextJs + React
++ Backend: Spring boot(Java)
++ Database: MongoDB
