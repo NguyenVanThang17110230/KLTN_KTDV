@@ -7,7 +7,7 @@ public interface UserService {
 
     User findUserById(Long id);
 
-    User save(User user);
+    User save(User user) throws IllegalArgumentException;
 
     Role save (Role role);
 

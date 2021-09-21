@@ -16,6 +16,6 @@ public class SignInDTO implements Serializable {
     private String username;
 
     @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 6, message = "Password must be at least 8 characters")
     private String password;
 }

@@ -19,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
+import static com.document.manager.dto.constants.Constants.ROLE_USER;
 
 @Service
 @Transactional
@@ -61,9 +63,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User save(User user) {
-        logger.info("Saving new user {} to the database", user.getUsername());
+    public User save(User user) throws IllegalArgumentException {
+        if (userRepo.findByUsername(user.getUsername()) != null) {
+            logger.error("Username {} already exist in database", user.getUsername());
+            throw new IllegalArgumentException("Username already exist");
+        }
+        if (userRepo.findByEmail(user.getEmail()) != null) {
+            logger.error("Email {} already exist in database", user.getUsername());
+            throw new IllegalArgumentException("Email already exist");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        Role role = findRoleByName(ROLE_USER);
+        if (role == null) {
+            role = roleRepo.save(new Role(null, ROLE_USER));
+        }
+        user.setRoles(new ArrayList<>(Collections.singleton(role)));
+        logger.info("Saving new user {} to the database", user.getUsername());
         return userRepo.save(user);
     }
 

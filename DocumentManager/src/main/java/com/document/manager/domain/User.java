@@ -19,9 +19,7 @@ import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity
-@Table
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
 
@@ -49,6 +47,12 @@ public class User implements UserDetails {
 
 //    @OneToMany(mappedBy = "user")
 //    private Set<Report> reports;
+
+
+    public User() {
+        isActive = false;
+        createdStamp = new Timestamp(System.currentTimeMillis());
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
