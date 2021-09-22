@@ -18,11 +18,9 @@ import java.util.Date;
 public class SignUpDTO implements Serializable {
 
     @NotBlank(message = "Code is mandatory")
-    @Column(name = "user_code")
     private String userCode;
 
     @NotBlank(message = "Firstname is mandatory")
-    @Column(name = "first_name")
     private String firstName;
 
     @NotBlank(message = "Lastname is mandatory")

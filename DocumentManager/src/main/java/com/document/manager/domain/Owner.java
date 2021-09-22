@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import java.sql.Timestamp;
 
@@ -23,10 +20,19 @@ public class Owner {
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
+
+    @Column(name = "owner_code")
     private String ownerCode;
+
+    @Column(name = "first_name")
     private String firstName;
+
+    @Column(name = "last_name")
     private String lastName;
+
     private String email;
     private Integer type;
+
+    @Column(name = "created_stamp")
     private Timestamp createdStamp;
 }

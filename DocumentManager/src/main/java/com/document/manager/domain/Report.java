@@ -27,11 +27,16 @@ public class Report {
     private Long id;
     private String title;
     private String note;
+
+    @Column(name = "file_name")
     private String fileName;
+
     private String content;
     private String vector;
     private String link;
     private Double mark;
+
+    @Column(name = "created_stamp")
     private Timestamp createdStamp;
 
     @ManyToMany(fetch = EAGER)
