@@ -2,8 +2,9 @@ package com.document.manager.rest;
 
 
 import com.document.manager.domain.User;
+import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
-import com.document.manager.dto.MailRequest;
+import com.document.manager.dto.ResetPasswordDTO;
 import com.document.manager.dto.SignInDTO;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.mapper.DTOMapper;
@@ -19,12 +20,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
 import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
@@ -49,6 +50,7 @@ public class UserController {
 
     private final MailService mailService;
 
+
     @PostMapping(value = "/sign-in")
     public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) {
         Authentication authentication = authenticationManager
@@ -71,18 +73,11 @@ public class UserController {
             user = userService.save(user);
 
             // Send mail
-            MailRequest mailRequest = new MailRequest("Nguyễn Văn Hà",
-                    "nguyenvanha11899@gmail.com",
-                    "vanha.br@gmail.com",
-                    "Test send mail");
-
             Map<String, Object> mapData = new HashMap<>();
-            mapData.put("Name", mailRequest.getName());
-            mapData.put("location", "Hồ Chí Minh, Việt Nam");
-            mailService.sendMail(mailRequest, mapData);
-            // End send mail
+            mapData.put("link", "www.google.com");
+            mailService.sendMailRegister(user.getEmail(), user.getFirstname() + user.getLastname(), mapData);
 
-            logger.info("User {} sign up success", user.getUsername(), OK);
+            logger.info("User {} sign up success", user.getEmail(), OK);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.toString())
                     .message("Sign up successful")
@@ -97,8 +92,16 @@ public class UserController {
     }
 
     @PatchMapping(value = "/change-password")
-    public ResponseEntity<ResponseData> changePassword(@RequestParam("email") String email, @Validated @RequestBody ChangePasswordDTO changePasswordDTO) {
+    public ResponseEntity<ResponseData> changePassword(@Validated @RequestBody ChangePasswordDTO changePasswordDTO) {
         try {
+            org.springframework.security.core.userdetails.User user =
+                    (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (user == null) {
+                return new ResponseEntity<>(ResponseData.builder()
+                        .status(ERROR.name())
+                        .message("Email of user current not found").build(), BAD_REQUEST);
+            }
+            String email = user.getUsername();
             userService.changePassword(email, changePasswordDTO);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.name())
@@ -110,10 +113,130 @@ public class UserController {
         }
     }
 
+    @PostMapping(value = "/forgot-password")
+    public ResponseEntity<ResponseData> forgotPassword(@RequestParam("email") String email) {
+        if (GenericValidator.isBlankOrNull(email)) {
+            logger.error("Email is empty");
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("Email is not allow empty").build(), BAD_REQUEST);
+        }
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            logger.error("User {} not found", email);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User not found").build(), NOT_FOUND);
+        }
+        // Handle link for reset password
+        String uuid = UUID.randomUUID().toString();
+        UserReference userReference = UserReference
+                .builder().uuid(uuid)
+                .user(user)
+                .createdStamp(new Date()).build();
+
+        userReference = userService.save(userReference);
+
+        if (userReference != null) {
+            // Send mail
+            Map<String, Object> mapData = new HashMap<>();
+            String link = "http://localhost:9000/reset-password?email=" + userReference.getUser().getEmail() + "&uuid=" + uuid;
+            mapData.put("link", link);
+            mailService.sendMailForgotPassword(user.getEmail(), user.getFirstname() + user.getLastname(), mapData);
+        }
+
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Send request forgot password success").build(), OK);
+    }
+
     @PostMapping(value = "/reset-password")
-    public ResponseEntity<ResponseData> resetPassword(@RequestParam("email")) {
+    public ResponseEntity<ResponseData> resetPassword(@RequestParam("email") String email,
+                                                      @RequestParam("uuid") String uuid,
+                                                      @Validated @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        if (GenericValidator.isBlankOrNull(email)) {
+            logger.error("Email is empty", email);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("Email not allow empty").build(), BAD_REQUEST);
+        }
+        if (GenericValidator.isBlankOrNull(uuid)) {
+            logger.error("Code is empty", email);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("Code not allow empty").build(), BAD_REQUEST);
+        }
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            logger.error("User {} not found", email);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User not found").build(), NOT_FOUND);
+        }
+        // Handle reset password
+        UserReference userReference = userService.findByUuid(uuid);
+        if (userReference == null) {
+            logger.error("User reference with uuid {} not found", uuid);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User reference not found").build(), NOT_FOUND);
+        }
+        if (new Date().after(userReference.getExpiredStamp())) {
+            logger.error("User reference with uuid {} was expired", uuid);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User reference was expired").build(), BAD_REQUEST);
+        }
+        if (!resetPasswordDTO.getPassword().equals(resetPasswordDTO.getConfirmPassword())) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("New password and confirm password is not match").build(), BAD_REQUEST);
+        }
+        user.setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
+        userService.save(user);
+        logger.info("Reset password successful");
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Reset password successful").build(), OK);
+    }
 
+    @PostMapping(value = "/resend-email")
+    public ResponseEntity<ResponseData> resendEmail(@RequestParam("email") String email) {
+        if (GenericValidator.isBlankOrNull(email)) {
+            logger.info("Email is empty");
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("Email not allow empty").build(), BAD_REQUEST);
+        }
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            logger.info("User {} not found", email);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User not found").build(), BAD_REQUEST);
+        }
+        List<UserReference> userReferences = userService.findUserReferenceByEmail(email);
+        if (userReferences != null && userReferences.size() > 0) {
+            UserReference userReference = userReferences.stream().sorted().findFirst().get();
+            userService.delete(userReference);
+        }
+        String uuid = UUID.randomUUID().toString();
+        UserReference userReference = UserReference
+                .builder().uuid(uuid)
+                .user(user)
+                .createdStamp(new Date()).build();
 
-        return null;
+        userReference = userService.save(userReference);
+
+        if (userReference != null) {
+            // Send mail
+            Map<String, Object> mapData = new HashMap<>();
+            String link = "http://localhost:9000/reset-password?email=" + userReference.getUser().getEmail() + "&uuid=" + uuid;
+            mapData.put("link", link);
+            mailService.sendMailForgotPassword(user.getEmail(), user.getFirstname() + user.getLastname(), mapData);
+        }
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Resend link to success").build(), OK);
     }
 }

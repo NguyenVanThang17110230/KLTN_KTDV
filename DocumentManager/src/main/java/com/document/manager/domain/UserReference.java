@@ -1,38 +1,35 @@
 package com.document.manager.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
 import java.util.Date;
 
+import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity
-@Table
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-public class Owner {
+@Table(name = "user_reference")
+public class UserReference {
 
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
 
-    @Column(name = "owner_code")
-    private String ownerCode;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
-
-    private String email;
-    private Integer type;
+    private String uuid;
 
     @Column(name = "created_stamp")
     private Date createdStamp;
+
+    @Column(name = "expired_stamp")
+    private Date expiredStamp;
 }

@@ -33,6 +33,7 @@ public class SignUpDTO implements Serializable {
     private Date dob;
 
     @Column(name = "phone_number")
+    @Size(min = 10, max = 10, message = "Phone number must be has 10 characters")
     private String phoneNumber;
 
     @NotBlank

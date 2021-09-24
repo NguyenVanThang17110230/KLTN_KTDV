@@ -3,17 +3,12 @@ package com.document.manager.domain;
 import com.document.manager.dto.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.GenerationType.AUTO;
@@ -21,7 +16,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Entity
 @Data
 @AllArgsConstructor
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue(strategy = AUTO)
@@ -51,10 +46,10 @@ public class User implements UserDetails {
     private Boolean isActive;
 
     @Column(name = "created_stamp")
-    private Timestamp createdStamp;
+    private Date createdStamp;
 
     @Column(name = "modified_stamp")
-    private Timestamp modifiedStamp;
+    private Date modifiedStamp;
 
     @ManyToMany(fetch = EAGER)
     private Collection<Role> roles = new ArrayList<>();

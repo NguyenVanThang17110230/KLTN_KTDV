@@ -3,12 +3,10 @@ package com.document.manager.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static javax.persistence.FetchType.EAGER;
@@ -37,7 +35,7 @@ public class Report {
     private Double mark;
 
     @Column(name = "created_stamp")
-    private Timestamp createdStamp;
+    private Date createdStamp;
 
     @ManyToMany(fetch = EAGER)
     private List<Owner> owners = new ArrayList<>();

@@ -2,7 +2,6 @@ package com.document.manager.jwt;
 
 import com.document.manager.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @NoArgsConstructor
@@ -55,9 +54,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             logger.error("Error logging in: {}", e.getMessage());
             response.setHeader("error", e.getMessage());
-            response.setStatus(FORBIDDEN.value());
+            response.setStatus(UNAUTHORIZED.value());
             Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
+            error.put("error", "Username or password incorrect");
             response.setContentType(APPLICATION_JSON_VALUE);
             new ObjectMapper().writeValue(response.getOutputStream(), error);
         }

@@ -8,5 +8,10 @@ import java.util.Map;
 
 public interface MailService {
 
-    MailResponse sendMail(MailRequest request, Map<String, Object> mapData) throws MessagingException;
+    //MailResponse sendMail(MailRequest request, String templateName, Map<String, Object> mapData) throws MessagingException;
+
+    void sendMailRegister(String to, String name, Map<String, Object> mapData);
+
+    void sendMailForgotPassword(String to, String name, Map<String, Object> mapData);
+
 }

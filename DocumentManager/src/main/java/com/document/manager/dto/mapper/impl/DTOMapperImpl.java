@@ -21,6 +21,9 @@ public class DTOMapperImpl implements DTOMapper {
         if (!GenericValidator.isBlankOrNull(signUpDTO.getFirstName())) {
             user.setFirstname(signUpDTO.getFirstName());
         }
+        if (!GenericValidator.isBlankOrNull(signUpDTO.getLastName())) {
+            user.setLastname(signUpDTO.getLastName());
+        }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getGender())) {
             user.setGender(signUpDTO.getGender().equalsIgnoreCase("Male") ? MALE : FEMALE);
         }
@@ -32,9 +35,6 @@ public class DTOMapperImpl implements DTOMapper {
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getEmail())) {
             user.setEmail(signUpDTO.getEmail());
-        }
-        if (!GenericValidator.isBlankOrNull(signUpDTO.getUsername())) {
-            user.setUsername(signUpDTO.getUsername());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getPassword())) {
             user.setPassword(signUpDTO.getPassword());

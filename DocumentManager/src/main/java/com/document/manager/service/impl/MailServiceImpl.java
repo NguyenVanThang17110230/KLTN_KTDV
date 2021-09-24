@@ -1,13 +1,13 @@
 package com.document.manager.service.impl;
 
-import com.document.manager.dto.MailResponse;
 import com.document.manager.dto.MailRequest;
+import com.document.manager.dto.MailResponse;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,10 +15,13 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class MailServiceImpl implements MailService {
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private JavaMailSender sender;
@@ -26,20 +29,19 @@ public class MailServiceImpl implements MailService {
     @Autowired
     private Configuration configuration;
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Autowired
+    private Environment env;
 
-
-    @Override
-    public MailResponse sendMail(MailRequest request, Map<String, Object> mapData) {
+    public MailResponse sendMail(MailRequest request, String templateName, Map<String, Object> mapData) {
         MailResponse mailResponse = new MailResponse();
         MimeMessage message = sender.createMimeMessage();
         try {
             MimeMessageHelper messageHelper = new MimeMessageHelper(message,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name());
-            messageHelper.addAttachment("logo.png", new ClassPathResource("logo.png"));
+//            messageHelper.addAttachment("logo.png", new ClassPathResource("logo.png"));
 
-            Template template = configuration.getTemplate("email-template.ftl");
+            Template template = configuration.getTemplate(templateName);
             String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, mapData);
 
             messageHelper.setTo(request.getTo());
@@ -57,5 +59,17 @@ public class MailServiceImpl implements MailService {
             mailResponse.setStatus(Boolean.FALSE);
         }
         return mailResponse;
+    }
+
+    @Override
+    public void sendMailRegister(String to, String name, Map<String, Object> mapData) {
+        MailRequest mailRequest = new MailRequest(name, to, env.getProperty("spring.mail.username"), "Xác nhận đăng ký tài khoản");
+        sendMail(mailRequest, "mail-template-register.ftl", mapData);
+    }
+
+    @Override
+    public void sendMailForgotPassword(String to, String name, Map<String, Object> mapData) {
+        MailRequest mailRequest = new MailRequest(name, to, env.getProperty("spring.mail.username"), "Quên mật khẩu");
+        sendMail(mailRequest, "mail-template-forgot-password.ftl", mapData);
     }
 }
