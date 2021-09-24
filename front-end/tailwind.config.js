@@ -5,7 +5,11 @@ module.exports = {
   ],
   darkMode: false, // or 'media' or 'class'
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage:{
+        'background-login': "url('../public/static/img/bg-login.jpg')",
+      }
+    },
   },
   variants: {
     extend: {},
