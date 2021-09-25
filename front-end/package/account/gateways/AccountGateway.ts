@@ -12,7 +12,6 @@ export class AccountGateway{
     public async getLoginUser(): Promise<Account | null> {
         try {
           const resp = await this.restConnector.get('/user/welcome');          
-          console.log('ressss',resp.data);
           return resp.data;
         } catch (e) {
           return null;
