@@ -34,6 +34,7 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequestMapping(value = "/api/user")
 @AllArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -66,10 +67,13 @@ public class UserController {
         org.springframework.security.core.userdetails.User user =
                 (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
         String jwt = tokenProvider.generateToken(user);
+        Map<String, Object> mapData = new HashMap<>();
+        mapData.put("jwt", jwt);
+        mapData.put("roles", user.getAuthorities());
         ResponseData responseData = ResponseData.builder()
                 .status(SUCCESS.toString())
                 .message("Sign in successful")
-                .data(jwt).build();
+                .data(mapData).build();
         logger.info("User {} login success", signInDTO.getUsername());
         return new ResponseEntity<>(responseData, OK);
     }
