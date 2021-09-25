@@ -7,8 +7,11 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage:{
-        'background-login': "url('../public/static/img/bg-login.jpg')",
-      }
+        'background-login': "url('../public/static/img/bg-login.jpg')"
+      },
+      // fontFamily:{
+      //   'body': ['Open Sans', sans-serif]
+      // }
     },
   },
   variants: {

@@ -1,8 +1,9 @@
 import Head from "next/head";
 import Image from "next/image";
-import type { FC, ReactElement } from "react";
+import { FC, ReactElement, useEffect } from "react";
 import UserGuest from "../layouts/UserGuest";
 import { Formik, Field, Form, FormikHelpers } from "formik";
+import {accountService} from "../package/RestConnector"
 
 interface Values {
   email: string;
@@ -10,6 +11,13 @@ interface Values {
 }
 
 const Home = () => {
+
+  useEffect(() => {
+    const data = accountService.getLoginUser()
+    console.log('data',data);
+    
+  }, [])
+
   return (
     <div className="relative z-10 w-full h-full flex items-center justify-center">
       <Formik
@@ -17,14 +25,14 @@ const Home = () => {
           email: "",
           password: "",
         }}
-        onSubmit={(
+        onSubmit={async(
           values: Values,
           { setSubmitting }: FormikHelpers<Values>
         ) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 500);
+          const user = await accountService.loginAdmin({username:values.email,password:values.password}); 
+          console.log('userrrrrrrrrrr',user);
+          
+          
         }}
       >
         <div className="w-full max-w-md">
@@ -38,7 +46,7 @@ const Home = () => {
                 height={250}
               />
             </div> */}
-            <h1 className="text-gray-600 uppercase font-black text-2xl text-center">Đăng Nhập</h1>
+            <h1 className="text-gray-600 font-bold text-2xl text-center">Sign In</h1>
             <div className="mb-4">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
@@ -49,8 +57,9 @@ const Home = () => {
               <Field
                 id="email"
                 name="email"
-                placeholder="John"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="example@hcmute.edu.vn"
+                className="appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm"
+                type="email"
               />
             </div>
             <div className="mb-4">
@@ -58,28 +67,32 @@ const Home = () => {
                 className="block text-gray-700 text-sm font-bold mb-2"
                 htmlFor="password"
               >
-                Mật khẩu
+                Password
               </label>
               <Field
                 id="password"
                 name="password"
-                placeholder="John"
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="********"
+                className="appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm"
+                type="password"
               />
             </div>
             <div className="flex items-center justify-between">
               <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white py-2 px-10 rounded focus:outline-none focus:shadow-outline font-semibold"
                 type="submit"
               >
-                Đăng nhập
+                Sign in
               </button>
               <a
                 className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
                 href="#"
               >
-                Quên mật khẩu?
+                Forgot password?
               </a>
+            </div>
+            <div className="text-center text-sm mt-4 text-gray-500 font-medium">
+              Don&#39;t have an account? <a href="#" className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500"> Sign up</a>
             </div>
           </Form>
         </div>
