@@ -1,6 +1,6 @@
 package com.document.manager.dto.mapper.impl;
 
-import com.document.manager.domain.User;
+import com.document.manager.domain.UserApp;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.mapper.DTOMapper;
 import org.apache.commons.validator.GenericValidator;
@@ -13,32 +13,32 @@ import static com.document.manager.dto.enums.Gender.MALE;
 public class DTOMapperImpl implements DTOMapper {
 
     @Override
-    public User toUser(SignUpDTO signUpDTO) {
-        User user = new User();
+    public UserApp toUser(SignUpDTO signUpDTO) {
+        UserApp userApp = new UserApp();
         if (!GenericValidator.isBlankOrNull(signUpDTO.getUserCode())) {
-            user.setUserCode(signUpDTO.getUserCode());
+            userApp.setUserCode(signUpDTO.getUserCode());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getFirstName())) {
-            user.setFirstname(signUpDTO.getFirstName());
+            userApp.setFirstname(signUpDTO.getFirstName());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getLastName())) {
-            user.setLastname(signUpDTO.getLastName());
+            userApp.setLastname(signUpDTO.getLastName());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getGender())) {
-            user.setGender(signUpDTO.getGender().equalsIgnoreCase("Male") ? MALE : FEMALE);
+            userApp.setGender(signUpDTO.getGender().equalsIgnoreCase("Male") ? MALE : FEMALE);
         }
         if (signUpDTO.getDob() != null) {
-            user.setDob(signUpDTO.getDob());
+            userApp.setDob(signUpDTO.getDob());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getPhoneNumber())) {
-            user.setPhoneNumber(signUpDTO.getPhoneNumber());
+            userApp.setPhoneNumber(signUpDTO.getPhoneNumber());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getEmail())) {
-            user.setEmail(signUpDTO.getEmail());
+            userApp.setEmail(signUpDTO.getEmail());
         }
         if (!GenericValidator.isBlankOrNull(signUpDTO.getPassword())) {
-            user.setPassword(signUpDTO.getPassword());
+            userApp.setPassword(signUpDTO.getPassword());
         }
-        return user;
+        return userApp;
     }
 }

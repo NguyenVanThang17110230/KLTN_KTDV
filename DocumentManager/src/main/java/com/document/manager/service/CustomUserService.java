@@ -1,7 +1,7 @@
 package com.document.manager.service;
 
 import com.document.manager.domain.Role;
-import com.document.manager.domain.User;
+import com.document.manager.domain.UserApp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,12 +18,12 @@ import java.util.List;
 @NoArgsConstructor
 public class CustomUserService implements UserDetails {
 
-    private User user;
+    private UserApp userApp;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-        for (Role role : this.user.getRoles()) {
+        for (Role role : this.userApp.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
         return authorities;

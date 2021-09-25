@@ -1,7 +1,7 @@
 package com.document.manager.service.impl;
 
 import com.document.manager.domain.Role;
-import com.document.manager.domain.User;
+import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
 import com.document.manager.repository.RoleRepo;
@@ -46,19 +46,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        User user = userRepo.findByEmail(username);
-        if (user == null) {
+        UserApp userApp = userRepo.findByEmail(username);
+        if (userApp == null) {
             logger.error("User {} not found", username);
             return null;
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+        userApp.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
+        return new org.springframework.security.core.userdetails.User(userApp.getEmail(), userApp.getPassword(), authorities);
     }
 
     @Override
-    public User findUserById(Long id) {
-        Optional<User> userOptional = userRepo.findById(id);
+    public UserApp findUserById(Long id) {
+        Optional<UserApp> userOptional = userRepo.findById(id);
         if (userOptional.isPresent()) {
             logger.info("User with id {} found", id);
             return userOptional.get();
@@ -68,19 +68,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User save(User user) throws IllegalArgumentException {
-        if (userRepo.findByEmail(user.getEmail()) != null) {
-            logger.error("Email {} already exist in database", user.getEmail());
+    public UserApp save(UserApp userApp) throws IllegalArgumentException {
+        logger.info("Start save user to db");
+        if (userRepo.findByEmail(userApp.getEmail()) != null) {
+            logger.error("Email {} already exist in database", userApp.getEmail());
             throw new IllegalArgumentException("Email already exist");
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        logger.info("Checked user with email {}", userApp.getEmail());
+        userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
+        logger.info("Encode password success", userApp.getEmail());
         Role role = findRoleByName(ROLE_USER);
         if (role == null) {
             role = roleRepo.save(new Role(null, ROLE_USER));
         }
-        user.setRoles(new ArrayList<>(Collections.singleton(role)));
-        logger.info("Saving new user {} to the database", user.getEmail());
-        return userRepo.save(user);
+        userApp.setRoles(new ArrayList<>(Collections.singleton(role)));
+        logger.info("Saving new user {} to the database", userApp.getEmail());
+        return userRepo.save(userApp);
     }
 
     @Override
@@ -105,18 +108,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User findByEmail(String email) throws IllegalArgumentException {
+    public UserApp findByEmail(String email) throws IllegalArgumentException {
         if (GenericValidator.isBlankOrNull(email)) {
             logger.error("Email is empty");
             throw new IllegalArgumentException("Emails are not allowed to be empty");
         }
-        User user = userRepo.findByEmail(email);
-        if (user == null) {
+        UserApp userApp = userRepo.findByEmail(email);
+        if (userApp == null) {
             logger.error("User with email {} not found", email);
             return null;
         }
         logger.info("User with email {} found", email);
-        return user;
+        return userApp;
     }
 
     @Override
@@ -125,8 +128,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             logger.error("Emails are not allowed to be empty");
             throw new IllegalArgumentException("Emails are not allowed to be empty");
         }
-        User user = findByEmail(email);
-        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
+        UserApp userApp = findByEmail(email);
+        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), userApp.getPassword())) {
             logger.error("Old password is incorrect");
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -134,9 +137,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             logger.error("New password and confirm password not match");
             throw new IllegalArgumentException("New password and confirm password not match");
         }
-        user.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
-        logger.info("Change password for user {} success", user.getEmail());
-        save(user);
+        userApp.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+        logger.info("Change password for user {} success", userApp.getEmail());
+        save(userApp);
     }
 
     @Override
@@ -145,7 +148,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         now.plusMinutes(15);
         userReference.setExpiredStamp(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()));
         logger.info("Saving new user reference with uuid {} for user {} to the database",
-                userReference.getUuid(), userReference.getUser().getEmail());
+                userReference.getUuid(), userReference.getUserApp().getEmail());
         return userReferenceRepo.save(userReference);
     }
 
@@ -169,12 +172,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (GenericValidator.isBlankOrNull(email)) {
             return new ArrayList<>();
         }
-        return userReferenceRepo.findByEmail(email);
+        return new ArrayList<>();
+//        return userReferenceRepo.findByEmail(email);
     }
 
     @Override
     public boolean delete(UserReference userReference) {
-        if (userReference == null)  {
+        if (userReference == null) {
             logger.info("Delete user reference success");
             return false;
         }

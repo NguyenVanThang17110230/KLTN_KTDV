@@ -9,14 +9,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import java.io.Serializable;
+
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity
-@Table
+@Table(name = "role")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Role {
+public class Role implements Serializable {
 
     @Id
     @GeneratedValue(strategy = AUTO)

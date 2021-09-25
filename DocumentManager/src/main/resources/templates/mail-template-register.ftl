@@ -11,11 +11,11 @@
 	<div style="padding: 0;background-color: #fafafa;font-family: 'Open Sans', sans-serif;">
             <div>
                 <div style="margin: auto;text-align: center;padding-bottom: 20px;padding-top: 15px;">
-                    <img src="https://fhqx.hcmute.edu.vn/pluginfile.php?file=%2F1%2Ftheme_maker%2Flogo%2F1%2Flogo%20CLC%20%281%29.png"
+                    <img src="src/main/resources/images/logoCLC .png"
                         style="width: 300px;height: 70px;" />
                 </div>
                 <div class="block-center" style="width: 560px;background-color: #fff;color: #000;margin: auto;text-align: center;padding: 30px 20px;box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;">
-                    <img src="https://lvuwnh.stripocdn.email/content/guids/CABINET_81454401935a5244b77154ec71ea461e/images/21491626679172656.png"
+                    <img src="src/main/resources/images/icon.png"
                         style="width: 100px; height: 100px;" />
                     <div class="fullname" style="font-size: 46px;line-height: 55px;font-style: normal;font-weight: bold;color: #333;padding: 15px 0;">
                         Xác thực email

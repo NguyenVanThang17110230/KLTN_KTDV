@@ -1,11 +1,11 @@
 package com.document.manager.repository;
 
-import com.document.manager.domain.User;
+import com.document.manager.domain.UserApp;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepo extends JpaRepository<User, Long> {
+public interface UserRepo extends JpaRepository<UserApp, Long> {
 
-    User findByEmail(String email);
+    UserApp findByEmail(String email);
 
-    User findByUserCode(String code);
+    UserApp findByUserCode(String code);
 }

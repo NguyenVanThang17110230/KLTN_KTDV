@@ -1,7 +1,7 @@
 package com.document.manager.rest;
 
 
-import com.document.manager.domain.User;
+import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
 import com.document.manager.dto.ResetPasswordDTO;
@@ -51,6 +51,14 @@ public class UserController {
     private final MailService mailService;
 
 
+    @GetMapping("/welcome")
+    public ResponseEntity<ResponseData> welcome() {
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.toString())
+                .message("Welcome to my app")
+                .data("Connect success").build(), OK);
+    }
+
     @PostMapping(value = "/sign-in")
     public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) {
         Authentication authentication = authenticationManager
@@ -69,19 +77,21 @@ public class UserController {
     @PostMapping(value = "/sign-up")
     public ResponseEntity<ResponseData> signUp(@Validated @RequestBody SignUpDTO signUpDTO) {
         try {
-            User user = dtoMapper.toUser(signUpDTO);
-            user = userService.save(user);
+            UserApp userApp = dtoMapper.toUser(signUpDTO);
+            logger.info("Convert to entity success");
+            userApp = userService.save(userApp);
+            logger.info("Save user entity success");
 
             // Send mail
             Map<String, Object> mapData = new HashMap<>();
             mapData.put("link", "www.google.com");
-            mailService.sendMailRegister(user.getEmail(), user.getFirstname() + user.getLastname(), mapData);
+            mailService.sendMailRegister(userApp.getEmail(), userApp.getFirstname() + userApp.getLastname(), mapData);
 
-            logger.info("User {} sign up success", user.getEmail(), OK);
+            logger.info("User {} sign up success", userApp.getEmail(), OK);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.toString())
                     .message("Sign up successful")
-                    .data(user).build(), OK);
+                    .data(userApp).build(), OK);
 
         } catch (Exception e) {
             logger.info("User sign up failed");
@@ -121,8 +131,8 @@ public class UserController {
                     .status(ERROR.name())
                     .message("Email is not allow empty").build(), BAD_REQUEST);
         }
-        User user = userService.findByEmail(email);
-        if (user == null) {
+        UserApp userApp = userService.findByEmail(email);
+        if (userApp == null) {
             logger.error("User {} not found", email);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -132,7 +142,7 @@ public class UserController {
         String uuid = UUID.randomUUID().toString();
         UserReference userReference = UserReference
                 .builder().uuid(uuid)
-                .user(user)
+                .userApp(userApp)
                 .createdStamp(new Date()).build();
 
         userReference = userService.save(userReference);
@@ -140,9 +150,9 @@ public class UserController {
         if (userReference != null) {
             // Send mail
             Map<String, Object> mapData = new HashMap<>();
-            String link = "http://localhost:9000/reset-password?email=" + userReference.getUser().getEmail() + "&uuid=" + uuid;
+            String link = "http://localhost:9000/reset-password?email=" + userReference.getUserApp().getEmail() + "&uuid=" + uuid;
             mapData.put("link", link);
-            mailService.sendMailForgotPassword(user.getEmail(), user.getFirstname() + user.getLastname(), mapData);
+            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstname() + userApp.getLastname(), mapData);
         }
 
         return new ResponseEntity<>(ResponseData.builder()
@@ -166,8 +176,8 @@ public class UserController {
                     .status(ERROR.name())
                     .message("Code not allow empty").build(), BAD_REQUEST);
         }
-        User user = userService.findByEmail(email);
-        if (user == null) {
+        UserApp userApp = userService.findByEmail(email);
+        if (userApp == null) {
             logger.error("User {} not found", email);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -192,8 +202,8 @@ public class UserController {
                     .status(ERROR.name())
                     .message("New password and confirm password is not match").build(), BAD_REQUEST);
         }
-        user.setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
-        userService.save(user);
+        userApp.setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
+        userService.save(userApp);
         logger.info("Reset password successful");
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
@@ -208,8 +218,8 @@ public class UserController {
                     .status(ERROR.name())
                     .message("Email not allow empty").build(), BAD_REQUEST);
         }
-        User user = userService.findByEmail(email);
-        if (user == null) {
+        UserApp userApp = userService.findByEmail(email);
+        if (userApp == null) {
             logger.info("User {} not found", email);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -223,7 +233,7 @@ public class UserController {
         String uuid = UUID.randomUUID().toString();
         UserReference userReference = UserReference
                 .builder().uuid(uuid)
-                .user(user)
+                .userApp(userApp)
                 .createdStamp(new Date()).build();
 
         userReference = userService.save(userReference);
@@ -231,9 +241,9 @@ public class UserController {
         if (userReference != null) {
             // Send mail
             Map<String, Object> mapData = new HashMap<>();
-            String link = "http://localhost:9000/reset-password?email=" + userReference.getUser().getEmail() + "&uuid=" + uuid;
+            String link = "http://localhost:9000/reset-password?email=" + userReference.getUserApp().getEmail() + "&uuid=" + uuid;
             mapData.put("link", link);
-            mailService.sendMailForgotPassword(user.getEmail(), user.getFirstname() + user.getLastname(), mapData);
+            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstname() + userApp.getLastname(), mapData);
         }
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())

@@ -6,16 +6,17 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity
-@Table
+@Table(name = "owner")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Owner {
+public class Owner implements Serializable {
 
     @Id
     @GeneratedValue(strategy = AUTO)

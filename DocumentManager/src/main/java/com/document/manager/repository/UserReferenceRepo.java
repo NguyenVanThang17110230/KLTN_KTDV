@@ -8,6 +8,4 @@ import java.util.List;
 public interface UserReferenceRepo extends JpaRepository<UserReference, Long> {
 
     UserReference findByUuid(String uuid);
-
-    List<UserReference> findByEmail(String email);
 }

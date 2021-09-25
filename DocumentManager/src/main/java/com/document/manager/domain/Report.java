@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,11 +15,11 @@ import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.AUTO;
 
 @Entity
-@Table
+@Table(name = "report")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Report {
+public class Report implements Serializable {
 
     @Id
     @GeneratedValue(strategy = AUTO)
@@ -42,5 +43,5 @@ public class Report {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "created_id")
-    private User user;
+    private UserApp userApp;
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.FetchType.LAZY;
@@ -15,7 +16,7 @@ import static javax.persistence.GenerationType.AUTO;
 @Builder
 @AllArgsConstructor
 @Table(name = "user_reference")
-public class UserReference {
+public class UserReference implements Serializable {
 
     @Id
     @GeneratedValue(strategy = AUTO)
@@ -23,7 +24,7 @@ public class UserReference {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserApp userApp;
 
     private String uuid;
 
