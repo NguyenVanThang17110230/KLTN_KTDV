@@ -40,9 +40,6 @@ public class SignUpDTO implements Serializable {
     @Email(message = "Email invalid")
     private String email;
 
-    @NotBlank(message = "Username is mandatory")
-    private String username;
-
     @NotBlank
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;

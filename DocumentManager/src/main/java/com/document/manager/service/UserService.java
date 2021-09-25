@@ -28,4 +28,10 @@ public interface UserService {
     List<UserReference> findUserReferenceByEmail(String email);
 
     boolean delete(UserReference userReference);
+
+    List<UserApp> getUsers();
+
+    UserApp getUserById(Long id);
+
+    UserApp getUserByEmail(String email);
 }

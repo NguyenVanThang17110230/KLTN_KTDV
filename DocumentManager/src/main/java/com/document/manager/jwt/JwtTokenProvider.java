@@ -38,7 +38,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String authToken) {
         try {
-            if (StringUtils.hasText(authToken)) {
+            if (!StringUtils.hasText(authToken)) {
                 return false;
             }
             Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(authToken);

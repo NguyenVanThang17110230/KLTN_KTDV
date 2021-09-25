@@ -55,6 +55,8 @@ public class UserApp implements Serializable {
     private Date modifiedStamp;
 
     @ManyToMany(fetch = EAGER)
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_app_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Collection<Role> roles = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "user")
@@ -65,33 +67,4 @@ public class UserApp implements Serializable {
         isActive = false;
         createdStamp = new Timestamp(System.currentTimeMillis());
     }
-
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-//        for (Role role : this.roles) {
-//            authorities.add(new SimpleGrantedAuthority(role.getName()));
-//        }
-//        return authorities;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return false;
-//    }
 }

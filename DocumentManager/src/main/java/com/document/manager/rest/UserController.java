@@ -12,11 +12,16 @@ import com.document.manager.jwt.JwtTokenProvider;
 import com.document.manager.service.UserService;
 import com.document.manager.service.impl.MailService;
 import com.document.manager.util.ResponseData;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 import lombok.AllArgsConstructor;
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,6 +40,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequestMapping(value = "/api/user")
 @AllArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
+@Api(value = "/api/user", tags = "User Controller")
 public class UserController {
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -53,6 +59,7 @@ public class UserController {
 
 
     @GetMapping("/welcome")
+    @ApiOperation(value = "API test connection")
     public ResponseEntity<ResponseData> welcome() {
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.toString())
@@ -61,9 +68,10 @@ public class UserController {
     }
 
     @PostMapping(value = "/sign-in")
+    @ApiOperation(value = "API sign in")
     public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) {
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(signInDTO.getUsername(), signInDTO.getPassword()));
+                .authenticate(new UsernamePasswordAuthenticationToken(signInDTO.getEmail(), signInDTO.getPassword()));
         org.springframework.security.core.userdetails.User user =
                 (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
         String jwt = tokenProvider.generateToken(user);
@@ -74,11 +82,12 @@ public class UserController {
                 .status(SUCCESS.toString())
                 .message("Sign in successful")
                 .data(mapData).build();
-        logger.info("User {} login success", signInDTO.getUsername());
+        logger.info("User {} login success", signInDTO.getEmail());
         return new ResponseEntity<>(responseData, OK);
     }
 
     @PostMapping(value = "/sign-up")
+    @ApiOperation(value = "API sign up")
     public ResponseEntity<ResponseData> signUp(@Validated @RequestBody SignUpDTO signUpDTO) {
         try {
             UserApp userApp = dtoMapper.toUser(signUpDTO);
@@ -106,6 +115,7 @@ public class UserController {
     }
 
     @PatchMapping(value = "/change-password")
+    @ApiOperation(value = "API change password")
     public ResponseEntity<ResponseData> changePassword(@Validated @RequestBody ChangePasswordDTO changePasswordDTO) {
         try {
             org.springframework.security.core.userdetails.User user =
@@ -128,6 +138,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/forgot-password")
+    @ApiOperation(value = "API send request forgot password")
     public ResponseEntity<ResponseData> forgotPassword(@RequestParam("email") String email) {
         if (GenericValidator.isBlankOrNull(email)) {
             logger.error("Email is empty");
@@ -165,6 +176,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/reset-password")
+    @ApiOperation(value = "API reset password")
     public ResponseEntity<ResponseData> resetPassword(@RequestParam("email") String email,
                                                       @RequestParam("uuid") String uuid,
                                                       @Validated @RequestBody ResetPasswordDTO resetPasswordDTO) {
@@ -215,6 +227,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/resend-email")
+    @ApiOperation(value = "API resend email when request forgot password")
     public ResponseEntity<ResponseData> resendEmail(@RequestParam("email") String email) {
         if (GenericValidator.isBlankOrNull(email)) {
             logger.info("Email is empty");
@@ -252,5 +265,34 @@ public class UserController {
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
                 .message("Resend link to success").build(), OK);
+    }
+
+    @GetMapping(value = "/users")
+    @ApiOperation(value = "API get all users in system")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ResponseData> getUsers() {
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Get all users success")
+                .data(userService.getUsers()).build(), OK);
+    }
+
+    @GetMapping(value = "/users/{id}")
+    @ApiOperation(value = "API get user by id")
+    public ResponseEntity<ResponseData> getUserById(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Get all users success")
+                .data(userService.getUserById(id)).build(), OK);
+    }
+
+    @GetMapping(value = "/users/{email}")
+    @ApiOperation(value = "API get user by email")
+    public ResponseEntity<ResponseData> getUserByEmail(@PathVariable("email") String email) {
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Get all users success")
+                .data(userService.getUserByEmail(email)).build(), OK);
     }
 }

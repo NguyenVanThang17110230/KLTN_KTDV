@@ -74,14 +74,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             logger.error("Email {} already exist in database", userApp.getEmail());
             throw new IllegalArgumentException("Email already exist");
         }
-        logger.info("Checked user with email {}", userApp.getEmail());
         userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
-        logger.info("Encode password success", userApp.getEmail());
-        Role role = findRoleByName(ROLE_USER);
-        if (role == null) {
-            role = roleRepo.save(new Role(null, ROLE_USER));
-        }
-        userApp.setRoles(new ArrayList<>(Collections.singleton(role)));
         logger.info("Saving new user {} to the database", userApp.getEmail());
         return userRepo.save(userApp);
     }
@@ -185,5 +178,37 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         logger.info("Delete user reference success");
         userReferenceRepo.delete(userReference);
         return true;
+    }
+
+    @Override
+    public List<UserApp> getUsers() {
+        logger.info("Get all users");
+        return userRepo.findAll();
+    }
+
+    @Override
+    public UserApp getUserById(Long id) {
+        Optional<UserApp> userApp = userRepo.findById(id);
+        if (!userApp.isPresent()) {
+            logger.info("User with id {} not found", id);
+            return null;
+        }
+        logger.info("User with id {} found", id);
+        return userApp.get();
+    }
+
+    @Override
+    public UserApp getUserByEmail(String email) {
+        if (GenericValidator.isBlankOrNull(email)) {
+            logger.error("Email is empty");
+            return null;
+        }
+        UserApp userApp = userRepo.findByEmail(email);
+        if (userApp == null) {
+            logger.error("User with email {} not found", email);
+            return null;
+        }
+        logger.info("User with email {} found", email);
+        return userApp;
     }
 }
