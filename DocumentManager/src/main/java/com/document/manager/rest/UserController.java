@@ -3,24 +3,18 @@ package com.document.manager.rest;
 
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
-import com.document.manager.dto.ChangePasswordDTO;
-import com.document.manager.dto.ResetPasswordDTO;
-import com.document.manager.dto.SignInDTO;
-import com.document.manager.dto.SignUpDTO;
+import com.document.manager.dto.*;
 import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.jwt.JwtTokenProvider;
 import com.document.manager.service.UserService;
 import com.document.manager.service.impl.MailService;
-import com.document.manager.util.ResponseData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
 import lombok.AllArgsConstructor;
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -267,10 +261,9 @@ public class UserController {
                 .message("Resend link to success").build(), OK);
     }
 
-    @GetMapping(value = "/users")
-    @ApiOperation(value = "API get all users in system")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PostAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping
+    @ApiOperation(value = "API get all users in system")
     public ResponseEntity<ResponseData> getUsers() {
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
@@ -278,7 +271,7 @@ public class UserController {
                 .data(userService.getUsers()).build(), OK);
     }
 
-    @GetMapping(value = "/users/{id}")
+    @GetMapping(value = "/{id}")
     @ApiOperation(value = "API get user by id")
     public ResponseEntity<ResponseData> getUserById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(ResponseData.builder()
@@ -287,7 +280,7 @@ public class UserController {
                 .data(userService.getUserById(id)).build(), OK);
     }
 
-    @GetMapping(value = "/users/{email}")
+    @GetMapping(value = "/{email}")
     @ApiOperation(value = "API get user by email")
     public ResponseEntity<ResponseData> getUserByEmail(@PathVariable("email") String email) {
         return new ResponseEntity<>(ResponseData.builder()
@@ -295,4 +288,73 @@ public class UserController {
                 .message("Get all users success")
                 .data(userService.getUserByEmail(email)).build(), OK);
     }
+
+    @PatchMapping(value = "/{id}")
+    @ApiOperation(value = "API update user information")
+    public ResponseEntity<ResponseData> updateUserInfo(@PathVariable("id") Long userId, @RequestBody UserInfoDTO userInfoDTO) {
+        UserApp userApp = userService.findUserById(userId);
+        if (userApp == null) {
+            logger.error("User with id {} not found", userId);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User with id " + userId + " not found").build(), BAD_REQUEST);
+        }
+        if (userInfoDTO == null) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("Data is null").build(), BAD_REQUEST);
+        }
+        userApp = userService.updateUserInfo(userInfoDTO, userApp);
+        if (userApp == null) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("Update user information failed").build(), BAD_REQUEST);
+        }
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Update user information successful")
+                .data(userApp).build(), OK);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PatchMapping(value = "/lock/{id}")
+    @ApiOperation(value = "API lock account (set is_active = false)")
+    public ResponseEntity<ResponseData> lockAccount(@PathVariable("id") Long userId) {
+        UserApp userApp = userService.findUserById(userId);
+        if (userApp == null) {
+            logger.error("User with id {} not found", userId);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User with id " + userId + " not found").build(), BAD_REQUEST);
+        }
+        userApp.setIsActive(Boolean.FALSE);
+        userService.save(userApp);
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.name())
+                .message("Locked account success").build(), OK);
+    }
+
+    @GetMapping(value = "info")
+    @ApiOperation(value = "API get information of user current")
+    public ResponseEntity<ResponseData> getUserInfoCurrent() {
+        org.springframework.security.core.userdetails.User user =
+                (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user == null) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User current not found").build(), BAD_REQUEST);
+        }
+        String email = user.getUsername();
+        UserApp userApp = userService.findByEmail(email);
+        if (userApp == null) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message("User current not found").build(), BAD_REQUEST);
+        }
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(ERROR.name())
+                .message("Get user info current success")
+                .data(userApp).build(), BAD_REQUEST);
+    }
+
 }

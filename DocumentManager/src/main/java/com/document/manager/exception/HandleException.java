@@ -1,7 +1,7 @@
 package com.document.manager.exception;
 
 import com.document.manager.dto.enums.ResponseDataStatus;
-import com.document.manager.util.ResponseData;
+import com.document.manager.dto.ResponseData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

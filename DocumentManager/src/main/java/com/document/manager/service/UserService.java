@@ -4,6 +4,7 @@ import com.document.manager.domain.Role;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
+import com.document.manager.dto.UserInfoDTO;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface UserService {
     UserApp getUserById(Long id);
 
     UserApp getUserByEmail(String email);
+
+    UserApp updateUserInfo(UserInfoDTO userInfoDTO, UserApp userApp);
 }

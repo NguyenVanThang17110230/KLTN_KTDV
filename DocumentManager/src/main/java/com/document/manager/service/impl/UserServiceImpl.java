@@ -4,6 +4,7 @@ import com.document.manager.domain.Role;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
+import com.document.manager.dto.UserInfoDTO;
 import com.document.manager.repository.RoleRepo;
 import com.document.manager.repository.UserReferenceRepo;
 import com.document.manager.repository.UserRepo;
@@ -23,7 +24,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
-import static com.document.manager.dto.constants.Constants.ROLE_USER;
+import static com.document.manager.dto.enums.Gender.FEMALE;
+import static com.document.manager.dto.enums.Gender.MALE;
 
 @Service
 @Transactional
@@ -210,5 +212,30 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         logger.info("User with email {} found", email);
         return userApp;
+    }
+
+    @Override
+    public UserApp updateUserInfo(UserInfoDTO userInfoDTO, UserApp userApp) {
+        if (userInfoDTO == null || userApp == null) {
+            logger.error("Data invalid");
+            return null;
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getUserCode())) {
+            userApp.setUserCode(userInfoDTO.getUserCode());
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getFirstName())) {
+            userApp.setFirstname(userInfoDTO.getFirstName());
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getLastName())) {
+            userApp.setLastname(userInfoDTO.getLastName());
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getGender())) {
+            userApp.setGender(userInfoDTO.getGender().equalsIgnoreCase(MALE.toString()) ? MALE : FEMALE);
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getPhoneNumber())) {
+            userApp.setPhoneNumber(userInfoDTO.getPhoneNumber());
+        }
+        logger.error("Update user info success");
+        return save(userApp);
     }
 }

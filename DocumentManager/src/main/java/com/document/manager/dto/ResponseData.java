@@ -1,4 +1,4 @@
-package com.document.manager.util;
+package com.document.manager.dto;
 
 import lombok.*;
 

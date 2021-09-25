@@ -61,10 +61,9 @@ public class UserApp implements Serializable {
 
 //    @OneToMany(mappedBy = "user")
 //    private Set<Report> reports;
-
-
+    
     public UserApp() {
-        isActive = false;
+        isActive = true;
         createdStamp = new Timestamp(System.currentTimeMillis());
     }
 }

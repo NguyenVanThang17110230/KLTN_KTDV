@@ -1,4 +1,4 @@
-package com.document.manager.security;
+package com.document.manager.config.security;
 
 import com.document.manager.jwt.JwtAuthenticationFilter;
 import com.google.common.collect.ImmutableList;
