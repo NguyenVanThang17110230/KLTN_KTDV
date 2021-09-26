@@ -8,8 +8,8 @@ export class AccountService{
   constructor(options: {accountGateway: AccountGateway}) {
     this.accountGateway = options.accountGateway;
   }
-  public async getLoginUser(): Promise<Account | null> {
-    return this.accountGateway.getLoginUser();
+  public async wellcomeLoginUser(): Promise<Account | null> {
+    return this.accountGateway.wellcomeLoginUser();
   }
 
   public async loginAdmin(body:{

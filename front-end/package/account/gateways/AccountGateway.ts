@@ -9,7 +9,7 @@ export class AccountGateway{
         this.restConnector = options.restConnector;
     }
 
-    public async getLoginUser(): Promise<Account | null> {
+    public async wellcomeLoginUser(): Promise<Account | null> {
         try {
           const resp = await this.restConnector.get('/user/welcome');          
           return resp.data;
