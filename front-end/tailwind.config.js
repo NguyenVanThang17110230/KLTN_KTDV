@@ -15,7 +15,10 @@ module.exports = {
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      textColor: ['responsive', 'hover', 'focus', 'group-hover'],
+      gradientColorStops: ['responsive', 'hover', 'focus','active', 'group-hover']
+    },
   },
   plugins: [],
 }

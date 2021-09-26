@@ -1,9 +1,6 @@
-import Head from "next/head";
-import React, { FC, ReactNode } from "react";
 
-interface Props {
-  children?: ReactNode;
-}
+import React, { FC } from "react";
+import { Props } from "../package/Model";
 
 const UserGuest: FC = ({ children }: Props) => {
   return (
