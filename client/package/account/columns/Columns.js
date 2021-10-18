@@ -16,8 +16,8 @@ export const COLUMN_ACOUNT =[
         accessor:'dob'
     },
     {
-        Header: 'Sex',
-        accessor:'sex'
+        Header: 'Gender',
+        accessor:'gender'
     },
     {
         Header: 'Email',
