@@ -3,8 +3,8 @@ import UserDropdown from "../UserDropdown/UserDropdown";
 
 const Header = () => {
   return (
-    <nav className="w-full bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center p-4 h-20 border-b">
-      <div className="w-full h-full mx-auto items-center flex justify-between md:flex-nowrap flex-wrap md:px-10 px-4">
+    <nav className="w-full bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center px-20 py-4 h-20 border-b border-gray-400">
+      <div className="w-full h-full mx-auto items-center flex justify-between md:flex-nowrap flex-wrap">
         {/* Brand */}
         <a
           className="text-black text-sm uppercase lg:inline-block font-semibold"

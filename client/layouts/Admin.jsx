@@ -7,7 +7,7 @@ import { Props } from "../package/Model";
 export const AdminLayout = ({ children }) => {
   return (
     <>
-      <div className="relative md:ml-64 bg-blueGray-100 h-screen">
+      <div className="relative md:ml-64 bg-gray-100 h-full">
         <SidebarAdmin />
         <Header />
         <div className="w-full">
