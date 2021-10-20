@@ -1,5 +1,6 @@
 import Head from "next/head";
 import React, { useEffect } from "react";
+import Link from 'next/link'
 import UserGuest from "../../layouts/UserGuest";
 import { Formik, Field, Form, FormikHelpers, FormikProps } from "formik";
 import { accountService } from "../../package/RestConnector";
@@ -19,7 +20,10 @@ const Login = () => {
     try {
       console.log('aloooo');
       const user = await accountService.loginAdmin(values);
-      console.log("userrrrrrrrrrr", user);
+      const jwt = user.data.jwt
+      console.log('user',user);
+      
+      
     } catch (err) {
       console.log('agugu');
       actions.setSubmitting(false);
@@ -95,6 +99,7 @@ const Login = () => {
               </div>
               <div className="text-center text-sm mt-4 text-gray-500 font-medium">
                 Don&#39;t have an account?{" "}
+                <Link href="/signup">
                 <a
                   href="#"
                   className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500"
@@ -102,6 +107,8 @@ const Login = () => {
                   {" "}
                   Sign up
                 </a>
+                </Link>
+                
               </div>
             </Form>
           </div>

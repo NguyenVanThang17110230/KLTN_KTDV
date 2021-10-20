@@ -1,17 +1,23 @@
-import React from "react";
+import React,{useEffect,useState} from "react";
 import UserDropdown from "../UserDropdown/UserDropdown";
 
 const Header = () => {
+  const [title,setTitle] = useState(null)
+  useEffect(()=>{
+    if (process.browser) {
+      setTitle(document.title);
+     }
+  })
   return (
-    <nav className="w-full bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center px-20 py-4 h-20 border-b border-gray-400">
+    <nav className="w-full bg-transparent md:flex-row md:flex-nowrap md:justify-start flex items-center px-20 py-4 h-20 border-b-2 border-gray-400">
       <div className="w-full h-full mx-auto items-center flex justify-between md:flex-nowrap flex-wrap">
         {/* Brand */}
         <a
-          className="text-black text-sm uppercase lg:inline-block font-semibold"
+          className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500 text-xl uppercase lg:inline-block font-semibold cursor-default"
           href="#pablo"
           onClick={(e) => e.preventDefault()}
         >
-          Dashboard
+         {title}
         </a>
         {/* Form */}
         <form className="md:flex flex-row flex-wrap items-center lg:ml-auto mr-3">
