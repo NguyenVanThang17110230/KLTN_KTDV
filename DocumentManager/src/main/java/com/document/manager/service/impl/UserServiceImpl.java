@@ -1,6 +1,6 @@
 package com.document.manager.service.impl;
 
-import com.document.manager.domain.Role;
+import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return null;
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        userApp.getRoles().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
+        userApp.getRoleApps().forEach(role -> authorities.add(new SimpleGrantedAuthority(role.getName())));
         return new org.springframework.security.core.userdetails.User(userApp.getEmail(), userApp.getPassword(), authorities);
     }
 
@@ -82,18 +82,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Role save(Role role) {
+    public RoleApp save(RoleApp role) {
         logger.info("Saving new role {} to the database", role.getName());
         return roleRepo.save(role);
     }
 
     @Override
-    public Role findRoleByName(String roleName) throws IllegalArgumentException {
+    public RoleApp findRoleByName(String roleName) throws IllegalArgumentException {
         if (GenericValidator.isBlankOrNull(roleName)) {
             logger.error("Role name is empty");
             throw new IllegalArgumentException("Role name not allowed empty");
         }
-        Role role = roleRepo.findByName(roleName);
+        RoleApp role = roleRepo.findByName(roleName);
         if (role == null) {
             logger.error("Role {} not found", roleName);
             return null;

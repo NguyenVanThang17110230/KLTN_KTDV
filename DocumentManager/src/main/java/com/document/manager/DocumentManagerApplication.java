@@ -1,6 +1,6 @@
 package com.document.manager;
 
-import com.document.manager.domain.Role;
+import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.dto.enums.Gender;
 import com.document.manager.service.UserService;
@@ -22,8 +22,8 @@ public class DocumentManagerApplication {
     @Bean
     CommandLineRunner run(UserService userService) throws Exception {
         return args -> {
-            Role roleAdmin = new Role(null, "ROLE_ADMIN");
-            Role roleUser = new Role(null, "ROLE_USER");
+            RoleApp roleAdmin = new RoleApp(null, "ROLE_ADMIN");
+            RoleApp roleUser = new RoleApp(null, "ROLE_USER");
 
             if (userService.findRoleByName("ROLE_USER") == null) {
                 userService.save(roleUser);
@@ -32,7 +32,7 @@ public class DocumentManagerApplication {
                 userService.save(roleAdmin);
             }
             if (userService.findByEmail("admin@yopmail.com") == null) {
-                List<Role> roles = new ArrayList<>();
+                List<RoleApp> roles = new ArrayList<>();
                 roles.add(roleAdmin);
                 roles.add(roleUser);
 
@@ -51,7 +51,7 @@ public class DocumentManagerApplication {
                         roles));
             }
             if (userService.findByEmail("user@yopmail.com") == null) {
-                List<Role> roles = new ArrayList<>();
+                List<RoleApp> roles = new ArrayList<>();
                 roles.add(roleUser);
 
                 userService.save(new UserApp(null,

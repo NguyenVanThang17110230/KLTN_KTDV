@@ -57,7 +57,7 @@ public class UserApp implements Serializable {
     @ManyToMany(fetch = EAGER)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_app_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Collection<Role> roles = new ArrayList<>();
+    private Collection<RoleApp> roleApps = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "user")
 //    private Set<Report> reports;
