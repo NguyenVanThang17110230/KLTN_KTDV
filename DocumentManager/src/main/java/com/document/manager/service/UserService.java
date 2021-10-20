@@ -1,6 +1,6 @@
 package com.document.manager.service;
 
-import com.document.manager.domain.Role;
+import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.ChangePasswordDTO;
@@ -14,9 +14,9 @@ public interface UserService {
 
     UserApp save(UserApp userApp) throws IllegalArgumentException;
 
-    Role save(Role role);
+    RoleApp save(RoleApp role);
 
-    Role findRoleByName(String roleName) throws IllegalArgumentException;
+    RoleApp findRoleByName(String roleName) throws IllegalArgumentException;
 
     UserApp findByEmail(String email) throws IllegalArgumentException;
 
