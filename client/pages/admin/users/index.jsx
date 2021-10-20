@@ -18,12 +18,12 @@ export default function ManagerUsers() {
     usePagination
   );
 
-  const { 
-    getTableProps, 
-    getTableBodyProps, 
+  const {
+    getTableProps,
+    getTableBodyProps,
     headerGroups,
     rows,
-    prepareRow, 
+    prepareRow,
     page,
     canPreviousPage,
     canNextPage,
@@ -33,8 +33,8 @@ export default function ManagerUsers() {
     nextPage,
     previousPage,
     setPageSize,
-    state: { pageIndex, pageSize }
-    } = tableInstance;
+    state: { pageIndex, pageSize },
+  } = tableInstance;
 
   return (
     <div className="px-20 py-10">
@@ -73,53 +73,74 @@ export default function ManagerUsers() {
           </tbody>
         </table>
 
-        
-
         <div className="pagination flex items-center justify-center mt-3">
-        <button className='p-3 bg-gray-500 disabled:opacity-50 border-2 border-black' onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-          {'First'}
-        </button>{' '}
-        <button className='p-3 bg-gray-500 disabled:opacity-50' onClick={() => previousPage()} disabled={!canPreviousPage}>
-          {'<'}
-        </button>{' '}
-        <button className='p-3 bg-gray-500 disabled:opacity-50' onClick={() => nextPage()} disabled={!canNextPage}>
-          {'>'}
-        </button>{' '}
-        <button className='p-3 bg-gray-500 disabled:opacity-50' onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
-          {'Last'}
-        </button>{' '}
-        <span>
-          Page{' '}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{' '}
-        </span>
-        <span>
-          | Go to page:{' '}
-          <input
-            type="number"
-            className="border-2"
-            defaultValue={pageIndex + 1}
-            onChange={e => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0
-              gotoPage(page)
+          <button
+            className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-2 rounded-l-lg ro border-yellow-500"
+            onClick={() => gotoPage(0)}
+            disabled={!canPreviousPage}
+          >
+            {"First"}
+          </button>{" "}
+          <button
+            className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-t-2 border-b-2 border-r-2 border-yellow-500"
+            onClick={() => previousPage()}
+            disabled={!canPreviousPage}
+          >
+            {"<"}
+          </button>{" "}
+          <div className="border-t-2 border-b-2 border-yellow-500">
+          <span className="py-3 border-r-2 border-yellow-500 px-3">
+            Page{" "}
+            <strong>
+              {pageIndex + 1} of {pageOptions.length}
+            </strong>{" "}
+          </span>
+          
+          <span className="py-3 border-r-2 border-yellow-500 px-3">
+            Go to page:{" "}
+            <input
+              type="number"
+              className="border-2 border-yellow-500"
+              defaultValue={pageIndex + 1}
+              onChange={(e) => {
+                const page = e.target.value ? Number(e.target.value) - 1 : 0;
+                gotoPage(page);
+              }}
+              style={{ width: "100px" }}
+            />
+          </span>{" "}
+
+          <select
+            className="p-3 focus:outline-none"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
             }}
-            style={{ width: '100px' }}
-          />
-        </span>{' '}
-        <select
-          value={pageSize}
-          onChange={e => {
-            setPageSize(Number(e.target.value))
-          }}
-        >
-          {[10, 20, 30, 40, 50].map(pageSize => (
-            <option key={pageSize} value={pageSize}>
-              Show {pageSize}
-            </option>
-          ))}
-        </select>
-      </div>
+          >
+            {[10, 20, 30, 40, 50].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                Show {pageSize}
+              </option>
+            ))}
+          </select>
+          </div>
+          
+          
+          <button
+            className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-t-2 border-b-2 border-l-2 border-yellow-500"
+            onClick={() => nextPage()}
+            disabled={!canNextPage}
+          >
+            {">"}
+          </button>{" "}
+          <button
+            className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-2 rounded-r-lg ro border-yellow-500"
+            onClick={() => gotoPage(pageCount - 1)}
+            disabled={!canNextPage}
+          >
+            {"Last"}
+          </button>{" "}
+        </div>
       </div>
     </div>
   );

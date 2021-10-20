@@ -15,7 +15,8 @@ module.exports = {
     extend: {
       textColor: ['responsive', 'hover', 'focus', 'group-hover'],
       opacity:['responsive', 'hover', 'focus', 'group-hover','disabled'],
-      gradientColorStops: ['responsive', 'hover', 'focus','active', 'group-hover']
+      gradientColorStops: ['responsive', 'hover', 'focus','active', 'group-hover'],
+      cursor:['responsive', 'hover', 'focus', 'group-hover','disabled']
     },
   },
   plugins: [],

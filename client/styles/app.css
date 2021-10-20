@@ -2,3 +2,33 @@ body{
     font-family: 'Open Sans', sans-serif;
     background-color: #f3f4f6;
 }
+#list-doc .react-pdf__Page__canvas{
+    width: 100% !important;
+    height: 550px !important;
+}
+#list-doc .react-pdf__Page__textContent{
+    width: 100% !important;
+    height: 100% !important;
+}
+#list-doc .react-pdf__Document{
+    height: 100% !important;
+}
+#list-doc .react-pdf__Page{
+    height: 100% !important;
+}
+
+.react-pdf__Page__canvas{
+    width: 100% !important;
+    height: 100% !important;
+}
+.react-pdf__Page__textContent{
+    width: 100% !important;
+    height: 100% !important;
+}
+.react-pdf__Document{
+    height: 100% !important;
+}
+.react-pdf__Page{
+    height: 100% !important;
+}
+

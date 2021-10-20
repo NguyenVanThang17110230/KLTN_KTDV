@@ -2,29 +2,76 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-
 const menuItem = [
   {
     link: "/dashboard",
     label: "Dashboard",
-    icon: "fas fa-tv",
-  }
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="icon icon-tabler icon-tabler-home"
+        width={26}
+        height={26}
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="#ffffff"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <polyline points="5 12 3 12 12 3 21 12 19 12" />
+        <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+        <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+      </svg>
+    ),
+  },
+  {
+    link: "/document",
+    label: "Document",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="icon icon-tabler icon-tabler-report"
+        width={26}
+        height={26}
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="#ffffff"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697" />
+        <path d="M18 14v4h4" />
+        <path d="M18 11v-4a2 2 0 0 0 -2 -2h-2" />
+        <rect x={8} y={3} width={6} height={4} rx={2} />
+        <circle cx={18} cy={18} r={4} />
+        <path d="M8 11h4" />
+        <path d="M8 15h3" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
 
-  const getSidebarClass = (path) =>{
-    const matched = path === 'admin'? router.pathname === path : router.pathname.match(new RegExp(`^${path}($|/.*)`));
-    return (
-      matched ? 'text-gray-800 hover:text-lightBlue-600 bg-white rounded-md shadow' : 'text-Gray-500 hover:text-blueGray-500'
-    )
-  }
+  const getSidebarClass = (path) => {
+    const matched =
+      path === "admin"
+        ? router.pathname === path
+        : router.pathname.match(new RegExp(`^${path}($|/.*)`));
+    return matched
+      ? "text-gray-800 hover:text-lightBlue-600 bg-white rounded-md shadow"
+      : "text-Gray-500 hover:text-blueGray-500";
+  };
 
   return (
     <>
-      <nav className="md:left-0 md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden shadow bg-gray-100 flex flex-wrap items-center justify-between relative md:w-64 z-10 py-4 px-6">
+      <nav className="md:left-0 md:block md:fixed md:top-0 md:bottom-0 md:overflow-y-auto md:flex-row md:flex-nowrap md:overflow-hidden shadow bg-gray-800 flex flex-wrap items-center justify-between relative md:w-64 z-10 py-4 px-6">
         <div className="md:flex-col md:items-stretch md:min-h-full md:flex-nowrap px-0 flex flex-wrap items-center justify-between w-full mx-auto text-gray-500">
           {/* Toggler */}
           <button
@@ -38,9 +85,9 @@ export default function Sidebar() {
           <Link href="/">
             <a
               href="#pablo"
-              className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
+              className="md:block text-left text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-5 px-0 border-b-2"
             >
-              Notus NextJS
+              Check duplicate
             </a>
           </Link>
           {/* User */}
@@ -63,7 +110,7 @@ export default function Sidebar() {
                       href="#pablo"
                       className="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
                     >
-                      Notus NextJS
+                      Check duplicate
                     </a>
                   </Link>
                 </div>
@@ -88,9 +135,6 @@ export default function Sidebar() {
                 />
               </div>
             </form>
-
-            {/* Divider */}
-            <hr className="my-4 md:min-w-full" />
             {/* Heading */}
             <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
               Admin Layout Pages
@@ -98,7 +142,7 @@ export default function Sidebar() {
             {/* Navigation */}
 
             <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-              {menuItem.map((item,index) => (
+              {menuItem.map((item, index) => (
                 <li className="items-center" key={index}>
                   <Link href={item.link}>
                     <a
@@ -109,32 +153,8 @@ export default function Sidebar() {
                       }
                     >
                       <div className="bg-gradient-to-r from-pink-500 to-yellow-500 rounded-md p-1 mr-1 ">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="icon icon-tabler icon-tabler-home"
-                          width={26}
-                          height={26}
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="#ffffff"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <polyline points="5 12 3 12 12 3 21 12 19 12" />
-                          <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-                          <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-                        </svg>
+                        {item.icon}
                       </div>
-                      {/* <i
-                        className={
-                          `${item.icon} mr-2 text-sm` +
-                          (router.pathname.indexOf("/dashboard") !== -1
-                            ? "opacity-75"
-                            : "text-blueGray-300")
-                        }
-                      ></i>{" "} */}
                       {item.label}
                     </a>
                   </Link>

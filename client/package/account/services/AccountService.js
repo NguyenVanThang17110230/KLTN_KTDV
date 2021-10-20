@@ -9,6 +9,8 @@ export default class AccountService{
   }
 
   async loginAdmin({email,password}) {
-    return this.accountGateway.loginAdmin({email,password});
+    const token = await this.accountGateway.loginAdmin({email,password});
+    this.accountGateway.setAccessToken(token.data.jwt);
+    return this.accountGateway.getUserAfterLogin();
   }
 }
