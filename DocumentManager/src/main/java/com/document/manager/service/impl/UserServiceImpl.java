@@ -3,11 +3,13 @@ package com.document.manager.service.impl;
 import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
+import com.document.manager.domain.UsersRoles;
 import com.document.manager.dto.ChangePasswordDTO;
 import com.document.manager.dto.UserInfoDTO;
 import com.document.manager.repository.RoleRepo;
 import com.document.manager.repository.UserReferenceRepo;
 import com.document.manager.repository.UserRepo;
+import com.document.manager.repository.UsersRolesRepo;
 import com.document.manager.service.UserService;
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.document.manager.dto.enums.Gender.FEMALE;
 import static com.document.manager.dto.enums.Gender.MALE;
@@ -44,6 +47,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UsersRolesRepo usersRolesRepo;
 
 
     @Override
@@ -237,5 +243,21 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         logger.error("Update user info success");
         return save(userApp);
+    }
+
+    @Override
+    public List<RoleApp> getRoles(Long userId) {
+        List<RoleApp> roleApps = new ArrayList<>();
+        List<UsersRoles> usersRoles = usersRolesRepo.findUsersRolesByUserAppId(userId);
+        if (usersRoles == null || usersRoles.size() <= 0 ) {
+            return roleApps;
+        }
+        for (UsersRoles userRole: usersRoles) {
+            Optional<RoleApp> roleApp = roleRepo.findById(userRole.getRoleId());
+            if (roleApp.isPresent()) {
+                roleApps.add(roleApp.get());
+            }
+        }
+        return roleApps;
     }
 }
