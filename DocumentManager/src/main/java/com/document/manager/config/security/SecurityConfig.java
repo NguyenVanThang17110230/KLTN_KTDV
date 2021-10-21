@@ -77,7 +77,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         String[] NON_AUTHENTICATION_ENDPOINT = {
                 "/api/user/welcome",
                 "/api/user/sign-in",
-                "/api/user/sign-up"
+                "/api/user/sign-up",
+                "/api/user/data"
         };
 
         http.cors()
