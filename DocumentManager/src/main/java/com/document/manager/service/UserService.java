@@ -37,4 +37,6 @@ public interface UserService {
     UserApp getUserByEmail(String email);
 
     UserApp updateUserInfo(UserInfoDTO userInfoDTO, UserApp userApp);
+
+    List<RoleApp> getRoles(Long userId);
 }

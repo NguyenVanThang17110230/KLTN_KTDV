@@ -1,9 +1,11 @@
 package com.document.manager.rest.user;
 
 
+import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.*;
+import com.document.manager.dto.enums.Gender;
 import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.jwt.JwtTokenProvider;
 import com.document.manager.service.UserService;
@@ -62,6 +64,61 @@ public class UserController {
                 .data("Connect success").build(), OK);
     }
 
+    @GetMapping("/data")
+    @ApiOperation(value = "API create data default")
+    public ResponseEntity<ResponseData> createData() {
+
+        RoleApp roleAdmin = new RoleApp(null, "ROLE_ADMIN");
+            RoleApp roleUser = new RoleApp(null, "ROLE_USER");
+
+            if (userService.findRoleByName("ROLE_USER") == null) {
+                userService.save(roleUser);
+            }
+            if (userService.findRoleByName("ROLE_ADMIN") == null) {
+                userService.save(roleAdmin);
+            }
+            if (userService.findByEmail("admin@yopmail.com") == null) {
+                List<RoleApp> roles = new ArrayList<>();
+                roles.add(roleAdmin);
+                roles.add(roleUser);
+
+                userService.save(new UserApp(1L,
+                        "10000000",
+                        "A",
+                        "Admin",
+                        Gender.MALE,
+                        new Date("01/01/1999"),
+                        "1111111111",
+                        "admin@yopmail.com",
+                        "12345678",
+                        true,
+                        new Date(),
+                        null,
+                        roles));
+            }
+            if (userService.findByEmail("user@yopmail.com") == null) {
+                List<RoleApp> roles = new ArrayList<>();
+                roles.add(roleUser);
+
+                userService.save(new UserApp(2L,
+                        "10000001",
+                        "U",
+                        "User",
+                        Gender.MALE,
+                        new Date("02/02/2000"),
+                        "2222222222",
+                        "user@yopmail.com",
+                        "12345678",
+                        true,
+                        new Date(),
+                        null,
+                        roles));
+            }
+        return new ResponseEntity<>(ResponseData.builder()
+                .status(SUCCESS.toString())
+                .message("Create data successful").build(), OK);
+    }
+
     @PostMapping(value = "/sign-in")
     @ApiOperation(value = "API sign in")
     public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) {
@@ -69,10 +126,16 @@ public class UserController {
                 .authenticate(new UsernamePasswordAuthenticationToken(signInDTO.getEmail(), signInDTO.getPassword()));
         org.springframework.security.core.userdetails.User user =
                 (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        UserApp userApp = userService.getUserByEmail(user.getUsername());
+        if (userApp == null) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.toString())
+                    .message("User with email " + user.getUsername() +" not found").build(), BAD_REQUEST);
+        }
         String jwt = tokenProvider.generateToken(user);
         Map<String, Object> mapData = new HashMap<>();
         mapData.put("jwt", jwt);
-        mapData.put("roles", user.getAuthorities());
+        mapData.put("roles", userService.getRoles(userApp.getId()));
         ResponseData responseData = ResponseData.builder()
                 .status(SUCCESS.toString())
                 .message("Sign in successful")
@@ -273,21 +336,21 @@ public class UserController {
                 .data(userService.getUsers()).build(), OK);
     }
 
-    @GetMapping(value = "/{id}")
-    @ApiOperation(value = "API get user by id")
-    public ResponseEntity<ResponseData> getUserById(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(ResponseData.builder()
-                .status(SUCCESS.name())
-                .message("Get all users success")
-                .data(userService.getUserById(id)).build(), OK);
-    }
+//    @GetMapping(value = "/{id}")
+//    @ApiOperation(value = "API get user by id")
+//    public ResponseEntity<ResponseData> getUserById(@PathVariable("id") Long id) {
+//        return new ResponseEntity<>(ResponseData.builder()
+//                .status(SUCCESS.name())
+//                .message("Get all users success")
+//                .data(userService.getUserById(id)).build(), OK);
+//    }
 
     @GetMapping(value = "/{email}")
     @ApiOperation(value = "API get user by email")
     public ResponseEntity<ResponseData> getUserByEmail(@PathVariable("email") String email) {
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
-                .message("Get all users success")
+                .message("Get user by email success")
                 .data(userService.getUserByEmail(email)).build(), OK);
     }
 
@@ -353,6 +416,7 @@ public class UserController {
                     .status(ERROR.name())
                     .message("User current not found").build(), BAD_REQUEST);
         }
+        userApp.setRoleApps(userService.getRoles(userApp.getId()));
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
                 .message("Get user info current success")
