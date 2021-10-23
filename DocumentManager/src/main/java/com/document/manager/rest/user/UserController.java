@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -69,51 +67,51 @@ public class UserController {
     public ResponseEntity<ResponseData> createData() {
 
         RoleApp roleAdmin = new RoleApp(null, "ROLE_ADMIN");
-            RoleApp roleUser = new RoleApp(null, "ROLE_USER");
+        RoleApp roleUser = new RoleApp(null, "ROLE_USER");
 
-            if (userService.findRoleByName("ROLE_USER") == null) {
-                userService.save(roleUser);
-            }
-            if (userService.findRoleByName("ROLE_ADMIN") == null) {
-                userService.save(roleAdmin);
-            }
-            if (userService.findByEmail("admin@yopmail.com") == null) {
-                List<RoleApp> roles = new ArrayList<>();
-                roles.add(roleAdmin);
-                roles.add(roleUser);
+        if (userService.findRoleByName("ROLE_USER") == null) {
+            userService.save(roleUser);
+        }
+        if (userService.findRoleByName("ROLE_ADMIN") == null) {
+            userService.save(roleAdmin);
+        }
+        if (userService.findByEmail("admin@yopmail.com") == null) {
+            List<RoleApp> roles = new ArrayList<>();
+            roles.add(roleAdmin);
+            roles.add(roleUser);
 
-                userService.save(new UserApp(1L,
-                        "10000000",
-                        "A",
-                        "Admin",
-                        Gender.MALE,
-                        new Date("01/01/1999"),
-                        "1111111111",
-                        "admin@yopmail.com",
-                        "12345678",
-                        true,
-                        new Date(),
-                        null,
-                        roles));
-            }
-            if (userService.findByEmail("user@yopmail.com") == null) {
-                List<RoleApp> roles = new ArrayList<>();
-                roles.add(roleUser);
+            userService.save(new UserApp(1L,
+                    "10000000",
+                    "A",
+                    "Admin",
+                    Gender.MALE,
+                    new Date("01/01/1999"),
+                    "1111111111",
+                    "admin@yopmail.com",
+                    "12345678",
+                    true,
+                    new Date(),
+                    null,
+                    roles));
+        }
+        if (userService.findByEmail("user@yopmail.com") == null) {
+            List<RoleApp> roles = new ArrayList<>();
+            roles.add(roleUser);
 
-                userService.save(new UserApp(2L,
-                        "10000001",
-                        "U",
-                        "User",
-                        Gender.MALE,
-                        new Date("02/02/2000"),
-                        "2222222222",
-                        "user@yopmail.com",
-                        "12345678",
-                        true,
-                        new Date(),
-                        null,
-                        roles));
-            }
+            userService.save(new UserApp(2L,
+                    "10000001",
+                    "U",
+                    "User",
+                    Gender.MALE,
+                    new Date("02/02/2000"),
+                    "2222222222",
+                    "user@yopmail.com",
+                    "12345678",
+                    true,
+                    new Date(),
+                    null,
+                    roles));
+        }
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.toString())
                 .message("Create data successful").build(), OK);
@@ -121,27 +119,19 @@ public class UserController {
 
     @PostMapping(value = "/sign-in")
     @ApiOperation(value = "API sign in")
-    public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) {
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(signInDTO.getEmail(), signInDTO.getPassword()));
-        org.springframework.security.core.userdetails.User user =
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        UserApp userApp = userService.getUserByEmail(user.getUsername());
-        if (userApp == null) {
+    public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) throws Exception {
+        try {
+            Map<String, Object> mapData = userService.signIn(signInDTO.getEmail(), signInDTO.getPassword());
+            logger.info("User {} login success", signInDTO.getEmail());
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.toString())
+                    .message("Sign in successful")
+                    .data(mapData).build(), OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.toString())
-                    .message("User with email " + user.getUsername() +" not found").build(), BAD_REQUEST);
+                    .message("Sign in failed with error: " + e.getMessage()).build(), OK);
         }
-        String jwt = tokenProvider.generateToken(user);
-        Map<String, Object> mapData = new HashMap<>();
-        mapData.put("jwt", jwt);
-        mapData.put("roles", userService.getRoles(userApp.getId()));
-        ResponseData responseData = ResponseData.builder()
-                .status(SUCCESS.toString())
-                .message("Sign in successful")
-                .data(mapData).build();
-        logger.info("User {} login success", signInDTO.getEmail());
-        return new ResponseEntity<>(responseData, OK);
     }
 
     @PostMapping(value = "/sign-up")
@@ -150,7 +140,7 @@ public class UserController {
         try {
             UserApp userApp = dtoMapper.toUser(signUpDTO);
             logger.info("Convert to entity success");
-            userApp = userService.save(userApp);
+            userApp = userService.register(userApp);
             logger.info("Save user entity success");
 
             // Send mail
@@ -184,7 +174,7 @@ public class UserController {
                         .message("Email of user current not found").build(), BAD_REQUEST);
             }
             String email = user.getUsername();
-            userService.changePassword(email, changePasswordDTO);
+            userService.changePassword(email, changePasswordDTO.getOldPassword(), changePasswordDTO.getNewPassword());
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.name())
                     .message("Change password success").build(), OK);
@@ -357,28 +347,16 @@ public class UserController {
     @PatchMapping(value = "/{id}")
     @ApiOperation(value = "API update user information")
     public ResponseEntity<ResponseData> updateUserInfo(@PathVariable("id") Long userId, @RequestBody UserInfoDTO userInfoDTO) {
-        UserApp userApp = userService.findUserById(userId);
-        if (userApp == null) {
-            logger.error("User with id {} not found", userId);
+        try {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.name())
+                    .message("Update user information successful")
+                    .data(userService.updateUserInfo(userId, userInfoDTO)).build(), OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
-                    .message("User with id " + userId + " not found").build(), BAD_REQUEST);
+                    .message(e.getMessage()).build(), BAD_REQUEST);
         }
-        if (userInfoDTO == null) {
-            return new ResponseEntity<>(ResponseData.builder()
-                    .status(ERROR.name())
-                    .message("Data is null").build(), BAD_REQUEST);
-        }
-        userApp = userService.updateUserInfo(userInfoDTO, userApp);
-        if (userApp == null) {
-            return new ResponseEntity<>(ResponseData.builder()
-                    .status(ERROR.name())
-                    .message("Update user information failed").build(), BAD_REQUEST);
-        }
-        return new ResponseEntity<>(ResponseData.builder()
-                .status(SUCCESS.name())
-                .message("Update user information successful")
-                .data(userApp).build(), OK);
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

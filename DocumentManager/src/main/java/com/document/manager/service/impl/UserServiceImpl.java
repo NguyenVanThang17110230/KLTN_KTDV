@@ -5,16 +5,24 @@ import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.domain.UsersRoles;
 import com.document.manager.dto.ChangePasswordDTO;
+import com.document.manager.dto.ResponseData;
 import com.document.manager.dto.UserInfoDTO;
+import com.document.manager.dto.constants.Constants;
+import com.document.manager.jwt.JwtTokenProvider;
 import com.document.manager.repository.RoleRepo;
 import com.document.manager.repository.UserReferenceRepo;
 import com.document.manager.repository.UserRepo;
 import com.document.manager.repository.UsersRolesRepo;
 import com.document.manager.service.UserService;
+import javassist.NotFoundException;
 import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,10 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.document.manager.dto.enums.Gender.FEMALE;
 import static com.document.manager.dto.enums.Gender.MALE;
+import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
+import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @Transactional
@@ -50,6 +60,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private UsersRolesRepo usersRolesRepo;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
 
     @Override
@@ -77,14 +93,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserApp save(UserApp userApp) throws IllegalArgumentException {
-        logger.info("Start save user to db");
+        logger.info("Saving new user {} to the database", userApp.getEmail());
+        return userRepo.save(userApp);
+    }
+
+    @Override
+    public UserApp register(UserApp userApp) throws IllegalArgumentException {
+        if (userApp == null) {
+            return null;
+        }
         if (userRepo.findByEmail(userApp.getEmail()) != null) {
             logger.error("Email {} already exist in database", userApp.getEmail());
             throw new IllegalArgumentException("Email already exist");
         }
         userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
-        logger.info("Saving new user {} to the database", userApp.getEmail());
-        return userRepo.save(userApp);
+        if (userApp.getRoleApps() == null || userApp.getRoleApps().size() <= 0) {
+            RoleApp roleUser = roleRepo.findByName(Constants.ROLE_USER);
+            userApp.setRoleApps(new ArrayList<>(Collections.singleton(roleUser)));
+        }
+        return this.save(userApp);
     }
 
     @Override
@@ -124,21 +151,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void changePassword(String email, ChangePasswordDTO changePasswordDTO) throws IllegalArgumentException {
+    public void changePassword(String email, String oldPassword, String newPassword) throws IllegalArgumentException {
         if (GenericValidator.isBlankOrNull(email)) {
             logger.error("Emails are not allowed to be empty");
             throw new IllegalArgumentException("Emails are not allowed to be empty");
         }
         UserApp userApp = findByEmail(email);
-        if (!passwordEncoder.matches(changePasswordDTO.getOldPassword(), userApp.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, userApp.getPassword())) {
             logger.error("Old password is incorrect");
             throw new IllegalArgumentException("Old password is incorrect");
         }
-        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getConfirmPassword())) {
-            logger.error("New password and confirm password not match");
-            throw new IllegalArgumentException("New password and confirm password not match");
-        }
-        userApp.setPassword(passwordEncoder.encode(changePasswordDTO.getNewPassword()));
+        userApp.setPassword(passwordEncoder.encode(newPassword));
         logger.info("Change password for user {} success", userApp.getEmail());
         save(userApp);
     }
@@ -246,18 +269,64 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception{
+        UserApp userApp = this.findUserById(userId);
+        if (userApp == null) {
+            logger.error("User with id {} not found", userId);
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        if (userInfoDTO == null) {
+            return userApp;
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getUserCode())) {
+            userApp.setUserCode(userInfoDTO.getUserCode());
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getFirstName())) {
+            userApp.setFirstname(userInfoDTO.getFirstName());
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getLastName())) {
+            userApp.setLastname(userInfoDTO.getLastName());
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getGender())) {
+            userApp.setGender(userInfoDTO.getGender().equalsIgnoreCase(MALE.toString()) ? MALE : FEMALE);
+        }
+        if (!GenericValidator.isBlankOrNull(userInfoDTO.getPhoneNumber())) {
+            userApp.setPhoneNumber(userInfoDTO.getPhoneNumber());
+        }
+        logger.error("Update user info success");
+        return save(userApp);
+    }
+
+    @Override
     public List<RoleApp> getRoles(Long userId) {
         List<RoleApp> roleApps = new ArrayList<>();
         List<UsersRoles> usersRoles = usersRolesRepo.findUsersRolesByUserAppId(userId);
-        if (usersRoles == null || usersRoles.size() <= 0 ) {
+        if (usersRoles == null || usersRoles.size() <= 0) {
             return roleApps;
         }
-        for (UsersRoles userRole: usersRoles) {
+        for (UsersRoles userRole : usersRoles) {
             Optional<RoleApp> roleApp = roleRepo.findById(userRole.getRoleId());
             if (roleApp.isPresent()) {
                 roleApps.add(roleApp.get());
             }
         }
         return roleApps;
+    }
+
+    @Override
+    public Map<String, Object> signIn(String email, String password) throws Exception {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        org.springframework.security.core.userdetails.User user =
+                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        UserApp userApp = this.getUserByEmail(user.getUsername());
+        if (userApp == null) {
+            throw new NotFoundException("User " + email + " not found");
+        }
+        String jwt = tokenProvider.generateToken(user);
+        Map<String, Object> mapData = new HashMap<>();
+        mapData.put("jwt", jwt);
+        mapData.put("roles", this.getRoles(userApp.getId()));
+        return mapData;
     }
 }

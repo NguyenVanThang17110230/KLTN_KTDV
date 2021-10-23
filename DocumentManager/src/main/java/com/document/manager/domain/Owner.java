@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.AUTO;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "owner")
@@ -19,7 +20,7 @@ import static javax.persistence.GenerationType.AUTO;
 public class Owner implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column(name = "owner_code")

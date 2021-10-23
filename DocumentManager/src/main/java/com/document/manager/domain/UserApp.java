@@ -3,6 +3,7 @@ package com.document.manager.domain;
 import com.document.manager.dto.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,6 +14,8 @@ import java.util.Date;
 
 import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.GenerationType.AUTO;
+import static javax.persistence.GenerationType.IDENTITY;
+import static org.hibernate.annotations.CascadeType.*;
 
 @Entity
 @Table(name = "user_app")
@@ -21,7 +24,7 @@ import static javax.persistence.GenerationType.AUTO;
 public class UserApp implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -57,6 +60,7 @@ public class UserApp implements Serializable {
     @ManyToMany(fetch = EAGER)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_app_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @Cascade(ALL)
     private Collection<RoleApp> roleApps = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "user")

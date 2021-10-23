@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.AUTO;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Data
@@ -19,7 +19,7 @@ import static javax.persistence.GenerationType.AUTO;
 public class UserReference implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = LAZY)

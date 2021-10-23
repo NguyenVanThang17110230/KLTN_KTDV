@@ -7,6 +7,7 @@ import com.document.manager.dto.ChangePasswordDTO;
 import com.document.manager.dto.UserInfoDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -14,13 +15,15 @@ public interface UserService {
 
     UserApp save(UserApp userApp) throws IllegalArgumentException;
 
+    UserApp register(UserApp userApp) throws IllegalArgumentException;
+
     RoleApp save(RoleApp role);
 
     RoleApp findRoleByName(String roleName) throws IllegalArgumentException;
 
     UserApp findByEmail(String email) throws IllegalArgumentException;
 
-    void changePassword(String email, ChangePasswordDTO changePasswordDTO) throws IllegalArgumentException;
+    void changePassword(String email, String oldPassword, String newPassword) throws IllegalArgumentException;
 
     UserReference save(UserReference userReference);
 
@@ -38,5 +41,9 @@ public interface UserService {
 
     UserApp updateUserInfo(UserInfoDTO userInfoDTO, UserApp userApp);
 
+    UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception;
+
     List<RoleApp> getRoles(Long userId);
+
+    Map<String, Object> signIn(String email, String password) throws Exception;
 }

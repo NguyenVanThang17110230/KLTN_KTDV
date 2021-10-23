@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static javax.persistence.GenerationType.AUTO;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "role")
@@ -20,7 +21,7 @@ import static javax.persistence.GenerationType.AUTO;
 public class RoleApp implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
     private String name;
 

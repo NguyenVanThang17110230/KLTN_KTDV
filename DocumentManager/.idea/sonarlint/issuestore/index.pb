@@ -5,3 +5,17 @@ o
 ?src/main/java/com/document/manager/service/DocumentService.java,f\0\f04473206ab2aac9f5190dcae1207fbd023f92e0
 x
 Hsrc/main/java/com/document/manager/service/impl/DocumentServiceImpl.java,7\9\798350de4e8a5962316ff5f3600342d065d2a121
+k
+;src/main/java/com/document/manager/repository/RoleRepo.java,8\6\861d0cfc35c556d31d1ddd4137833e84e47104bb
+t
+Dsrc/main/java/com/document/manager/repository/UserReferenceRepo.java,b\a\babe91804976f2627225a7584d26626b51a8416a
+k
+;src/main/java/com/document/manager/repository/UserRepo.java,2\9\29137c1f74e191dc7c0232a78744fb61d1733667
+q
+Asrc/main/java/com/document/manager/repository/UsersRolesRepo.java,9\e\9ee9767bd99ddc88e01e92bf56c8009d03600487
+v
+Fsrc/main/java/com/document/manager/config/security/SecurityConfig.java,4\8\48c2b9732b246c70c7afcc6da6b42ef509ed5867
+x
+Hsrc/main/java/com/document/manager/rest/document/DocumentController.java,d\0\d0288766ab241c70d2e0c3e462472c53f431cf8d
+r
+Bsrc/main/java/com/document/manager/DocumentManagerApplication.java,c\a\caf251a9890a40dad53b14d227086558264b2626

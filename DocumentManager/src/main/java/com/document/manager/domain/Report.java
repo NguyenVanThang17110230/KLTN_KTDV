@@ -13,6 +13,7 @@ import java.util.List;
 import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.AUTO;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "report")
@@ -22,7 +23,7 @@ import static javax.persistence.GenerationType.AUTO;
 public class Report implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
     private String title;
     private String note;
