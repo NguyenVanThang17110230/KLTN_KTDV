@@ -1,8 +1,7 @@
-import React, { ReactElement, useMemo } from "react";
+import React, {  useMemo } from "react";
 import { useTable, usePagination } from "react-table";
 import { AdminLayout } from "../../../layouts/Admin";
 import MOCK_DATA from "../../../public/MOCK_DATA.json";
-
 import { COLUMN_ACOUNT } from "../../../package/account/columns/Columns";
 
 export default function ManagerUsers() {

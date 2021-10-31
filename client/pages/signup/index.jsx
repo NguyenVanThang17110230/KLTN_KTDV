@@ -1,10 +1,11 @@
 import Head from "next/head";
-import Link from 'next/link'
+import Link from "next/link";
 import React, { useEffect } from "react";
-import UserGuest from "../../layouts/UserGuest";
-import { Formik, Field, Form, FormikHelpers, FormikProps } from "formik";
-import { accountService } from "../../package/RestConnector";
+import * as Yup from "yup";
+import { Formik, Field, Form } from "formik";
 
+import { accountService } from "../../package/RestConnector";
+import UserGuest from "../../layouts/UserGuest";
 const SignUp = () => {
   useEffect(() => {
     const fetchData = async () => {
@@ -14,8 +15,26 @@ const SignUp = () => {
     fetchData();
   }, []);
 
+  const SignupSchema = Yup.object().shape({
+    firstName: Yup.string().required("First name required"),
+    lastName: Yup.string().required("Last name required"),
+    email: Yup.string().email("Invalid email").required("Your email required"),
+    dob: Yup.date().required("Date of birth required"),
+    gender: Yup.string().required("Gender required"),
+    phoneNumber: Yup.string().required("Phone number required"),
+    userCode: Yup.string().required("User code required"),
+    password: Yup.string()
+      .min(8, "Your password is too short!")
+      .max(30, "Your password is too Long!")
+      .required("Your password required!"),
+    confirmPassword: Yup.string()
+      .min(8, "Your password is too short!")
+      .max(30, "Your password is too Long!")
+      .required("Your password required!"),
+  });
+
   const handleSignup = async (values, actions) => {
-    console.log("hhhhh",values);
+    console.log("hhhhh", values);
     actions.setSubmitting(true);
     // try {
     //   console.log("aloooo");
@@ -37,11 +56,14 @@ const SignUp = () => {
           firstName: "",
           lastName: "",
           email: "",
+          dob: "",
           gender: "Male",
-          password: "",
           phoneNumber: "",
           userCode: "",
+          password: "",
+          confirmPassword:""
         }}
+        validationSchema={SignupSchema}
         onSubmit={handleSignup}
       >
         {(props) => (
@@ -65,9 +87,19 @@ const SignUp = () => {
                     id="firstName"
                     name="firstName"
                     placeholder="Thang"
-                    className="appearance-none border-2 rounded-md  p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.firstName && props.touched.firstName
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
                     type="text"
                   />
+                  {props.errors.firstName && props.touched.firstName ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.firstName}
+                  </div>
+                ) : null}
                 </div>
 
                 <div className="mb-4">
@@ -81,27 +113,47 @@ const SignUp = () => {
                     id="lastName"
                     name="lastName"
                     placeholder="Nguyen"
-                    className="appearance-none border-2 rounded-md  p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.lastName && props.touched.lastName
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
                     type="text"
                   />
+                  {props.errors.lastName && props.touched.lastName ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.lastName}
+                  </div>
+                ) : null}
                 </div>
               </div>
 
               <div className="mb-4">
-                  <label
-                    className="block text-gray-700 text-sm font-bold mb-2"
-                    htmlFor="email"
-                  >
-                    Email
-                  </label>
-                  <Field
-                    id="email"
-                    name="email"
-                    placeholder="demo@student.hcmute.edu.vn"
-                    className="appearance-none border-2 rounded-md p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
-                    type="email"
-                  />
-                </div>
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="email"
+                >
+                  Email
+                </label>
+                <Field
+                  id="email"
+                  name="email"
+                  placeholder="demo@student.hcmute.edu.vn"
+                  className={
+                    "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                    (props.errors.email && props.touched.email
+                      ? "border-red-500"
+                      : "border-green-500")
+                  }
+                  type="email"
+                />
+                {props.errors.email && props.touched.email ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.email}
+                  </div>
+                ) : null}
+              </div>
               <div className="mb-4">
                 <label
                   className="block text-gray-700 text-sm font-bold mb-2"
@@ -113,9 +165,19 @@ const SignUp = () => {
                   id="dob"
                   name="dob"
                   placeholder="example@hcmute.edu.vn"
-                  className="appearance-none border-2 rounded-md p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
+                  className={
+                    "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                    (props.errors.dob && props.touched.dob
+                      ? "border-red-500"
+                      : "border-green-500")
+                  }
                   type="date"
                 />
+                {props.errors.dob && props.touched.dob ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.dob}
+                  </div>
+                ) : null}
               </div>
               <div className="mb-4">
                 <label
@@ -129,8 +191,9 @@ const SignUp = () => {
                     <Field
                       className="mr-2 form-radio"
                       type="radio"
-                      name="picked"
+                      name="gender"
                       value="Male"
+                      
                     />
                     Male
                   </label>
@@ -138,7 +201,7 @@ const SignUp = () => {
                     <Field
                       className="mr-2 form-radio"
                       type="radio"
-                      name="picked"
+                      name="gender"
                       value="Female"
                     />
                     Female
@@ -157,61 +220,95 @@ const SignUp = () => {
                     id="phoneNumber"
                     name="phoneNumber"
                     placeholder="0978686868"
-                    className="appearance-none border-2 rounded-md p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.phoneNumber && props.touched.phoneNumber
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
                     type="text"
                   />
+                  {props.errors.phoneNumber && props.touched.phoneNumber ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.phoneNumber}
+                  </div>
+                ) : null}
                 </div>
 
                 <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="userCode"
-                >
-                  User Code
-                </label>
-                <Field
-                  id="userCode"
-                  name="userCode"
-                  placeholder="17110230"
-                  className="appearance-none border-2 rounded-md p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
-                  type="text"
-                />
-              </div>
-                
-
-
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="userCode"
+                  >
+                    User Code
+                  </label>
+                  <Field
+                    id="userCode"
+                    name="userCode"
+                    placeholder="17110230"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.userCode && props.touched.userCode
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
+                    type="text"
+                  />
+                  {props.errors.userCode && props.touched.userCode ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.userCode}
+                  </div> ) : null}
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2 box-border mt-3">
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="password"
-                >
-                  Password
-                </label>
-                <Field
-                  id="password"
-                  name="password"
-                  placeholder="********"
-                  className="appearance-none border-2 rounded-md p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
-                  type="password"
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="confirmPassword"
-                >
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  <Field
+                    id="password"
+                    name="password"
+                    placeholder="********"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.password && props.touched.password
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
+                    type="password"
+                  />
+                  {props.errors.password && props.touched.password ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.password}
+                  </div> ) : null}
+                </div>
+                <div className="mb-4">
+                  <label
+                    className="block text-gray-700 text-sm font-bold mb-2"
+                    htmlFor="confirmPassword"
+                  >
                     Confirm Password
-                </label>
-                <Field
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  placeholder="********"
-                  className="appearance-none border-2 rounded-md p-3 text-gray-700 leading-tight focus:outline-none focus: focus:border-blue-500 text-sm w-full"
-                  type="password"
-                />
-              </div>
+                  </label>
+                  <Field
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="********"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.confirmPassword && props.touched.confirmPassword
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
+                    type="password"
+                  />
+                  {props.errors.confirmPassword && props.touched.confirmPassword ? (
+                  <div className="text-red-600 text-sm mt-2">
+                    {props.errors.confirmPassword}
+                  </div> ) : null}
+                </div>
               </div>
               <div className="flex items-center justify-between">
                 <button
@@ -221,12 +318,12 @@ const SignUp = () => {
                   Sign up
                 </button>
                 <Link href="/login">
-                <a
-                  className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-                  href="#"
-                >
-                  Login
-                </a>
+                  <a
+                    className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                    href="#"
+                  >
+                    Login
+                  </a>
                 </Link>
               </div>
             </Form>
