@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, createContext } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 import PreviewModal from "../../../package/document/component/PreviewModal";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Head from "next/head";
 import { UserLayout } from "../../layouts/User";
 import DocumentFile from "../../package/document/component/Document";
-import AddNewDocumentModal from "../../package/document/component/AddNewDocumentModal"
+import AddNewDocumentModal from "../../package/document/component/AddNewDocumentModal";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);

@@ -22,8 +22,6 @@ export default class AccountGateway{
     }
 
     async loginAdmin({email,password}) {
-      console.log('username',email);
-      console.log('password',password);
       const resp = await this.restConnector.post('/user/sign-in',{email,password})
       return resp.data
     }

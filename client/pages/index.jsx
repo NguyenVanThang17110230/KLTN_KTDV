@@ -7,10 +7,14 @@ import { useRouter } from "next/router";
 const IndexPage = () => {
   const router = useRouter();
   useEffect(() => {
-    const data = accountService.wellcomeLoginUser();
-    console.log(data);
+    wellcome()
     router.replace("/login");
   }, [router]);
+
+  const wellcome = async () =>{
+    const data =  await accountService.wellcomeLoginUser();
+    console.log('data-wellcome',data);
+  }
 
   return (
     <div className="h-screen flex items-center justify-center relative z-10">

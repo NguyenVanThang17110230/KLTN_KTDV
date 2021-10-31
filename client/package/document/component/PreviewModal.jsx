@@ -24,8 +24,8 @@ const PreviewModal = ({ document, toggle }) => {
 
   return (
     <div className="fixed z-50 top-0 left-0 flex justify-center flex-col w-full h-full items-center bg-black bg-opacity-50 antialiased">
-      <div className="w-auto h-auto">
-        <div className="border border-gray-300 shadow-xl box-border">
+      <div className="min-w-1/3 h-5/6">
+        <div className="border border-gray-300 shadow-xl box-border w-full">
           <div className="flex flex-row justify-between p-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
             <p className="font-semibold text-gray-800">Add a step</p>
             <svg
@@ -46,10 +46,9 @@ const PreviewModal = ({ document, toggle }) => {
           </div>
         </div>
         <div className="h-full w-full flex flex-col">
-          <div className="h-3/4 bg-white">
+          <div className="bg-white overflow-y-scroll overflow-x-hidden">
             <Document
               file={document}
-              options={{ workerSrc: "/pdf.worker.js" }}
               onLoadSuccess={onDocumentLoadSuccess}
             >
               <Page pageNumber={pageNumber} />

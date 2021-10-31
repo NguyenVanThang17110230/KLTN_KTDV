@@ -2,7 +2,6 @@ import React from "react";
 // import { Modal } from 'reactstrap'
 
 const AddNewDocumentModal = ({closeModal}) => {
-  console.log("okiii");
   return (
     <div className="fixed z-10 top-0 left-0 flex justify-center w-full h-full items-center bg-black bg-opacity-50 antialiased">
       <div className="border w-3/6 border-gray-300 shadow-xl box-border">

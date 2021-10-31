@@ -57,7 +57,6 @@ export default function Sidebar() {
   const router = useRouter();
 
   const getSidebarNavItemLinkClass = (path) => {
-    console.log("path", path);
     const matched =
       path === "/admin"
         ? router.pathname === path
