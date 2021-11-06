@@ -13,7 +13,13 @@ module.exports = {
         '1/2': '50%',
         '3/4': '75%',
         'full': '100%',
-       }
+      },
+      backgroundColor: {
+        'primary': '#3490dc',
+        'secondary': '#ffed4a',
+        'danger': '#e3342f',
+        'success':'#22bb33'
+      }
     },
   },
   variants: {

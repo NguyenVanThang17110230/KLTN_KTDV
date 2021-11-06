@@ -13,4 +13,7 @@ export default class AccountService{
     this.accountGateway.setAccessToken(token.data.jwt);
     return this.accountGateway.getUserAfterLogin();
   }
+  async signUpUser(values) {
+    return this.accountGateway.signUpUser(values);
+  }
 }

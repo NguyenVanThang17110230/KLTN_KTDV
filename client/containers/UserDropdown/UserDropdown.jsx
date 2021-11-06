@@ -1,24 +1,26 @@
 import React, { FC } from "react";
 import Image from "next/image";
+import Cookies from "js-cookie";
+import { useRouter } from "next/router";
 
-const ItemForm = ({ title, svg }) => {
+const ItemForm = ({ title, svg, alo}) => {
   return (
-    <a
-      href="#pablo"
+    <div
       className={
-        "text-sm py-2 px-4 font-normal w-60 whitespace-nowrap bg-transparent text-blueGray-700 flex items-center hover:bg-black hover:bg-opacity-10 group"
+        "text-sm py-2 px-4 font-normal w-60 whitespace-nowrap bg-transparent text-blueGray-700 flex items-center hover:bg-black hover:bg-opacity-10 group cursor-pointer"
       }
-      onClick={(e) => e.preventDefault()}
+      onClick={() => alo()}
     >
       <div className="p-1 bg-gradient-to-r from-green-400 to-blue-500 rounded-md mr-2 group-hover:from-pink-500 group-hover:to-yellow-500">
         {svg}
       </div>
       {title}
-    </a>
+    </div>
   );
 };
 
 const UserDropdown = () => {
+  const router = useRouter();
   // dropdown props
   const [dropdownPopoverShow, setDropdownPopoverShow] = React.useState(false);
   const openDropdownPopover = () => {
@@ -27,6 +29,11 @@ const UserDropdown = () => {
   const closeDropdownPopover = () => {
     setDropdownPopoverShow(false);
   };
+
+  const logout = () =>{
+    Cookies.remove('jwt')
+    router.replace("/login");
+  }
   return (
     <>
       <a
@@ -118,6 +125,7 @@ const UserDropdown = () => {
               <path d="M7 12h14l-3 -3m0 6l3 -3" />
             </svg>
           }
+          alo={logout}
         />
       </div>
     </>

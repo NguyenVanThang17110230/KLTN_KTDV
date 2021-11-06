@@ -44,4 +44,9 @@ export default class AccountGateway{
       const resp = await this.restConnector.get('/user/info')
       return resp.data
     }
+
+    async signUpUser(values){
+      const resp = await this.restConnector.post('/user/sign-up',values)
+      return resp.data
+    }
 }

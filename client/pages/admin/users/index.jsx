@@ -99,7 +99,7 @@ export default function ManagerUsers() {
             Go to page:{" "}
             <input
               type="number"
-              className="border-2 border-yellow-500"
+              className="border-2 border-yellow-500 pl-2"
               defaultValue={pageIndex + 1}
               onChange={(e) => {
                 const page = e.target.value ? Number(e.target.value) - 1 : 0;

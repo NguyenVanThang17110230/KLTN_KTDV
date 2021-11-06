@@ -31,7 +31,7 @@ const Login = () => {
     actions.setSubmitting(true);
     try {
       const user = await accountService.loginAdmin(values);
-      console.log("user-data", user.data.roleApps);
+      console.log("user-data", user);
 
       const nextPage = isAdmin(user.data.roleApps) ? "/admin" : "/document";
       toastr.success("login success");
