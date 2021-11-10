@@ -34,6 +34,12 @@ const UserDropdown = () => {
     Cookies.remove('jwt')
     router.replace("/login");
   }
+
+  const changeProfile = () =>{
+    router.replace("/profile");
+    setDropdownPopoverShow(false);
+  }
+
   return (
     <>
       <a
@@ -82,6 +88,7 @@ const UserDropdown = () => {
               <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
             </svg>
           }
+          alo={changeProfile}
         />
         <ItemForm
           title="Settings"
