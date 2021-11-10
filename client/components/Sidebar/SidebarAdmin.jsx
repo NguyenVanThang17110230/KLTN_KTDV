@@ -124,7 +124,7 @@ export default function Sidebar() {
             
             {/* Heading */}
             <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
-              Admin Layout Pages
+              Admin Layout Pages test
             </h6>
             {/* Navigation */}
 

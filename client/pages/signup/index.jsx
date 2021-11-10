@@ -76,7 +76,7 @@ const SignUp = () => {
             <div className="w-full max-w-md">
               <Form
                 onSubmit={props.handleSubmit}
-                className="bg-white shadow-md rounded-md px-8 pt-6 pb-8 mb-4"
+                className="bg-white shadow-md rounded-md px-8 pt-6 pb-8"
               >
                 <h1 className="text-gray-600 font-bold text-2xl text-center">
                   Sign Up
