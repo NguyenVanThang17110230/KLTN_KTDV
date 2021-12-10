@@ -9,4 +9,6 @@ public interface DocumentService {
     String readFile(MultipartFile multipartFile);
 
     File convertFile(MultipartFile multipartFile);
+
+    void saveFile(MultipartFile multipartFile);
 }

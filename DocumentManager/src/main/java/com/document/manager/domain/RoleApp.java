@@ -20,9 +20,18 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 public class RoleApp implements Serializable {
 
+//    @Id
+//    @GeneratedValue(strategy = IDENTITY)
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_app_id_generator")
+    @SequenceGenerator(
+            name = "role_app_id_generator",
+            sequenceName = "role_app_id_seq",
+            allocationSize = 1
+    )
     private Long id;
+
     private String name;
 
 //    @ManyToMany(mappedBy = "roles")

@@ -16,8 +16,16 @@ import static javax.persistence.GenerationType.*;
 @AllArgsConstructor
 public class UsersRoles {
 
+//    @Id
+//    @GeneratedValue(strategy = IDENTITY)
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "users_roles_id_generator")
+    @SequenceGenerator(
+            name = "users_roles_id_generator",
+            sequenceName = "users_roles_id_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @Column(name ="user_app_id")

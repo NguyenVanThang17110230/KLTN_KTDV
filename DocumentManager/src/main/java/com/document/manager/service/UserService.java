@@ -3,7 +3,6 @@ package com.document.manager.service;
 import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
-import com.document.manager.dto.ChangePasswordDTO;
 import com.document.manager.dto.UserInfoDTO;
 
 import java.util.List;

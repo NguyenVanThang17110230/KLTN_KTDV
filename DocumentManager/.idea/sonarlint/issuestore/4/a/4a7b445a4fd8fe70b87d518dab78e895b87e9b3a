@@ -1,0 +1,11 @@
+
+X	java:S125&"<This block of commented-out lines of code should be removed.(®ÃÇ€8ßŒçëÉ/
+M
+java:S1128
+"0Remove this unused import 'java.util.ArrayList'.(÷‰îƒ8ßŒçëÉ/
+S
+java:S1128"1Remove this unused import 'java.util.Collection'.(¹ÉĞšùÿÿÿÿ8àŒçëÉ/
+_
+java:S1128"BRemove this unused import 'javax.persistence.GenerationType.AUTO'.(¬ŒÅ8‹‚Ì½Ê/
+h
+java:S1128"FRemove this unused import 'javax.persistence.GenerationType.IDENTITY'.(¡®¼­ıÿÿÿÿ8ˆå¾‡Ë/

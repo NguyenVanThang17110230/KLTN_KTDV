@@ -1,25 +1,19 @@
 
-V	java:S125#"<This block of commented-out lines of code should be removed.(–¸¨•øÿÿÿÿ
-Q	java:S125+"<This block of commented-out lines of code should be removed.(Žý÷
+N	java:S106)"9Replace this use of System.out or System.err by a logger.(Ý†£ã
+V
+java:S4719)"9Replace charset name argument with StandardCharsets.UTF_8(Ý†£ã8›Ó¢¸×/
+N	java:S106*"9Replace this use of System.out or System.err by a logger.(€¼ØÝ
+U	java:S1060"9Replace this use of System.out or System.err by a logger.(”“î€8Ÿ¥¢¸×/
+V	java:S1258"<This block of commented-out lines of code should be removed.(ÿ‚´œûÿÿÿÿ
+V	java:S125?"<This block of commented-out lines of code should be removed.(–¸¨•øÿÿÿÿ
+Q	java:S125G"<This block of commented-out lines of code should be removed.(Žý÷
+W
+java:S1128":Remove this unused import 'org.apache.commons.io.IOUtils'.(Ì–’ž8¼ì¤¸×/
 _
-java:S1128"BRemove this unused import 'com.document.manager.dto.ResponseData'.(‘Ä¿å8îò¿žÊ/
-^
-java:S1128"ARemove this unused import 'org.springframework.core.io.Resource'.(¹ÒÁ8ïò¿žÊ/
-f
-java:S1128"DRemove this unused import 'org.springframework.http.ResponseEntity'.(¶¯ø¦úÿÿÿÿ8ïò¿žÊ/
-r
-java:S1128	"PRemove this unused import 'org.springframework.web.bind.annotation.PostMapping'.(äƒà°ùÿÿÿÿ8ïò¿žÊ/
-s
-java:S1128"QRemove this unused import 'org.springframework.web.bind.annotation.RequestParam'.(Â¬À·ùÿÿÿÿ8ïò¿žÊ/
-n
-java:S1128"LRemove this unused import 'org.springframework.web.multipart.MultipartFile'.(ôŸœžÿÿÿÿÿ8ðò¿žÊ/
-F
-java:S1128")Remove this unused import 'java.io.File'.(†Ð¥Å8ðò¿žÊ/
-R
-java:S1128"0Remove this unused import 'java.io.IOException'.(ªº»Úýÿÿÿÿ8ñò¿žÊ/
-F
-java:S1128")Remove this unused import 'java.net.URI'.(Ö¦¨°8òò¿žÊ/
-x
-java:S1128"VRemove this unused import 'com.document.manager.dto.enums.ResponseDataStatus.SUCCESS'.(€·½Ýüÿÿÿÿ8òò¿žÊ/
-`
-java:S1128"CRemove this unused import 'org.springframework.http.HttpStatus.OK'.(Û­à°8òò¿žÊ/
+java:S1128"BRemove this unused import 'org.apache.pdfbox.pdfparser.PDFParser'.(Ç†‰ç8¼ì¤¸×/
+P
+java:S1128"3Remove this unused import 'java.io.BufferedReader'.(€é²Å8¼ì¤¸×/
+S
+java:S1128"6Remove this unused import 'java.io.InputStreamReader'.(ãˆÎÉ8¼ì¤¸×/
+[
+java:S1128">Remove this unused import 'java.nio.charset.StandardCharsets'.(ï˜ÞÛ8¼ì¤¸×/

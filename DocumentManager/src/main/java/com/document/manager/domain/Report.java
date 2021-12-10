@@ -22,9 +22,18 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 public class Report implements Serializable {
 
+//    @Id
+//    @GeneratedValue(strategy = IDENTITY)
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "report_id_generator")
+    @SequenceGenerator(
+            name = "report_id_generator",
+            sequenceName = "report_id_seq",
+            allocationSize = 1
+    )
     private Long id;
+
     private String title;
     private String note;
 

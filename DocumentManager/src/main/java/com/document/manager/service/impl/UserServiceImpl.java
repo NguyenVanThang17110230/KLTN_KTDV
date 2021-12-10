@@ -4,8 +4,6 @@ import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.domain.UsersRoles;
-import com.document.manager.dto.ChangePasswordDTO;
-import com.document.manager.dto.ResponseData;
 import com.document.manager.dto.UserInfoDTO;
 import com.document.manager.dto.constants.Constants;
 import com.document.manager.jwt.JwtTokenProvider;
@@ -19,7 +17,6 @@ import org.apache.commons.validator.GenericValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -36,9 +33,6 @@ import java.util.*;
 
 import static com.document.manager.dto.enums.Gender.FEMALE;
 import static com.document.manager.dto.enums.Gender.MALE;
-import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
-import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Service
 @Transactional
@@ -94,6 +88,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserApp save(UserApp userApp) throws IllegalArgumentException {
         logger.info("Saving new user {} to the database", userApp.getEmail());
+        userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
         return userRepo.save(userApp);
     }
 
@@ -106,10 +101,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             logger.error("Email {} already exist in database", userApp.getEmail());
             throw new IllegalArgumentException("Email already exist");
         }
-        userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
         if (userApp.getRoleApps() == null || userApp.getRoleApps().size() <= 0) {
             RoleApp roleUser = roleRepo.findByName(Constants.ROLE_USER);
-            userApp.setRoleApps(new ArrayList<>(Collections.singleton(roleUser)));
+            if (roleUser != null) {
+                userApp.setRoleApps(new ArrayList<>(Collections.singleton(roleUser)));
+            }
         }
         return this.save(userApp);
     }
@@ -269,7 +265,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception{
+    public UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception {
         UserApp userApp = this.findUserById(userId);
         if (userApp == null) {
             logger.error("User with id {} not found", userId);

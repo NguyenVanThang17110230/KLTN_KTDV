@@ -18,8 +18,16 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name = "user_reference")
 public class UserReference implements Serializable {
 
+//    @Id
+//    @GeneratedValue(strategy = IDENTITY)
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_reference_id_generator")
+    @SequenceGenerator(
+            name = "user_reference_id_generator",
+            sequenceName = "user_reference_id_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @ManyToOne(fetch = LAZY)

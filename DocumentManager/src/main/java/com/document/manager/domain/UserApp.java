@@ -23,9 +23,18 @@ import static org.hibernate.annotations.CascadeType.*;
 @AllArgsConstructor
 public class UserApp implements Serializable {
 
+//    @Id
+//    @GeneratedValue(strategy = IDENTITY)
+//    @Column(name = "id")
+//    private Long id;
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_app_id_generator")
+    @SequenceGenerator(
+            name = "user_app_id_generator",
+            sequenceName = "user_app_id_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @Column(name = "user_code")

@@ -5,6 +5,7 @@ import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.*;
+import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.Gender;
 import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.jwt.JwtTokenProvider;
@@ -65,22 +66,23 @@ public class UserController {
     @GetMapping("/data")
     @ApiOperation(value = "API create data default")
     public ResponseEntity<ResponseData> createData() {
-
-        RoleApp roleAdmin = new RoleApp(null, "ROLE_ADMIN");
-        RoleApp roleUser = new RoleApp(null, "ROLE_USER");
-
-        if (userService.findRoleByName("ROLE_USER") == null) {
+        if (userService.findRoleByName(Constants.ROLE_USER) == null) {
+            RoleApp roleUser = new RoleApp(null, Constants.ROLE_USER);
             userService.save(roleUser);
         }
-        if (userService.findRoleByName("ROLE_ADMIN") == null) {
+        if (userService.findRoleByName(Constants.ROLE_ADMIN) == null) {
+            RoleApp roleAdmin = new RoleApp(null, Constants.ROLE_ADMIN);
             userService.save(roleAdmin);
         }
+
+        RoleApp roleAdmin = userService.findRoleByName(Constants.ROLE_ADMIN);
+        RoleApp roleUser = userService.findRoleByName(Constants.ROLE_USER);
         if (userService.findByEmail("admin@yopmail.com") == null) {
             List<RoleApp> roles = new ArrayList<>();
             roles.add(roleAdmin);
             roles.add(roleUser);
 
-            userService.save(new UserApp(1L,
+            userService.save(new UserApp(null,
                     "10000000",
                     "A",
                     "Admin",
@@ -95,10 +97,7 @@ public class UserController {
                     roles));
         }
         if (userService.findByEmail("user@yopmail.com") == null) {
-            List<RoleApp> roles = new ArrayList<>();
-            roles.add(roleUser);
-
-            userService.save(new UserApp(2L,
+            userService.save(new UserApp(null,
                     "10000001",
                     "U",
                     "User",
@@ -110,7 +109,7 @@ public class UserController {
                     true,
                     new Date(),
                     null,
-                    roles));
+                    new ArrayList<>(Collections.singleton(roleUser))));
         }
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.toString())
@@ -139,9 +138,7 @@ public class UserController {
     public ResponseEntity<ResponseData> signUp(@Validated @RequestBody SignUpDTO signUpDTO) {
         try {
             UserApp userApp = dtoMapper.toUser(signUpDTO);
-            logger.info("Convert to entity success");
             userApp = userService.register(userApp);
-            logger.info("Save user entity success");
 
             // Send mail
             Map<String, Object> mapData = new HashMap<>();
@@ -153,7 +150,6 @@ public class UserController {
                     .status(SUCCESS.toString())
                     .message("Sign up successful")
                     .data(userApp).build(), OK);
-
         } catch (Exception e) {
             logger.info("User sign up failed");
             return new ResponseEntity<>(ResponseData.builder()

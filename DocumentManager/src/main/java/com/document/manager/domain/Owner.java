@@ -19,8 +19,16 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 public class Owner implements Serializable {
 
+//    @Id
+//    @GeneratedValue(strategy = IDENTITY)
+
     @Id
-    @GeneratedValue(strategy = IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "owner_id_generator")
+    @SequenceGenerator(
+            name = "owner_id_generator",
+            sequenceName = "owner_id_seq",
+            allocationSize = 1
+    )
     private Long id;
 
     @Column(name = "owner_code")
