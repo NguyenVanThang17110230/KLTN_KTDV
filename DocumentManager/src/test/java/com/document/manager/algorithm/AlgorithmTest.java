@@ -3,6 +3,7 @@ package com.document.manager.algorithm;
 
 import com.document.manager.pipeline.Annotation;
 import com.document.manager.pipeline.VnCoreNLP;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -67,4 +68,51 @@ public class AlgorithmTest {
             System.out.println(key + " - " + map1.get(key));
         }
     }
+
+    /* Document 1
+        String s1 = "Hello everyone";                       100
+        String s2 = "This is my message to test function";  70
+        String s3 = "That right";                           100
+        String s4 = "I want to know";                       41
+    */
+
+    /* Document 2
+        String d1 = "Hello everyone";
+        String d2 = "I'm from Viet Nam";
+        String d3 = "I send to message to test my function";
+        String d4 = "And I want to know is working well";
+        String d5 = "That right";
+    */
+
+    @Test
+    public void testSentencesZero() {
+        String s1 = "I want to know";
+        String s2 = "I am want to know";
+        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        Assert.assertEquals(82.0, actual, 2);
+    }
+
+    @Test
+    public void testSentencesOne() {
+        String s1 = "Hello everyone";
+        String s2 = "Hello everyone";
+        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        Assert.assertEquals(100.0, actual, 2);
+    }
+
+    @Test
+    public void testSentencesTwo() {
+        String s1 = "This is my message to test function";
+        String s2 = "I send to message to test my function";
+        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        Assert.assertEquals(70.0, actual, 2);
+    }
+    @Test
+    public void testSentencesThree() {
+        String s1 = "I want to know";
+        String s2 = "And I want to know is working well";
+        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        Assert.assertEquals(41.0, actual, 2);
+    }
+
 }

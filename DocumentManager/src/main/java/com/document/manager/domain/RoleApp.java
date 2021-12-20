@@ -1,39 +1,35 @@
 package com.document.manager.domain;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import static javax.persistence.GenerationType.AUTO;
-import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "role")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RoleApp implements Serializable {
 
-//    @Id
-//    @GeneratedValue(strategy = IDENTITY)
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_app_id_generator")
-    @SequenceGenerator(
-            name = "role_app_id_generator",
-            sequenceName = "role_app_id_seq",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = AUTO)
     private Long id;
 
     private String name;
 
-//    @ManyToMany(mappedBy = "roles")
+//    @ManyToMany(mappedBy = "roleApps")
 //    private Collection<UserApp> userApps = new ArrayList<>();
+
+    public RoleApp(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

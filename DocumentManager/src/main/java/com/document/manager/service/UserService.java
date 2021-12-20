@@ -4,6 +4,8 @@ import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
 import com.document.manager.dto.UserInfoDTO;
+import javassist.NotFoundException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -45,4 +47,10 @@ public interface UserService {
     List<RoleApp> getRoles(Long userId);
 
     Map<String, Object> signIn(String email, String password) throws Exception;
+
+    void changeAvatar(MultipartFile file) throws NotFoundException;
+
+    UserApp getCurrentUser() throws NotFoundException;
+
+    Map<String, String> refreshToken(String authorization);
 }

@@ -8,7 +8,5 @@ W
 java:S34577"AFormat specifiers should be used instead of string concatenation.(Ô…ÞÈ
 \
 java:S3457;"AFormat specifiers should be used instead of string concatenation.(É«èåþÿÿÿÿ
-I
-java:S1128".Remove this unused import 'java.util.HashMap'.(™˜”€ùÿÿÿÿ
 j
 java:S1192$"UDefine a constant instead of duplicating this literal "spring.mail.username" 3 times.(•¿¤

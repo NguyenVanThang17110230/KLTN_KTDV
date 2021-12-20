@@ -5,12 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
 import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.GenerationType.AUTO;
-import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "owner")
@@ -19,16 +17,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 public class Owner implements Serializable {
 
-//    @Id
-//    @GeneratedValue(strategy = IDENTITY)
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "owner_id_generator")
-    @SequenceGenerator(
-            name = "owner_id_generator",
-            sequenceName = "owner_id_seq",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = AUTO)
     private Long id;
 
     @Column(name = "owner_code")

@@ -2,6 +2,7 @@ package com.document.manager.service.impl;
 
 import com.document.manager.dto.MailRequest;
 import com.document.manager.dto.MailResponse;
+import com.document.manager.service.MailService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.slf4j.Logger;
@@ -15,7 +16,6 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import javax.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service

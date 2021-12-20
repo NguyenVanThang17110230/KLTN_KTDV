@@ -1,38 +1,52 @@
 package com.document.manager.service.impl;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
-import com.document.manager.domain.UsersRoles;
+import com.document.manager.dto.AuthorizationDTO;
+import com.document.manager.dto.ResponseData;
 import com.document.manager.dto.UserInfoDTO;
 import com.document.manager.dto.constants.Constants;
-import com.document.manager.jwt.JwtTokenProvider;
 import com.document.manager.repository.RoleRepo;
 import com.document.manager.repository.UserReferenceRepo;
 import com.document.manager.repository.UserRepo;
-import com.document.manager.repository.UsersRolesRepo;
+import com.document.manager.service.FileService;
 import com.document.manager.service.UserService;
 import javassist.NotFoundException;
-import org.apache.commons.validator.GenericValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.document.manager.dto.enums.Gender.FEMALE;
 import static com.document.manager.dto.enums.Gender.MALE;
+import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
+import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.OK;
 
 @Service
 @Transactional
@@ -53,13 +67,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UsersRolesRepo usersRolesRepo;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtTokenProvider tokenProvider;
+    private FileService fileService;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private HttpServletRequest request;
 
 
     @Override
@@ -88,7 +105,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserApp save(UserApp userApp) throws IllegalArgumentException {
         logger.info("Saving new user {} to the database", userApp.getEmail());
-        userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
         return userRepo.save(userApp);
     }
 
@@ -107,6 +123,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 userApp.setRoleApps(new ArrayList<>(Collections.singleton(roleUser)));
             }
         }
+        userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
         return this.save(userApp);
     }
 
@@ -118,7 +135,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public RoleApp findRoleByName(String roleName) throws IllegalArgumentException {
-        if (GenericValidator.isBlankOrNull(roleName)) {
+        if (StringUtils.isEmpty(roleName)) {
             logger.error("Role name is empty");
             throw new IllegalArgumentException("Role name not allowed empty");
         }
@@ -133,7 +150,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserApp findByEmail(String email) throws IllegalArgumentException {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             logger.error("Email is empty");
             throw new IllegalArgumentException("Emails are not allowed to be empty");
         }
@@ -148,7 +165,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void changePassword(String email, String oldPassword, String newPassword) throws IllegalArgumentException {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             logger.error("Emails are not allowed to be empty");
             throw new IllegalArgumentException("Emails are not allowed to be empty");
         }
@@ -174,7 +191,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserReference findByUuid(String uuid) {
-        if (GenericValidator.isBlankOrNull(uuid)) {
+        if (StringUtils.isEmpty(uuid)) {
             logger.error("Uuid is empty");
             return null;
         }
@@ -189,7 +206,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public List<UserReference> findUserReferenceByEmail(String email) {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             return new ArrayList<>();
         }
         return new ArrayList<>();
@@ -226,7 +243,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserApp getUserByEmail(String email) {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             logger.error("Email is empty");
             return null;
         }
@@ -245,19 +262,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             logger.error("Data invalid");
             return null;
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getUserCode())) {
+        if (!StringUtils.isEmpty(userInfoDTO.getUserCode())) {
             userApp.setUserCode(userInfoDTO.getUserCode());
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getFirstName())) {
-            userApp.setFirstname(userInfoDTO.getFirstName());
+        if (!StringUtils.isEmpty(userInfoDTO.getFirstName())) {
+            userApp.setFirstName(userInfoDTO.getFirstName());
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getLastName())) {
-            userApp.setLastname(userInfoDTO.getLastName());
+        if (!StringUtils.isEmpty(userInfoDTO.getLastName())) {
+            userApp.setLastName(userInfoDTO.getLastName());
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getGender())) {
+        if (!StringUtils.isEmpty(userInfoDTO.getGender())) {
             userApp.setGender(userInfoDTO.getGender().equalsIgnoreCase(MALE.toString()) ? MALE : FEMALE);
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getPhoneNumber())) {
+        if (!StringUtils.isEmpty(userInfoDTO.getPhoneNumber())) {
             userApp.setPhoneNumber(userInfoDTO.getPhoneNumber());
         }
         logger.error("Update user info success");
@@ -274,19 +291,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (userInfoDTO == null) {
             return userApp;
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getUserCode())) {
+        if (!StringUtils.isEmpty(userInfoDTO.getUserCode())) {
             userApp.setUserCode(userInfoDTO.getUserCode());
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getFirstName())) {
-            userApp.setFirstname(userInfoDTO.getFirstName());
+        if (!StringUtils.isEmpty(userInfoDTO.getFirstName())) {
+            userApp.setFirstName(userInfoDTO.getFirstName());
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getLastName())) {
-            userApp.setLastname(userInfoDTO.getLastName());
+        if (!StringUtils.isEmpty(userInfoDTO.getLastName())) {
+            userApp.setLastName(userInfoDTO.getLastName());
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getGender())) {
+        if (!StringUtils.isEmpty(userInfoDTO.getGender())) {
             userApp.setGender(userInfoDTO.getGender().equalsIgnoreCase(MALE.toString()) ? MALE : FEMALE);
         }
-        if (!GenericValidator.isBlankOrNull(userInfoDTO.getPhoneNumber())) {
+        if (!StringUtils.isEmpty(userInfoDTO.getPhoneNumber())) {
             userApp.setPhoneNumber(userInfoDTO.getPhoneNumber());
         }
         logger.error("Update user info success");
@@ -296,33 +313,99 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public List<RoleApp> getRoles(Long userId) {
         List<RoleApp> roleApps = new ArrayList<>();
-        List<UsersRoles> usersRoles = usersRolesRepo.findUsersRolesByUserAppId(userId);
-        if (usersRoles == null || usersRoles.size() <= 0) {
-            return roleApps;
-        }
-        for (UsersRoles userRole : usersRoles) {
-            Optional<RoleApp> roleApp = roleRepo.findById(userRole.getRoleId());
-            if (roleApp.isPresent()) {
-                roleApps.add(roleApp.get());
-            }
-        }
+//        if (usersRoles == null || usersRoles.size() <= 0) {
+//            return roleApps;
+//        }
+//        for (UsersRoles userRole : usersRoles) {
+//            Optional<RoleApp> roleApp = roleRepo.findById(userRole.getRoleApp().getId());
+//            if (roleApp.isPresent()) {
+//                roleApps.add(roleApp.get());
+//            }
+//        }
         return roleApps;
     }
 
     @Override
     public Map<String, Object> signIn(String email, String password) throws Exception {
-        Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
-        org.springframework.security.core.userdetails.User user =
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        UserApp userApp = this.getUserByEmail(user.getUsername());
+        UserApp userApp = this.getUserByEmail(email);
         if (userApp == null) {
             throw new NotFoundException("User " + email + " not found");
         }
-        String jwt = tokenProvider.generateToken(user);
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        userApp.getRoleApps().forEach(role -> {
+            authorities.add(new SimpleGrantedAuthority(role.getName()));
+        });
+        Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("jwt.secret").getBytes());
+        String access_token = JWT.create()
+                .withSubject(email)
+                .withIssuer(request.getRequestURL().toString())
+                .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.access.token.expire"))))
+                .withClaim("roles", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .sign(algorithm);
+        String refresh_token = JWT.create()
+                .withSubject(email)
+                .withIssuer(request.getRequestURL().toString())
+                .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.refresh.token.expire"))))
+                .sign(algorithm);
         Map<String, Object> mapData = new HashMap<>();
-        mapData.put("jwt", jwt);
-        mapData.put("roles", this.getRoles(userApp.getId()));
+        mapData.put("access_token", access_token);
+        mapData.put("refresh_token", refresh_token);
+        mapData.put("roles", userApp.getRoleApps().stream().map(RoleApp::getName).collect(Collectors.toList()));
         return mapData;
+    }
+
+    @Override
+    public void changeAvatar(MultipartFile file) throws NotFoundException {
+        if (file == null) {
+            throw new NotFoundException("Avatar not found");
+        }
+        try {
+            UserApp userApp = getCurrentUser();
+            userApp.setAvatar(file.getOriginalFilename());
+            fileService.saveFile(Constants.DIR_UPLOADED_USER, file.getOriginalFilename(), file.getBytes());
+            this.save(userApp);
+        } catch (NotFoundException | IOException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+    }
+
+    @Override
+    public UserApp getCurrentUser() throws NotFoundException {
+        try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            UserApp userApp = this.findByEmail(email);
+            if (userApp == null) {
+                throw new NotFoundException("Current user not found");
+            }
+            return userApp;
+        } catch (Exception e) {
+            throw new NotFoundException("Current user not found");
+        }
+    }
+
+    @Override
+    public Map<String, String> refreshToken(String authorization) {
+        if (StringUtils.isEmpty(authorization) || !authorization.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Refresh token is missing");
+        }
+        try {
+            String refresh_token = authorization.substring("Bearer ".length());
+            Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("jwt.secret").getBytes());
+            JWTVerifier verifier = JWT.require(algorithm).build();
+            DecodedJWT decodedJWT = verifier.verify(refresh_token);
+            String email = decodedJWT.getSubject();
+            UserApp user = this.findByEmail(email);
+            String access_token = JWT.create()
+                    .withSubject(user.getEmail())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.access.token.expire"))))
+                    .withIssuer(request.getRequestURL().toString())
+                    .withClaim("roles", user.getRoleApps().stream().map(RoleApp::getName).collect(Collectors.toList()))
+                    .sign(algorithm);
+            Map<String, String> tokens = new HashMap<>();
+            tokens.put("access_token", access_token);
+            return tokens;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

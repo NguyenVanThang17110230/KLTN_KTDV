@@ -1,5 +1,8 @@
 package com.document.manager.algorithm;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class Algorithm {
 
     /**
@@ -8,7 +11,7 @@ public class Algorithm {
      * @param s2 The second string.
      * @return Returns the Levenshtein Distance for two strings.
      */
-    public static int getLevenshteinDistance(String s1, String s2) {
+    public int getLevenshteinDistance(String s1, String s2) {
         int s1Length = s1.length();
         int s2Length = s2.length();
 
@@ -37,7 +40,7 @@ public class Algorithm {
      * @param len2 The length of the second string.
      * @return The percentage of similarity between two strings.
      */
-    public static float getPercentageSimilarity(int distance, int len1, int len2) {
+    public float getPercentageSimilarity(int distance, int len1, int len2) {
         return Math.round(Math.abs((1.0f - (distance / ((float) Math.max(len1, len2)))) * 100.0f));
     }
 
@@ -56,7 +59,7 @@ public class Algorithm {
      * @param s1 String to convert.
      * @return The character array representing the s1.
      */
-    private static char[] stringToChar(String s1) {
+    private char[] stringToChar(String s1) {
         char[] charArr = new char[s1.length()];
 
         for (int i = 0; i < s1.length(); i++) {
@@ -70,7 +73,7 @@ public class Algorithm {
      * Prints a character array.
      * @param charArr The character array to print.
      */
-    private static void printCharArray(char[] charArr) {
+    private void printCharArray(char[] charArr) {
         for (int i = 0; i < charArr.length; i++) {
             System.out.print(charArr[i] + " ");
         }
@@ -84,7 +87,7 @@ public class Algorithm {
      * @param n Rows in the matrix.
      * @param m Columns in the matrix.
      */
-    private static void printLevenshteinMatrix(int[][] arr, int n, int m) {
+    private void printLevenshteinMatrix(int[][] arr, int n, int m) {
         for (int row = 0; row < n + 1; row++) {
             for (int col = 0; col < m + 1; col++) {
                 System.out.print(arr[row][col] + " ");
@@ -100,7 +103,7 @@ public class Algorithm {
      * @param s2 The second character array.
      * @return Levenshtein matrix.
      */
-    private static int[][] fillLevenshteinMatrix(char[] s1, char[] s2) {
+    private int[][] fillLevenshteinMatrix(char[] s1, char[] s2) {
         int[][] matrix = new int[s1.length + 1][s2.length + 1];
 
         for (int i = 0; i < s1.length + 1; i++) {

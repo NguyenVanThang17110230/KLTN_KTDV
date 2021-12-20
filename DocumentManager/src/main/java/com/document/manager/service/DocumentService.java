@@ -1,14 +1,29 @@
 package com.document.manager.service;
 
-import org.springframework.web.multipart.MultipartFile;
+import com.document.manager.domain.DocumentApp;
+import com.document.manager.dto.PlagiarismDocumentDTO;
+import com.document.manager.dto.UploadDocumentDTO;
+import javassist.NotFoundException;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public interface DocumentService {
 
-    String readFile(MultipartFile multipartFile);
+    DocumentApp save(DocumentApp documentApp);
 
-    File convertFile(MultipartFile multipartFile);
+    PlagiarismDocumentDTO uploadDocument(UploadDocumentDTO uploadDocumentDTO) throws IOException;
 
-    void saveFile(MultipartFile multipartFile);
+    String[] divisionToSentences(String content) throws Exception;
+
+    DocumentApp findById(Long id) throws NotFoundException;
+
+    List<DocumentApp> findByUserId(Long userId);
+
+    List<DocumentApp> findAll();
+
+    PlagiarismDocumentDTO getPlagiarism(String[] target, Map<Integer, List<String>> tokenizerOfTarget);
+
 }

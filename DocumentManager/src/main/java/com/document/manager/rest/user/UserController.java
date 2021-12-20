@@ -8,15 +8,16 @@ import com.document.manager.dto.*;
 import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.Gender;
 import com.document.manager.dto.mapper.DTOMapper;
-import com.document.manager.jwt.JwtTokenProvider;
+import com.document.manager.service.MailService;
 import com.document.manager.service.UserService;
-import com.document.manager.service.impl.MailService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import javassist.NotFoundException;
 import lombok.AllArgsConstructor;
-import org.apache.commons.validator.GenericValidator;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,8 +25,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.security.PermitAll;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
@@ -43,8 +46,6 @@ public class UserController {
 
     private final AuthenticationManager authenticationManager;
 
-    private final JwtTokenProvider tokenProvider;
-
     private final PasswordEncoder passwordEncoder;
 
     private final DTOMapper dtoMapper;
@@ -53,6 +54,9 @@ public class UserController {
 
     private final MailService mailService;
 
+    private final Environment environment;
+
+    private final HttpServletRequest request;
 
     @GetMapping("/welcome")
     @ApiOperation(value = "API test connection")
@@ -82,33 +86,25 @@ public class UserController {
             roles.add(roleAdmin);
             roles.add(roleUser);
 
-            userService.save(new UserApp(null,
-                    "10000000",
+            userService.save(new UserApp("10000000",
                     "A",
                     "Admin",
                     Gender.MALE,
                     new Date("01/01/1999"),
                     "1111111111",
                     "admin@yopmail.com",
-                    "12345678",
-                    true,
-                    new Date(),
-                    null,
+                    passwordEncoder.encode("12345678"),
                     roles));
         }
         if (userService.findByEmail("user@yopmail.com") == null) {
-            userService.save(new UserApp(null,
-                    "10000001",
+            userService.save(new UserApp("10000001",
                     "U",
                     "User",
                     Gender.MALE,
                     new Date("02/02/2000"),
                     "2222222222",
                     "user@yopmail.com",
-                    "12345678",
-                    true,
-                    new Date(),
-                    null,
+                    passwordEncoder.encode("12345678"),
                     new ArrayList<>(Collections.singleton(roleUser))));
         }
         return new ResponseEntity<>(ResponseData.builder()
@@ -120,12 +116,11 @@ public class UserController {
     @ApiOperation(value = "API sign in")
     public ResponseEntity<ResponseData> signIn(@Validated @RequestBody SignInDTO signInDTO) throws Exception {
         try {
-            Map<String, Object> mapData = userService.signIn(signInDTO.getEmail(), signInDTO.getPassword());
             logger.info("User {} login success", signInDTO.getEmail());
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.toString())
                     .message("Sign in successful")
-                    .data(mapData).build(), OK);
+                    .data(userService.signIn(signInDTO.getEmail(), signInDTO.getPassword())).build(), OK);
         } catch (Exception e) {
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.toString())
@@ -143,7 +138,7 @@ public class UserController {
             // Send mail
             Map<String, Object> mapData = new HashMap<>();
             mapData.put("link", "www.google.com");
-            mailService.sendMailRegister(userApp.getEmail(), userApp.getFirstname() + userApp.getLastname(), mapData);
+            mailService.sendMailRegister(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
 
             logger.info("User {} sign up success", userApp.getEmail(), OK);
             return new ResponseEntity<>(ResponseData.builder()
@@ -185,7 +180,7 @@ public class UserController {
     @PostMapping(value = "/forgot-password")
     @ApiOperation(value = "API send request forgot password")
     public ResponseEntity<ResponseData> forgotPassword(@RequestParam("email") String email) {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             logger.error("Email is empty");
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -212,7 +207,7 @@ public class UserController {
             Map<String, Object> mapData = new HashMap<>();
             String link = "http://localhost:9000/reset-password?email=" + userReference.getUserApp().getEmail() + "&uuid=" + uuid;
             mapData.put("link", link);
-            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstname() + userApp.getLastname(), mapData);
+            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
         }
 
         return new ResponseEntity<>(ResponseData.builder()
@@ -225,13 +220,13 @@ public class UserController {
     public ResponseEntity<ResponseData> resetPassword(@RequestParam("email") String email,
                                                       @RequestParam("uuid") String uuid,
                                                       @Validated @RequestBody ResetPasswordDTO resetPasswordDTO) {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             logger.error("Email is empty", email);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
                     .message("Email not allow empty").build(), BAD_REQUEST);
         }
-        if (GenericValidator.isBlankOrNull(uuid)) {
+        if (StringUtils.isEmpty(uuid)) {
             logger.error("Code is empty", email);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -274,7 +269,7 @@ public class UserController {
     @PostMapping(value = "/resend-email")
     @ApiOperation(value = "API resend email when request forgot password")
     public ResponseEntity<ResponseData> resendEmail(@RequestParam("email") String email) {
-        if (GenericValidator.isBlankOrNull(email)) {
+        if (StringUtils.isEmpty(email)) {
             logger.info("Email is empty");
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -305,7 +300,7 @@ public class UserController {
             Map<String, Object> mapData = new HashMap<>();
             String link = "http://localhost:9000/reset-password?email=" + userReference.getUserApp().getEmail() + "&uuid=" + uuid;
             mapData.put("link", link);
-            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstname() + userApp.getLastname(), mapData);
+            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
         }
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
@@ -321,15 +316,6 @@ public class UserController {
                 .message("Get all users success")
                 .data(userService.getUsers()).build(), OK);
     }
-
-//    @GetMapping(value = "/{id}")
-//    @ApiOperation(value = "API get user by id")
-//    public ResponseEntity<ResponseData> getUserById(@PathVariable("id") Long id) {
-//        return new ResponseEntity<>(ResponseData.builder()
-//                .status(SUCCESS.name())
-//                .message("Get all users success")
-//                .data(userService.getUserById(id)).build(), OK);
-//    }
 
     @GetMapping(value = "/{email}")
     @ApiOperation(value = "API get user by email")
@@ -347,7 +333,7 @@ public class UserController {
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.name())
                     .message("Update user information successful")
-                    .data(userService.updateUserInfo(userId, userInfoDTO)).build(), OK);
+                    .data(dtoMapper.toUserAppDTO(userService.updateUserInfo(userId, userInfoDTO))).build(), OK);
         } catch (Exception e) {
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
@@ -376,24 +362,49 @@ public class UserController {
     @GetMapping(value = "/info")
     @ApiOperation(value = "API get information of user current")
     public ResponseEntity<ResponseData> getUserInfoCurrent() {
-        org.springframework.security.core.userdetails.User user =
-                (org.springframework.security.core.userdetails.User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (user == null) {
+        try {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.name())
+                    .message("Get user info current success")
+                    .data(dtoMapper.toUserAppDTO(userService.getCurrentUser())).build(), OK);
+        } catch (NotFoundException e) {
             return new ResponseEntity<>(ResponseData.builder()
                     .status(ERROR.name())
                     .message("User current not found").build(), BAD_REQUEST);
         }
-        String email = user.getUsername();
-        UserApp userApp = userService.findByEmail(email);
-        if (userApp == null) {
+    }
+
+    @PostMapping(value = "/avatar")
+    @ApiOperation(value = "API change avatar of user")
+    public ResponseEntity<ResponseData> changeAvatar(@RequestParam(value = "file") MultipartFile file) {
+        try {
+            userService.changeAvatar(file);
             return new ResponseEntity<>(ResponseData.builder()
-                    .status(ERROR.name())
-                    .message("User current not found").build(), BAD_REQUEST);
+                    .status(SUCCESS.name())
+                    .message("Change avatar successful").build(), OK);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.name())
+                    .message("Change avatar failed").build(), BAD_REQUEST);
         }
-        userApp.setRoleApps(userService.getRoles(userApp.getId()));
-        return new ResponseEntity<>(ResponseData.builder()
-                .status(SUCCESS.name())
-                .message("Get user info current success")
-                .data(userApp).build(), OK);
+    }
+
+    @PostMapping(value = "/token/refresh")
+    @ApiOperation(value = "API to get access token from refresh token")
+    public ResponseEntity<ResponseData> refreshToken(@Validated @RequestBody AuthorizationDTO authorizationDTO) {
+        try {
+            return new ResponseEntity<>(ResponseData.builder().status(SUCCESS.name())
+                    .message("Refresh token successful").data(userService
+                            .refreshToken(authorizationDTO.getAuthorization())).build(), OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ResponseData.builder().status(ERROR.name())
+                    .message(e.getMessage()).build(), BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value = "/logout")
+    @ApiOperation(value = "API to log out")
+    public void logout() {
+        SecurityContextHolder.getContext().setAuthentication(null);
     }
 }

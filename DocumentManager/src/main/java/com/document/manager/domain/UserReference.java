@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Data
@@ -18,16 +17,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 @Table(name = "user_reference")
 public class UserReference implements Serializable {
 
-//    @Id
-//    @GeneratedValue(strategy = IDENTITY)
-
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_reference_id_generator")
-    @SequenceGenerator(
-            name = "user_reference_id_generator",
-            sequenceName = "user_reference_id_seq",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = LAZY)
