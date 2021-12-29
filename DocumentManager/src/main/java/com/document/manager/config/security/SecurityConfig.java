@@ -78,11 +78,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/api/user/welcome",
                 "/api/user/sign-in",
                 "/api/user/sign-up",
-                "/api/user/token/refresh",
                 "/api/user/logout",
                 "/api/user/data",
-                "/api/document/files",
-                "/api/user/avatar"
+                "/api/user/avatar",
+                "/api/user/active",
+                "/api/user/forgot-password",
+                "/api/user/reset-password",
+                "/api/user/token/refresh",
+                "/api/user/resend"
         };
 
         http.cors()

@@ -8,8 +8,6 @@ import com.document.manager.service.impl.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,8 +29,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
     @Autowired
     private JwtTokenProvider tokenProvider;
 
@@ -45,10 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (request.getServletPath().equals("/api/user/sign-in") || request.getServletPath().equals("/api/user/token/refresh")
-                || request.getServletPath().equals("/api/user/sign-up" )
-                || request.getServletPath().equals("/api/user/logout" )
-                || request.getServletPath().equals("/swagger-ui.html")) {
+        if (request.getServletPath().equals("/api/user/sign-in")
+                || request.getServletPath().equals("/api/user/token/refresh")
+                || request.getServletPath().equals("/api/user/sign-up")
+                || request.getServletPath().equals("/api/user/logout")
+                || request.getServletPath().equals("/swagger-ui.html")
+                || request.getServletPath().equals("/api/user/welcome")
+                || request.getServletPath().equals("/api/user/forgot-password")
+                || request.getServletPath().equals("/api/user/resend")
+                || request.getServletPath().equals("/api/user/reset-password")) {
             filterChain.doFilter(request, response);
         } else {
             String token = tokenProvider.getJwtFromRequest(request);

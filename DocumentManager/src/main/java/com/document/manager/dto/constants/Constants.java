@@ -7,5 +7,5 @@ public final class Constants {
 
     public static final String DIR_UPLOADED_REPORT = "C:\\Users\\nguye\\Desktop\\KLTN\\KLTN_KTDV\\DocumentManager\\src\\main\\resources\\uploads\\documents\\";
     public static final String DIR_UPLOADED_USER = "C:\\Users\\nguye\\Desktop\\KLTN\\KLTN_KTDV\\DocumentManager\\src\\main\\resources\\uploads\\user\\";
-    public static final String DIR_IMAGES = "C:\\Users\\nguye\\Desktop\\KLTN\\KLTN_KTDV\\DocumentManager\\src\\main\\resources\\uploads\\user\\";
+    public static final String DIR_IMAGES = "C:\\Users\\nguye\\Desktop\\KLTN\\KLTN_KTDV\\DocumentManager\\src\\main\\resources\\images\\";
 }

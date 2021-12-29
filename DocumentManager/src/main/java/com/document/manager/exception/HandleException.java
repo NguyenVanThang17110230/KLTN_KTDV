@@ -1,9 +1,8 @@
 package com.document.manager.exception;
 
-import com.document.manager.dto.enums.ResponseDataStatus;
 import com.document.manager.dto.ResponseData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.document.manager.dto.enums.ResponseDataStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -16,9 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
 public class HandleException {
-
-    private static final Logger log = LoggerFactory.getLogger(HandleException.class);
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_GATEWAY)

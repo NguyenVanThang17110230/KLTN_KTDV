@@ -1,8 +1,10 @@
 package com.document.manager.domain;
 
+import com.document.manager.dto.enums.ReferenceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,6 +16,7 @@ import static javax.persistence.FetchType.LAZY;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "user_reference")
 public class UserReference implements Serializable {
 
@@ -32,4 +35,7 @@ public class UserReference implements Serializable {
 
     @Column(name = "expired_stamp")
     private Date expiredStamp;
+
+    @Enumerated(EnumType.STRING)
+    private ReferenceType type;
 }

@@ -7,26 +7,32 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
-import com.document.manager.dto.AuthorizationDTO;
-import com.document.manager.dto.ResponseData;
+import com.document.manager.dto.ResetPasswordDTO;
+import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserInfoDTO;
 import com.document.manager.dto.constants.Constants;
+import com.document.manager.dto.enums.Gender;
+import com.document.manager.dto.enums.ReferenceType;
+import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.repository.RoleRepo;
 import com.document.manager.repository.UserReferenceRepo;
 import com.document.manager.repository.UserRepo;
 import com.document.manager.service.FileService;
+import com.document.manager.service.MailService;
+import com.document.manager.service.UserReferenceService;
 import com.document.manager.service.UserService;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,16 +49,11 @@ import java.util.stream.Collectors;
 
 import static com.document.manager.dto.enums.Gender.FEMALE;
 import static com.document.manager.dto.enums.Gender.MALE;
-import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
-import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.OK;
 
 @Service
 @Transactional
+@Slf4j
 public class UserServiceImpl implements UserService, UserDetailsService {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private UserRepo userRepo;
@@ -61,13 +62,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private RoleRepo roleRepo;
 
     @Autowired
-    private UserReferenceRepo userReferenceRepo;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
     @Autowired
     private FileService fileService;
@@ -78,12 +73,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private HttpServletRequest request;
 
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private DTOMapper dtoMapper;
+
+    @Autowired
+    private UserReferenceService userReferenceService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) {
         UserApp userApp = userRepo.findByEmail(username);
         if (userApp == null) {
-            logger.error("User {} not found", username);
+            log.error("User {} not found", username);
             return null;
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
@@ -95,197 +102,162 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserApp findUserById(Long id) {
         Optional<UserApp> userOptional = userRepo.findById(id);
         if (userOptional.isPresent()) {
-            logger.info("User with id {} found", id);
+            log.info("User with id {} found", id);
             return userOptional.get();
         }
-        logger.error("User with id {} not fount", id);
+        log.error("User with id {} not fount", id);
         return null;
     }
 
     @Override
-    public UserApp save(UserApp userApp) throws IllegalArgumentException {
-        logger.info("Saving new user {} to the database", userApp.getEmail());
+    public UserApp save(UserApp userApp) {
+        log.info("Saving user {} to the database", userApp.getEmail());
         return userRepo.save(userApp);
     }
 
+    @Transactional
     @Override
-    public UserApp register(UserApp userApp) throws IllegalArgumentException {
-        if (userApp == null) {
-            return null;
-        }
-        if (userRepo.findByEmail(userApp.getEmail()) != null) {
-            logger.error("Email {} already exist in database", userApp.getEmail());
-            throw new IllegalArgumentException("Email already exist");
-        }
-        if (userApp.getRoleApps() == null || userApp.getRoleApps().size() <= 0) {
-            RoleApp roleUser = roleRepo.findByName(Constants.ROLE_USER);
-            if (roleUser != null) {
-                userApp.setRoleApps(new ArrayList<>(Collections.singleton(roleUser)));
+    public UserApp signUp(SignUpDTO signUpDTO) {
+        try {
+            if (this.findByEmail(signUpDTO.getEmail()) != null) {
+                log.error("Email {} already exist in database", signUpDTO.getEmail());
+                throw new IllegalArgumentException("Email already exist");
             }
+            UserApp userApp = dtoMapper.toUser(signUpDTO);
+
+            if (userApp.getRoleApps() == null || userApp.getRoleApps().size() <= 0) {
+                RoleApp roleUser = roleRepo.findByName(Constants.ROLE_USER);
+                if (roleUser != null) {
+                    userApp.setRoleApps(new ArrayList<>(Collections.singleton(roleUser)));
+                }
+            }
+            userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
+            userApp.setIsActive(Boolean.FALSE);
+            userApp = this.save(userApp);
+            // Send mail
+            Map<String, Object> mapData = new HashMap<>();
+            String uuid = UUID.randomUUID().toString();
+            mapData.put("link", environment.getProperty("server.host") + "/api/user/active?id=" + userApp.getId() + "&uuid=" + uuid);
+            LocalDateTime now = LocalDateTime.now();
+            Date createdStamp = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+            Date expiredStamp = Date.from(now.plusMinutes(Long.parseLong(environment.getProperty("server.time.expired.register")))
+                    .atZone(ZoneId.systemDefault()).toInstant());
+            UserReference userReference = UserReference.builder().userApp(userApp).uuid(uuid)
+                    .createdStamp(createdStamp).expiredStamp(expiredStamp).type(ReferenceType.REGISTER).build();
+            userReferenceService.save(userReference);
+            mailService.sendMailRegister(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
+            log.info("Sign up successful with email {}", userApp.getEmail());
+            return userApp;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        userApp.setPassword(passwordEncoder.encode(userApp.getPassword()));
-        return this.save(userApp);
     }
 
     @Override
     public RoleApp save(RoleApp role) {
-        logger.info("Saving new role {} to the database", role.getName());
+        log.info("Saving new role {} to the database", role.getName());
         return roleRepo.save(role);
     }
 
     @Override
     public RoleApp findRoleByName(String roleName) throws IllegalArgumentException {
         if (StringUtils.isEmpty(roleName)) {
-            logger.error("Role name is empty");
+            log.error("Role name is empty");
             throw new IllegalArgumentException("Role name not allowed empty");
         }
         RoleApp role = roleRepo.findByName(roleName);
         if (role == null) {
-            logger.error("Role {} not found", roleName);
+            log.error("Role {} not found", roleName);
             return null;
         }
-        logger.info("Role {} found", roleRepo);
+        log.info("Role {} found", roleRepo);
         return role;
     }
 
     @Override
     public UserApp findByEmail(String email) throws IllegalArgumentException {
         if (StringUtils.isEmpty(email)) {
-            logger.error("Email is empty");
+            log.error("Email is empty");
             throw new IllegalArgumentException("Emails are not allowed to be empty");
         }
         UserApp userApp = userRepo.findByEmail(email);
         if (userApp == null) {
-            logger.error("User with email {} not found", email);
+            log.error("User with email {} not found", email);
             return null;
         }
-        logger.info("User with email {} found", email);
+        log.info("User with email {} found", email);
         return userApp;
     }
 
     @Override
-    public void changePassword(String email, String oldPassword, String newPassword) throws IllegalArgumentException {
+    public void changePassword(String oldPassword, String newPassword) throws IllegalArgumentException {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.error("Can't get info of user current!");
+            throw new IllegalArgumentException("Can't get info of user current!");
+        }
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
         if (StringUtils.isEmpty(email)) {
-            logger.error("Emails are not allowed to be empty");
-            throw new IllegalArgumentException("Emails are not allowed to be empty");
+            log.error("Emails of user current is empty");
+            throw new IllegalArgumentException("Can't get email of user current!");
         }
         UserApp userApp = findByEmail(email);
         if (!passwordEncoder.matches(oldPassword, userApp.getPassword())) {
-            logger.error("Old password is incorrect");
+            log.error("Old password is incorrect");
             throw new IllegalArgumentException("Old password is incorrect");
         }
         userApp.setPassword(passwordEncoder.encode(newPassword));
-        logger.info("Change password for user {} success", userApp.getEmail());
+        log.info("Change password for user {} success", userApp.getEmail());
         save(userApp);
     }
 
     @Override
     public UserReference save(UserReference userReference) {
-        LocalDateTime now = LocalDateTime.ofInstant(userReference.getCreatedStamp().toInstant(), ZoneId.systemDefault());
-        now.plusMinutes(15);
-        userReference.setExpiredStamp(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()));
-        logger.info("Saving new user reference with uuid {} for user {} to the database",
+        log.info("Saving new user reference with uuid {} for user {} to the database",
                 userReference.getUuid(), userReference.getUserApp().getEmail());
-        return userReferenceRepo.save(userReference);
+        return userReferenceService.save(userReference);
     }
 
     @Override
     public UserReference findByUuid(String uuid) {
         if (StringUtils.isEmpty(uuid)) {
-            logger.error("Uuid is empty");
+            log.error("Uuid is empty");
             return null;
         }
-        UserReference userReference = userReferenceRepo.findByUuid(uuid);
+        UserReference userReference = userReferenceService.findByUuid(uuid);
         if (userReference == null) {
-            logger.error("User reference with uuid {} not found", uuid);
+            log.error("User reference with uuid {} not found", uuid);
             return null;
         }
-        logger.info("User reference with uuid {} found", uuid);
+        log.info("User reference with uuid {} found", uuid);
         return userReference;
     }
 
     @Override
-    public List<UserReference> findUserReferenceByEmail(String email) {
-        if (StringUtils.isEmpty(email)) {
-            return new ArrayList<>();
-        }
-        return new ArrayList<>();
-//        return userReferenceRepo.findByEmail(email);
-    }
-
-    @Override
-    public boolean delete(UserReference userReference) {
-        if (userReference == null) {
-            logger.info("Delete user reference success");
-            return false;
-        }
-        logger.info("Delete user reference success");
-        userReferenceRepo.delete(userReference);
-        return true;
-    }
-
-    @Override
     public List<UserApp> getUsers() {
-        logger.info("Get all users");
+        log.info("Get all users");
         return userRepo.findAll();
-    }
-
-    @Override
-    public UserApp getUserById(Long id) {
-        Optional<UserApp> userApp = userRepo.findById(id);
-        if (!userApp.isPresent()) {
-            logger.info("User with id {} not found", id);
-            return null;
-        }
-        logger.info("User with id {} found", id);
-        return userApp.get();
     }
 
     @Override
     public UserApp getUserByEmail(String email) {
         if (StringUtils.isEmpty(email)) {
-            logger.error("Email is empty");
+            log.error("Email is empty");
             return null;
         }
         UserApp userApp = userRepo.findByEmail(email);
         if (userApp == null) {
-            logger.error("User with email {} not found", email);
+            log.error("User with email {} not found", email);
             return null;
         }
-        logger.info("User with email {} found", email);
+        log.info("User with email {} found", email);
         return userApp;
-    }
-
-    @Override
-    public UserApp updateUserInfo(UserInfoDTO userInfoDTO, UserApp userApp) {
-        if (userInfoDTO == null || userApp == null) {
-            logger.error("Data invalid");
-            return null;
-        }
-        if (!StringUtils.isEmpty(userInfoDTO.getUserCode())) {
-            userApp.setUserCode(userInfoDTO.getUserCode());
-        }
-        if (!StringUtils.isEmpty(userInfoDTO.getFirstName())) {
-            userApp.setFirstName(userInfoDTO.getFirstName());
-        }
-        if (!StringUtils.isEmpty(userInfoDTO.getLastName())) {
-            userApp.setLastName(userInfoDTO.getLastName());
-        }
-        if (!StringUtils.isEmpty(userInfoDTO.getGender())) {
-            userApp.setGender(userInfoDTO.getGender().equalsIgnoreCase(MALE.toString()) ? MALE : FEMALE);
-        }
-        if (!StringUtils.isEmpty(userInfoDTO.getPhoneNumber())) {
-            userApp.setPhoneNumber(userInfoDTO.getPhoneNumber());
-        }
-        logger.error("Update user info success");
-        return save(userApp);
     }
 
     @Override
     public UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception {
         UserApp userApp = this.findUserById(userId);
         if (userApp == null) {
-            logger.error("User with id {} not found", userId);
+            log.error("User with id {} not found", userId);
             throw new NotFoundException("User with id " + userId + " not found");
         }
         if (userInfoDTO == null) {
@@ -306,56 +278,46 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (!StringUtils.isEmpty(userInfoDTO.getPhoneNumber())) {
             userApp.setPhoneNumber(userInfoDTO.getPhoneNumber());
         }
-        logger.error("Update user info success");
+        if (userInfoDTO.getDob() != null) {
+            userApp.setDob(userInfoDTO.getDob());
+        }
+        log.error("Update user info success");
         return save(userApp);
     }
 
     @Override
-    public List<RoleApp> getRoles(Long userId) {
-        List<RoleApp> roleApps = new ArrayList<>();
-//        if (usersRoles == null || usersRoles.size() <= 0) {
-//            return roleApps;
-//        }
-//        for (UsersRoles userRole : usersRoles) {
-//            Optional<RoleApp> roleApp = roleRepo.findById(userRole.getRoleApp().getId());
-//            if (roleApp.isPresent()) {
-//                roleApps.add(roleApp.get());
-//            }
-//        }
-        return roleApps;
-    }
+    public Map<String, Object> signIn(String email, String password) {
+        try {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
-    @Override
-    public Map<String, Object> signIn(String email, String password) throws Exception {
-        UserApp userApp = this.getUserByEmail(email);
-        if (userApp == null) {
-            throw new NotFoundException("User " + email + " not found");
+            User user = (User) authentication.getPrincipal();
+            Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("jwt.secret").getBytes());
+            String access_token = JWT.create()
+                    .withSubject(email)
+                    .withIssuer(request.getRequestURL().toString())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.access.token.expire"))))
+                    .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                    .sign(algorithm);
+            String refresh_token = JWT.create()
+                    .withSubject(email)
+                    .withIssuer(request.getRequestURL().toString())
+                    .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.refresh.token.expire"))))
+                    .sign(algorithm);
+            log.info("User {} login success", email);
+            Map<String, Object> mapData = new HashMap<>();
+            mapData.put("access_token", access_token);
+            mapData.put("refresh_token", refresh_token);
+            mapData.put("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
+            return mapData;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new IllegalArgumentException(e.getMessage());
         }
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        userApp.getRoleApps().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
-        Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("jwt.secret").getBytes());
-        String access_token = JWT.create()
-                .withSubject(email)
-                .withIssuer(request.getRequestURL().toString())
-                .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.access.token.expire"))))
-                .withClaim("roles", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .sign(algorithm);
-        String refresh_token = JWT.create()
-                .withSubject(email)
-                .withIssuer(request.getRequestURL().toString())
-                .withExpiresAt(new Date(System.currentTimeMillis() + Integer.parseInt(environment.getProperty("jwt.refresh.token.expire"))))
-                .sign(algorithm);
-        Map<String, Object> mapData = new HashMap<>();
-        mapData.put("access_token", access_token);
-        mapData.put("refresh_token", refresh_token);
-        mapData.put("roles", userApp.getRoleApps().stream().map(RoleApp::getName).collect(Collectors.toList()));
-        return mapData;
     }
 
     @Override
-    public void changeAvatar(MultipartFile file) throws NotFoundException {
+    public void updateAvatar(MultipartFile file) throws NotFoundException {
         if (file == null) {
             throw new NotFoundException("Avatar not found");
         }
@@ -371,21 +333,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserApp getCurrentUser() throws NotFoundException {
-        try {
-            String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-            UserApp userApp = this.findByEmail(email);
-            if (userApp == null) {
-                throw new NotFoundException("Current user not found");
-            }
-            return userApp;
-        } catch (Exception e) {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.error("Can't get info of user current!");
+            throw new IllegalArgumentException("Can't get info of user current!");
+        }
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        UserApp userApp = this.findByEmail(email);
+        if (userApp == null) {
+            log.error("User with email {} not found", email);
             throw new NotFoundException("Current user not found");
         }
+        return userApp;
     }
 
     @Override
     public Map<String, String> refreshToken(String authorization) {
         if (StringUtils.isEmpty(authorization) || !authorization.startsWith("Bearer ")) {
+            log.error("Refresh token is missing");
             throw new IllegalArgumentException("Refresh token is missing");
         }
         try {
@@ -405,7 +369,181 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             tokens.put("access_token", access_token);
             return tokens;
         } catch (Exception e) {
+            log.error("Refresh token with error: " + e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public void forgotPassword(String email) throws NotFoundException {
+        if (StringUtils.isEmpty(email)) {
+            log.error("Email is empty");
+            throw new IllegalArgumentException("Email is not allow empty");
+        }
+        UserApp userApp = this.findByEmail(email);
+        if (userApp == null) {
+            log.error("User {} not found", email);
+            throw new NotFoundException("User not found");
+        }
+        String uuid = UUID.randomUUID().toString();
+
+        LocalDateTime now = LocalDateTime.now();
+        Date createdStamp = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+        Date expiredStamp = Date.from(now.plusMinutes(Long.parseLong(environment.getProperty("server.time.expired.forgot-password")))
+                .atZone(ZoneId.systemDefault()).toInstant());
+        UserReference userReference = UserReference.builder().userApp(userApp).uuid(uuid)
+                .createdStamp(createdStamp).expiredStamp(expiredStamp).type(ReferenceType.RESET_PASSWORD).build();
+        userReference = this.save(userReference);
+        if (userReference != null) {
+            // Send mail
+            Map<String, Object> mapData = new HashMap<>();
+            String link = environment.getProperty("server.fe") + "/reset-password?email=" + userReference.getUserApp().getEmail() + "&uuid=" + uuid;
+            mapData.put("link", link);
+            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
+        }
+    }
+
+    @Override
+    public void resetPassword(String email, String uuid, ResetPasswordDTO resetPasswordDTO) throws NotFoundException {
+        if (StringUtils.isEmpty(email)) {
+            log.error("Email is empty");
+            throw new IllegalArgumentException("Email not allow empty");
+        }
+        if (StringUtils.isEmpty(uuid)) {
+            log.error("Code is empty");
+            throw new IllegalArgumentException("Code not allow empty");
+        }
+        UserApp userApp = this.findByEmail(email);
+        if (userApp == null) {
+            log.error("User {} not found", email);
+            throw new NotFoundException("User not found");
+        }
+        // Handle reset password
+        UserReference userReference = this.findByUuid(uuid);
+        if (userReference == null) {
+            log.error("User reference with uuid {} not found", uuid);
+            throw new NotFoundException("User reference not found");
+        }
+        if (new Date().after(userReference.getExpiredStamp())) {
+            log.error("User reference with uuid {} was expired", uuid);
+            throw new RuntimeException("User reference was expired");
+        }
+        userApp.setPassword(passwordEncoder.encode(resetPasswordDTO.getPassword()));
+        this.save(userApp);
+        log.info("Reset password successful");
+    }
+
+    @Override
+    public void createData() {
+        if (this.findRoleByName(Constants.ROLE_USER) == null) {
+            RoleApp roleUser = new RoleApp(null, Constants.ROLE_USER);
+            this.save(roleUser);
+        }
+        if (this.findRoleByName(Constants.ROLE_ADMIN) == null) {
+            RoleApp roleAdmin = new RoleApp(null, Constants.ROLE_ADMIN);
+            this.save(roleAdmin);
+        }
+
+        RoleApp roleAdmin = this.findRoleByName(Constants.ROLE_ADMIN);
+        RoleApp roleUser = this.findRoleByName(Constants.ROLE_USER);
+        if (this.findByEmail("admin@yopmail.com") == null) {
+            List<RoleApp> roles = new ArrayList<>();
+            roles.add(roleAdmin);
+            roles.add(roleUser);
+
+            this.save(new UserApp("10000000",
+                    "A",
+                    "Admin",
+                    Gender.MALE,
+                    new Date("01/01/1999"),
+                    "1111111111",
+                    "admin@yopmail.com",
+                    passwordEncoder.encode("12345678"),
+                    roles));
+        }
+        if (this.findByEmail("user@yopmail.com") == null) {
+            this.save(new UserApp("10000001",
+                    "U",
+                    "User",
+                    Gender.MALE,
+                    new Date("02/02/2000"),
+                    "2222222222",
+                    "user@yopmail.com",
+                    passwordEncoder.encode("12345678"),
+                    new ArrayList<>(Collections.singleton(roleUser))));
+        }
+    }
+
+    @Transactional
+    @Override
+    public void resendMailForgotPassword(String email) throws NotFoundException {
+        if (StringUtils.isEmpty(email)) {
+            log.info("Email is empty");
+            throw new IllegalArgumentException("Email not allow empty");
+        }
+        UserApp userApp = this.findByEmail(email);
+        if (userApp == null) {
+            log.info("User {} not found", email);
+            throw new NotFoundException("User not found");
+        }
+        List<UserReference> userReferences = this.userReferenceService.findUserReferenceByEmailAndType(email, ReferenceType.RESET_PASSWORD);
+        if (userReferences != null && userReferences.size() > 0) {
+           userReferenceService.deleteUserReferences(userReferences.stream().map(UserReference::getId).collect(Collectors.toList()));
+        }
+        String uuid = UUID.randomUUID().toString();
+
+        LocalDateTime now = LocalDateTime.now();
+        Date createdStamp = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
+        Date expiredStamp = Date.from(now.plusMinutes(Long.parseLong(environment.getProperty("server.time.expired.forgot-password")))
+                .atZone(ZoneId.systemDefault()).toInstant());
+        UserReference userReference = UserReference.builder().userApp(userApp).uuid(uuid)
+                .createdStamp(createdStamp).expiredStamp(expiredStamp).type(ReferenceType.RESET_PASSWORD).build();
+        userReference = this.save(userReference);
+
+        if (userReference != null) {
+            // Send mail
+            Map<String, Object> mapData = new HashMap<>();
+            String link = environment.getProperty("server.fe") + "/reset-password?email=" + userReference.getUserApp().getEmail() + "&uuid=" + uuid;
+            mapData.put("link", link);
+            mailService.sendMailForgotPassword(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
+            log.info("Resend mail reset password to email {}", userApp.getEmail());
+        }
+    }
+
+    @Override
+    public void lockAccount(Long userId) throws NotFoundException {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id can't null");
+        }
+        UserApp userApp = this.findUserById(userId);
+        if (userApp == null) {
+            log.error("User with id {} not found", userId);
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        userApp.setIsActive(Boolean.FALSE);
+        this.save(userApp);
+    }
+
+    @Transactional
+    @Override
+    public void activeAccount(Long userId, String uuid) throws NotFoundException {
+        if (userId == null || StringUtils.isEmpty(uuid)) {
+            log.info("Active account with id {} and uuid {}", userId, uuid);
+            throw new IllegalArgumentException("Params data invalid");
+        }
+        UserApp userApp = this.findUserById(userId);
+        if (userApp == null) {
+            log.error("User with id {} not found", userId);
+            throw new NotFoundException("User not found");
+        }
+        UserReference userReference = userReferenceService.findByUserIdAndUuidAndTypeOrderByExpiredStamp(userId, uuid, ReferenceType.REGISTER.name());
+        if (userReference == null) {
+            log.error("Can't found info active user with id {} and uuid {}", userId, uuid);
+            throw new NotFoundException("Can't found info active user");
+        }
+        userApp.setIsActive(Boolean.TRUE);
+        this.save(userApp);
+        userReferenceService.deleteUserReference(userReference);
+        log.info("Active user with id {} successful", userId);
     }
 }

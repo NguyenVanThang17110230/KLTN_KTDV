@@ -24,7 +24,6 @@ public class SignUpDTO implements Serializable {
     private String firstName;
 
     @NotBlank(message = "Lastname is mandatory")
-    @Column(name = "last_name")
     private String lastName;
 
     @NotBlank(message = "Gender is mandatory")
@@ -32,7 +31,6 @@ public class SignUpDTO implements Serializable {
 
     private Date dob;
 
-    @Column(name = "phone_number")
     @Size(min = 10, max = 10, message = "Phone number must be has 10 characters")
     private String phoneNumber;
 

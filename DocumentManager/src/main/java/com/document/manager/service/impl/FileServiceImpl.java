@@ -1,15 +1,13 @@
 package com.document.manager.service.impl;
 
 import com.document.manager.service.FileService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,43 +15,8 @@ import java.util.Date;
 
 
 @Service
+@Slf4j
 public class FileServiceImpl implements FileService {
-
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    @Override
-    public String readFile(MultipartFile multipartFile) {
-        try {
-            byte[] b = multipartFile.getBytes();
-            InputStream inputStream = multipartFile.getInputStream();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String result;
-            while ((result = bufferedReader.readLine()) != null) {
-                System.out.println(result);
-            }
-            String x = new String(b);
-            return result;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    @Override
-    public File convertFile(MultipartFile multipartFile) {
-        File convFile = new File("C:\\Users\\nguye\\Desktop\\KLTN\\KLTN_KTDV\\DocumentManager\\src\\main\\resources\\uploads"
-                + multipartFile.getOriginalFilename());
-        try {
-            convFile.createNewFile();
-            try (InputStream is = multipartFile.getInputStream()) {
-                Files.copy(is, convFile.toPath());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return convFile;
-    }
 
     @Override
     public String saveFile(String dir, String fileName, byte[] bytes) throws IOException {
@@ -71,7 +34,7 @@ public class FileServiceImpl implements FileService {
             }
             return link;
         } catch (IOException e) {
-            logger.info("Save file {} to location {} failed", fileName, dir);
+            log.info("Save file {} to location {} failed", fileName, dir);
             throw new IOException("Save file failed");
         }
     }
@@ -84,6 +47,7 @@ public class FileServiceImpl implements FileService {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             return pdfStripper.getText(document);
         } catch (Exception e) {
+            log.error("Read report failed");
             throw new IOException("Read report failed");
         } finally {
             if (document != null) {
