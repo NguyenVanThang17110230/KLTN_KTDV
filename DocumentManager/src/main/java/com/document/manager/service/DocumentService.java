@@ -1,11 +1,11 @@
 package com.document.manager.service;
 
 import com.document.manager.domain.DocumentApp;
+import com.document.manager.dto.DocumentDTO;
 import com.document.manager.dto.PlagiarismDocumentDTO;
 import com.document.manager.dto.UploadDocumentDTO;
 import javassist.NotFoundException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -26,4 +26,5 @@ public interface DocumentService {
 
     PlagiarismDocumentDTO getPlagiarism(String[] target, Map<Integer, List<String>> tokenizerOfTarget);
 
+    List<DocumentDTO> getDocumentOfCurrentUser() throws NotFoundException;
 }

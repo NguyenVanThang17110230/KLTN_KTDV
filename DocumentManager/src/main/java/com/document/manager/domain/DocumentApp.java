@@ -36,9 +36,6 @@ public class DocumentApp implements Serializable {
     @Column(name = "created_stamp")
     private Date createdStamp;
 
-    @ManyToMany(fetch = EAGER)
-    private List<Owner> owners = new ArrayList<>();
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "created_id")
     private UserApp userApp;

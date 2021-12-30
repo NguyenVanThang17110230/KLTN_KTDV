@@ -3,12 +3,11 @@ package com.document.manager.service.impl;
 import com.document.manager.algorithm.Algorithm;
 import com.document.manager.domain.DocumentApp;
 import com.document.manager.domain.Sentences;
-import com.document.manager.dto.IndexDTO;
-import com.document.manager.dto.PlagiarismDocumentDTO;
-import com.document.manager.dto.PlagiarismSentencesDTO;
-import com.document.manager.dto.UploadDocumentDTO;
+import com.document.manager.domain.UserApp;
+import com.document.manager.dto.*;
 import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.PlagiarismStatus;
+import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.pipeline.Annotation;
 import com.document.manager.pipeline.VnCoreNLP;
 import com.document.manager.pipeline.Word;
@@ -18,8 +17,10 @@ import com.document.manager.service.FileService;
 import com.document.manager.service.SentencesService;
 import com.document.manager.service.UserService;
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@Slf4j
 public class DocumentServiceImpl implements DocumentService {
 
     @Autowired
@@ -46,9 +48,28 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private DTOMapper dtoMapper;
+
     private static final String REGEX_DIVISION = "[?!.;]";
     private static final Integer LIMIT_CHARACTER = 30;
     private static final String DIVISION = "\\*";
+
+    @Override
+    public List<DocumentDTO> getDocumentOfCurrentUser() throws NotFoundException {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.error("Can't get info of user current!");
+            throw new IllegalArgumentException("Can't get info of user current!");
+        }
+        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+        UserApp userApp = userService.findByEmail(email);
+        if (userApp == null) {
+            log.error("User with email {} not found", email);
+            throw new NotFoundException("Current user not found");
+        }
+        List<DocumentApp> documentApps = this.findByUserId(userApp.getId());
+        return dtoMapper.toDocumentDTO(documentApps);
+    }
 
     @Override
     public DocumentApp save(DocumentApp documentApp) {
@@ -170,6 +191,7 @@ public class DocumentServiceImpl implements DocumentService {
         }
         try {
             content = content.replaceAll("\r\n", " ");
+            content = content.replaceAll("\\s+", " ");
             List<String> sentences = new LinkedList<>(Arrays.asList(content.split(REGEX_DIVISION)));
             List<Integer> deletes = new ArrayList<>();
             for (int i = 0; i < sentences.size(); i++) {
@@ -187,6 +209,7 @@ public class DocumentServiceImpl implements DocumentService {
             List<String> elementDeletes = new ArrayList<>();
             deletes.forEach(d -> elementDeletes.add(sentences.get(d)));
             elementDeletes.forEach(e -> sentences.remove(e));
+            sentences.stream().filter(s -> !StringUtils.isBlank(s)).collect(Collectors.toList());
             return sentences.stream().filter(s -> !StringUtils.isBlank(s)).map(String::trim).toArray(size -> new String[size]);
         } catch (Exception e) {
             throw new Exception(e.getMessage());
@@ -305,20 +328,38 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     public List<String> getPartPlagiarism(List<String> tokenizersOfTarget, List<String> tokenizerOfMatching) {
+        List<String> tokenizerOfMatchingLower = tokenizerOfMatching.stream().map(t -> t.toLowerCase()).collect(Collectors.toList());
         List<String> result = new ArrayList<>();
-        tokenizersOfTarget.stream().forEach(t -> result.addAll(tokenizerOfMatching.stream().filter(m -> m.equalsIgnoreCase(t)).collect(Collectors.toList())));
-        return result.stream().distinct().collect(Collectors.toList());
+        tokenizersOfTarget.stream().forEach(t -> {
+            if (tokenizerOfMatchingLower.contains(t.toLowerCase())) {
+                result.add(t);
+            }
+        });
+        return result.stream().collect(Collectors.toList());
     }
 
     private List<IndexDTO> getPlagiarism(String target, String matching, List<String> tokenizerOfMatching) {
+        String targetLower = target.toLowerCase();
+        String matchingLower = matching.toLowerCase();
+        Map<String, Integer> saveIndexOfTarget = new HashMap<>();
+        Map<String, Integer> saveIndexOfMatching = new HashMap<>();
         List<IndexDTO> indexList = new ArrayList<>();
         for (String s : tokenizerOfMatching) {
-            if (target.contains(s) && matching.contains(s)) {
-                int startTarget = target.indexOf(s);
-                int startMatching = target.indexOf(s);
+            String sLower = s.toLowerCase();
+            if (targetLower.contains(sLower) && matchingLower.contains(sLower)) {
+                int startTarget = targetLower.indexOf(sLower);
+                if (saveIndexOfTarget.containsKey(sLower) && saveIndexOfTarget.get(sLower) < targetLower.length()) {
+                    startTarget = targetLower.indexOf(sLower, saveIndexOfTarget.get(sLower));
+                }
+                saveIndexOfTarget.put(sLower, startTarget + sLower.length() - 1);
+                int startMatching = matchingLower.indexOf(sLower);
+                if (saveIndexOfMatching.containsKey(sLower) && saveIndexOfMatching.get(sLower) < matchingLower.length()) {
+                    startMatching = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
+                }
+                saveIndexOfMatching.put(sLower, startMatching + sLower.length() - 1);
                 indexList.add(IndexDTO.builder().startTarget(startTarget)
                         .startMatching(startMatching)
-                        .length(s.length())
+                        .length(sLower.length())
                         .build());
             }
         }
@@ -379,7 +420,7 @@ public class DocumentServiceImpl implements DocumentService {
 
                     // TODO: Get part plagiarism
                     List<String> partPlagiarism = this.getPartPlagiarism(tokenizers, tokenizerOfMatching);
-                    List<IndexDTO> indexDTOS = this.getPlagiarism(target, sentences.getRawText(), tokenizerOfMatching);
+                    List<IndexDTO> indexDTOS = this.getPlagiarism(target, sentences.getRawText(), partPlagiarism);
 
                     // TODO: Store data plagiarism of sentences
                     plagiarismSentencesDTO.setTarget(target);

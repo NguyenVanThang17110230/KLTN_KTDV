@@ -20,7 +20,7 @@ public class UserAppDTO {
     private String gender;
     private String phoneNumber;
     private Date dob;
-    private File avatar;
+    private String avatar;
     private Boolean isActive;
     private Date createdStamp;
     private Date modifiedStamp;
