@@ -8,3 +8,7 @@
 + Frontend: NextJs + React
 + Backend: Spring boot(Java)
 + Database: MongoDB
+### setup front-end
++ Install lib: npm i
++ create .env: BASE_API_URL={BASE_BACK_END)/api
++ Start: npm run dev
