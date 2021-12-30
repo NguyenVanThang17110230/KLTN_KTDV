@@ -1,0 +1,26 @@
+
+m
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.(ßÀ§»ûÿÿÿÿ
+S
+java:S1854#"8Remove this useless assignment to local variable "line".(ä»´Ÿıÿÿÿÿ
+T
+java:S4719""9Replace charset name argument with StandardCharsets.UTF_8(ï “Ìùÿÿÿÿ
+B
+java:S1264*",Replace this "for" loop with a "while" loop.(ùşŠ„
+m
+java:S3776i"RRefactor this method to reduce its Cognitive Complexity from 80 to the 15 allowed.(Èöûİúÿÿÿÿ
+V
+java:S1854¢":Remove this useless assignment to local variable "ilower".(ÎöÉÄıÿÿÿÿ
+Š
+java:S1130Ï"lRemove the declaration of thrown exception 'java.io.IOException', as it cannot be thrown from method's body.(¹£ş8‚ëĞ×/
+n	java:S135*"YReduce the total number of break and continue statements in this loop to use at most one.(ùşŠ„
+s	java:S135T"YReduce the total number of break and continue statements in this loop to use at most one.(˜ïˆÿÿÿÿÿ
+s	java:S135v"YReduce the total number of break and continue statements in this loop to use at most one.(Óï¿õúÿÿÿÿ
+E
+java:S1066{"/Merge this if statement with the enclosing one.(—÷ºÎ
+K
+java:S1066±"/Merge this if statement with the enclosing one.(§Ğ¶Êøÿÿÿÿ
+c
+java:S2259İ"GA "NullPointerException" could be thrown; "firedNode" is nullable here.(ÀŒ¿üÿÿÿÿ
+b
+java:S2095!"LUse try-with-resources or close this "BufferedReader" in a "finally" clause.(ï‡†œ

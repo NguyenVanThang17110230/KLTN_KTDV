@@ -12,8 +12,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class SignInDTO implements Serializable {
 
-    @NotBlank(message = "Username is mandatory")
-    private String username;
+    @NotBlank(message = "Email is mandatory")
+    private String email;
 
     @NotBlank(message = "Password is mandatory")
     @Size(min = 6, message = "Password must be at least 8 characters")

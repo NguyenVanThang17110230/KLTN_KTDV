@@ -1,7 +1,17 @@
 package com.document.manager;
 
+import com.document.manager.domain.RoleApp;
+import com.document.manager.domain.UserApp;
+import com.document.manager.dto.enums.Gender;
+import com.document.manager.service.UserService;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @SpringBootApplication
 public class DocumentManagerApplication {
@@ -12,8 +22,8 @@ public class DocumentManagerApplication {
 //    @Bean
 //    CommandLineRunner run(UserService userService) throws Exception {
 //        return args -> {
-//            Role roleAdmin = new Role(null, "ROLE_ADMIN");
-//            Role roleUser = new Role(null, "ROLE_USER");
+//            RoleApp roleAdmin = new RoleApp(null, "ROLE_ADMIN");
+//            RoleApp roleUser = new RoleApp(null, "ROLE_USER");
 //
 //            if (userService.findRoleByName("ROLE_USER") == null) {
 //                userService.save(roleUser);
@@ -22,11 +32,11 @@ public class DocumentManagerApplication {
 //                userService.save(roleAdmin);
 //            }
 //            if (userService.findByEmail("admin@yopmail.com") == null) {
-//                List<Role> roles = new ArrayList<>();
+//                List<RoleApp> roles = new ArrayList<>();
 //                roles.add(roleAdmin);
 //                roles.add(roleUser);
 //
-//                userService.save(new User(null,
+//                userService.save(new UserApp(null,
 //                        "10000000",
 //                        "A",
 //                        "Admin",
@@ -36,15 +46,15 @@ public class DocumentManagerApplication {
 //                        "admin@yopmail.com",
 //                        "12345678",
 //                        true,
-//                        new Timestamp(System.currentTimeMillis()),
+//                        new Date(),
 //                        null,
 //                        roles));
 //            }
 //            if (userService.findByEmail("user@yopmail.com") == null) {
-//                List<Role> roles = new ArrayList<>();
+//                List<RoleApp> roles = new ArrayList<>();
 //                roles.add(roleUser);
 //
-//                userService.save(new User(null,
+//                userService.save(new UserApp(null,
 //                        "10000001",
 //                        "U",
 //                        "User",
@@ -54,7 +64,7 @@ public class DocumentManagerApplication {
 //                        "user@yopmail.com",
 //                        "12345678",
 //                        true,
-//                        new Timestamp(System.currentTimeMillis()),
+//                        new Date(),
 //                        null,
 //                        roles));
 //            }
