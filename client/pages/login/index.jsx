@@ -9,43 +9,41 @@ import * as Yup from "yup";
 import UserGuest from "../../layouts/UserGuest";
 import { accountService } from "../../package/RestConnector";
 import { UserRole } from "../../package/account/model/Account";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const router = useRouter();
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await accountService.wellcomeLoginUser();
-      console.log("data", data);
-    };
-    fetchData();
-  }, []);
-
   const isAdmin = (role) => {
-    console.log("role", role);
-    const res = role.find((role) => role.name === UserRole.ROLE_ADMIN);
+    const res = role.find((role) => role === UserRole.ROLE_ADMIN);
     if (res) return true;
     return false;
   };
 
   const handleLogin = async (values, actions) => {
-    actions.setSubmitting(true);
+    const { setSubmitting } = actions;
+    setSubmitting(true);
     try {
-      const user = await accountService.loginAdmin(values);
-      console.log("user-data", user);
-
-      const nextPage = isAdmin(user.data.roleApps) ? "/admin" : "/document";
+      const res = await accountService.loginAdmin(values);
+      console.log('res-role',res.roles);
+      const nextPage = isAdmin(res.roles) ? "/admin" : "/document";
       toastr.success("login success");
+      Cookies.set('check-reset', 0)
+      setSubmitting(false);
       router.replace(nextPage);
-    } catch (err) {
-      toastr.error("Incorrect account or password");
-      actions.setSubmitting(false);
+    } catch (e) {
+      let msg;
+      switch (e.code) {
+        default: {
+          msg = e.message;
+        }
+      }
+      toastr.error(msg);
+      setSubmitting(false);
     }
   };
 
   const SignupSchema = Yup.object().shape({
     password: Yup.string()
-      // .min(8, 'Your password is too short!')
-      // .max(70, 'Your password is too Long!')
       .required("Your password required!"),
     email: Yup.string().email("Invalid email").required("Your email required"),
   });
@@ -79,23 +77,23 @@ const Login = () => {
                 >
                   Email
                 </label>
-                <Field
-                  id="email"
-                  name="email"
-                  placeholder="example@hcmute.edu.vn"
-                  className={
-                    "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
-                    (props.errors.email && props.touched.email
-                      ? "border-red-500"
-                      : "border-green-500")
-                  }
-                  type="text"
-                />
-                {props.errors.email && props.touched.email ? (
-                  <div className="text-red-600 text-sm mt-2 flex items-center">
+                <div className="relative">
+                  <Field
+                    id="email"
+                    name="email"
+                    placeholder="example@hcmute.edu.vn"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.email && props.touched.email
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
+                    type="text"
+                  />
+                  {props.errors.email && props.touched.email ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="icon icon-tabler icon-tabler-alert-triangle"
+                      className="icon icon-tabler icon-tabler-alert-triangle absolute right-2 top-1/2"
                       width={22}
                       height={22}
                       viewBox="0 0 24 24"
@@ -104,11 +102,17 @@ const Login = () => {
                       fill="none"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      style={{ transform: "translateY(-50%)" }}
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M12 9v2m0 4v.01" />
                       <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
                     </svg>
+                  ) : null}
+                </div>
+
+                {props.errors.email && props.touched.email ? (
+                  <div className="text-red-600 text-sm mt-2 flex items-center">
                     {props.errors.email}
                   </div>
                 ) : null}
@@ -120,23 +124,23 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <Field
-                  id="password"
-                  name="password"
-                  placeholder="********"
-                  className={
-                    "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
-                    (props.errors.password && props.touched.password
-                      ? "border-red-500"
-                      : "border-green-500")
-                  }
-                  type="password"
-                />
-                {props.errors.password && props.touched.password ? (
-                  <div className="text-red-600 text-sm mt-2 flex items-center">
+                <div className="relative">
+                  <Field
+                    id="password"
+                    name="password"
+                    placeholder="********"
+                    className={
+                      "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
+                      (props.errors.password && props.touched.password
+                        ? "border-red-500"
+                        : "border-green-500")
+                    }
+                    type="password"
+                  />
+                  {props.errors.password && props.touched.password ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="icon icon-tabler icon-tabler-alert-triangle"
+                      className="icon icon-tabler icon-tabler-alert-triangle absolute right-2 top-1/2"
                       width={22}
                       height={22}
                       viewBox="0 0 24 24"
@@ -145,11 +149,17 @@ const Login = () => {
                       fill="none"
                       strokeLinecap="round"
                       strokeLinejoin="round"
+                      style={{ transform: "translateY(-50%)" }}
                     >
                       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                       <path d="M12 9v2m0 4v.01" />
                       <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
                     </svg>
+                  ) : null}
+                </div>
+
+                {props.errors.password && props.touched.password ? (
+                  <div className="text-red-600 text-sm mt-2 flex items-center">
                     {props.errors.password}
                   </div>
                 ) : null}
@@ -185,12 +195,14 @@ const Login = () => {
                   )}
                   Sign in
                 </button>
-                <a
+                <Link href="/forgot-password"><a
                   className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
                   href="#"
                 >
                   Forgot password?
                 </a>
+                </Link>
+                
               </div>
               <div className="text-center text-sm mt-4 text-gray-500 font-medium">
                 Don&#39;t have an account?{" "}

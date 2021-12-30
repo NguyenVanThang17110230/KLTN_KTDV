@@ -8,16 +8,9 @@ const UserProvider = ({ children }) => {
 
   // Login updates the user data with a name parameter
   const dataLogin = (user) => {
-    console.log('@@@@@name',user);
     setUser(user)
   };
 
-  
-  
-
-  // const logout = () => {
-  //   setUser(null)
-  // };
   const globalData = {
     user,
     dataLogin

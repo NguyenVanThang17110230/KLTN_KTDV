@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import Head from "next/head";
+import { Formik, Field, Form } from "formik";
+
 import { UserLayout } from "../../layouts/User";
 import DocumentFile from "../../package/document/component/Document";
 import AddNewDocumentModal from "../../package/document/component/AddNewDocumentModal";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);
-
   return (
     <>
       <Head>
         <title>Document</title>
       </Head>
       <div className="px-20 py-10">
-        <div className="shadow-md p-3">
+        <div className="shadow-md p-3 bg-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="font-medium text-2xl text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
               List document
@@ -21,6 +22,7 @@ const Document = () => {
             <div
               className="flex p-3 items-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer rounded-md relative"
               onClick={() => setIsShowAddNewDocument(true)}
+              style={{ cursor: "pointer" }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +48,10 @@ const Document = () => {
           <DocumentFile />
         </div>
       </div>
-      {isShowAddNewDocument && <AddNewDocumentModal  closeModal={() => setIsShowAddNewDocument(false)} />}
+      <AddNewDocumentModal
+        style={isShowAddNewDocument}
+        closeModal={() => setIsShowAddNewDocument(false)}
+      />
     </>
   );
 };

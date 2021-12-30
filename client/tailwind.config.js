@@ -1,6 +1,7 @@
 module.exports = {
   purge: {
-    content:['./pages/**/*.{js,ts,jsx,tsx}', 
+    content:[
+    './pages/**/*.{js,ts,jsx,tsx}',
     './components/**/*.{js,ts,jsx,tsx}',
     './layouts/**/*.{js,ts,jsx,tsx}',
     './containers/**/*.{js,ts,jsx,tsx}'
@@ -10,6 +11,8 @@ module.exports = {
       'text-center',
       'hover:opacity-100',
       'lg:text-right',
+      'grid-cols-3',
+      'gap-5'
     ]
   
   },
@@ -32,7 +35,18 @@ module.exports = {
         'secondary': '#ffed4a',
         'danger': '#e3342f',
         'success':'#22bb33'
+      },
+      keyframes: {
+        wiggle: {
+          '0%': { transform: 'translateY(0px)'},
+          '100%': { transform: 'translateY(50%)'},
+        }
+      },
+      animation: {
+        wiggle: 'wiggle 1s ease-in-out',
       }
+
+
     },
   },
   variants: {
@@ -41,6 +55,7 @@ module.exports = {
       opacity:['responsive', 'hover', 'focus', 'group-hover','disabled'],
       gradientColorStops: ['responsive', 'hover', 'focus','active', 'group-hover'],
       cursor:['responsive', 'hover', 'focus', 'group-hover','disabled'],
+      visibility:['responsive', 'hover', 'focus', 'group-hover','disabled'],
       outline:['focus'],
       backgroundOpacity:['responsive', 'hover', 'focus', 'group-hover','disabled']
     },

@@ -10,10 +10,49 @@ export default class AccountService{
 
   async loginAdmin({email,password}) {
     const token = await this.accountGateway.loginAdmin({email,password});
-    this.accountGateway.setAccessToken(token.data.jwt);
-    return this.accountGateway.getUserAfterLogin();
+    console.log('token-2',token);
+    await this.accountGateway.setAccessToken(token.data);
+    return token.data
   }
+
   async signUpUser(values) {
     return this.accountGateway.signUpUser(values);
   }
+  
+  async getUserAfterLogin(){
+    return this.accountGateway.getUserAfterLogin()
+  }
+
+  async changePassword(values) {
+    return this.accountGateway.changePassword(values);
+  }
+
+  async getListUser() {
+    return this.accountGateway.getListUser();
+  }
+
+  async changeAvatar(file) {
+    return this.accountGateway.changeAvatar(file);
+  }
+
+  async changeProfile(id,values) {
+    return this.accountGateway.changeProfile(id,values);
+  }
+
+  async forgotPassword(email){
+    return this.accountGateway.forgotPassword(email)
+  }
+
+  async resetPassword(email,uuid,password){
+    return this.accountGateway.resetPassword(email,uuid,password)
+  }
+
+  async lockAccount(id){
+    return this.accountGateway.lockAccount(id)
+  }
+
+  async logout(){
+    return this.accountGateway.logout()
+  }
+
 }

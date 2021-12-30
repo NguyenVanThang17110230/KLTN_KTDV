@@ -9,19 +9,19 @@ export const AdminLayout = ({ children }) => {
   const router = useRouter();
   const token = Cookies.get("jwt");
   useEffect(() => {
-    if (token === undefined) {
-      return router.replace("/login");
-    }
+    // if (token === undefined) {
+    //   return router.replace("/login");
+    // }
   }, []);
   return (
     <>
-      {token !== undefined && (
+      {/* {token !== undefined && ( */}
         <div className="relative md:ml-64 bg-gray-100 h-full min-h-screen">
           <SidebarAdmin />
           <Header />
           <div className="w-full">{children}</div>
         </div>
-      )}
+      {/* )} */}
     </>
   );
 };

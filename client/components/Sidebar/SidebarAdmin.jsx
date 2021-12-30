@@ -120,8 +120,6 @@ export default function Sidebar() {
                 />
               </div>
             </form>
-
-            
             {/* Heading */}
             <h6 className="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
               Admin Layout Pages test
