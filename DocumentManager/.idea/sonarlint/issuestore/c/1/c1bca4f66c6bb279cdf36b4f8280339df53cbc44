@@ -1,0 +1,36 @@
+
+a	java:S112˜"FDefine and throw a dedicated exception instead of using a generic one.(Ê“Åıÿÿÿÿ
+a	java:S112õ"FDefine and throw a dedicated exception instead of using a generic one.(Ê“Åıÿÿÿÿ
+a	java:S112­"FDefine and throw a dedicated exception instead of using a generic one.(ò°‚Èùÿÿÿÿ
+C
+java:S1874Ê",Remove this use of "Date"; it is deprecated.(Ú€©õ
+H
+java:S1874Õ",Remove this use of "Date"; it is deprecated.(÷è´áıÿÿÿÿ
+^
+java:S1192Œ"GDefine a constant instead of duplicating this literal "&uuid=" 3 times.(ë˜£ë
+k
+java:S1192´"ODefine a constant instead of duplicating this literal "Email is empty" 5 times.(ÆŠ¬”ıÿÿÿÿ
+v
+java:S1192„"ZDefine a constant instead of duplicating this literal "User with id {} not found" 3 times.(‡àÿ®üÿÿÿÿ
+y
+java:S1192¹"]Define a constant instead of duplicating this literal "User with email {} not found" 3 times.(çŸ¶–şÿÿÿÿ
+b
+java:S1192¬"FDefine a constant instead of duplicating this literal "roles" 3 times.(„¢§øÿÿÿÿ
+f
+java:S1192‚"ODefine a constant instead of duplicating this literal "User not found" 4 times.(†Ìˆú
+m
+java:S1192]"RDefine a constant instead of duplicating this literal "User {} not found" 4 times.(âêöÇùÿÿÿÿ
+w
+java:S1192Ã"`Define a constant instead of duplicating this literal "Can't get info of user current!" 4 times.(¢ç•Ñ
+l	java:S117¨"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¤ØÇøÿÿÿÿ
+l	java:S117®"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Àı©‘ùÿÿÿÿ
+l	java:S117ä"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(—ÁäÔÿÿÿÿÿ
+l	java:S117ê"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(¤ØÇøÿÿÿÿ
+Z
+java:S1155€">Use isEmpty() to check whether the collection is empty or not.(³Ôªøÿÿÿÿ
+U
+java:S1155ê">Use isEmpty() to check whether the collection is empty or not.(Öé€ú
+f
+java:S2259å"JA "NullPointerException" could be thrown; "getProperty()" can return null.(ƒì²şÿÿÿÿ
+f
+java:S2259§"JA "NullPointerException" could be thrown; "getProperty()" can return null.(ƒì²şÿÿÿÿ
