@@ -41,7 +41,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                   Matching Comparison Text
                 </div>
               </div>
-              {/* {value.plagiarism.length > 0 &&
+              {value.plagiarism.length > 0 &&
                 value.plagiarism.map((data, index) => {
                   const arrTarget = data.tokenizerPlagiarism.sort(
                     (a, b) => a.startTarget - b.startTarget,
@@ -168,7 +168,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                       </div>
                     </div>
                   );
-                })} */}
+                })}
             </div>
           </div>
         </div>
