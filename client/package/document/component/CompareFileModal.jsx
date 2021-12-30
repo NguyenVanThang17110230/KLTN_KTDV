@@ -15,6 +15,24 @@ const CompareFileModal = ({ style, value, closeModal }) => {
         >
           <div className="my-10 mx-auto w-auto relative lg:max-w-xl lg:min-w-1/2">
             <div className="border-gray-300 shadow-xl box-border w-full bg-white p-6">
+            <div className="flex flex-row justify-between py-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
+            <p className="font-semibold text-gray-800">Document</p>
+            <svg
+              className="w-6 h-6 cursor-pointer"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              onClick={() => closeModal()}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
               <div className="grid grid-cols-2 mb-5 gap-1">
                 <div className="bg-green-400 text-center font-semibold py-2">
                   Target Document
@@ -23,7 +41,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                   Matching Comparison Text
                 </div>
               </div>
-              {value.plagiarism.length > 0 &&
+              {/* {value.plagiarism.length > 0 &&
                 value.plagiarism.map((data, index) => {
                   const arrTarget = data.tokenizerPlagiarism.sort(
                     (a, b) => a.startTarget - b.startTarget,
@@ -150,7 +168,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                       </div>
                     </div>
                   );
-                })}
+                })} */}
             </div>
           </div>
         </div>
