@@ -1,5 +1,6 @@
 package com.document.manager.domain;
 
+import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,11 +9,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-
-import static javax.persistence.FetchType.EAGER;
-import static javax.persistence.GenerationType.AUTO;
+import java.util.List;
 
 @Entity
 @Table(name = "user_app")
@@ -21,23 +19,24 @@ import static javax.persistence.GenerationType.AUTO;
 public class UserApp implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "user_code")
     private String userCode;
 
     @Column(name = "first_name")
-    private String firstname;
+    private String firstName;
 
     @Column(name = "last_name")
-    private String lastname;
+    private String lastName;
 
     @Enumerated(EnumType.ORDINAL)
     private Gender gender;
 
     private Date dob;
+
+    private String avatar;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -54,44 +53,46 @@ public class UserApp implements Serializable {
     @Column(name = "modified_stamp")
     private Date modifiedStamp;
 
-    @ManyToMany(fetch = EAGER)
-    private Collection<Role> roles = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = {@JoinColumn(name = "user_id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_id")}
+    )
+    private List<RoleApp> roleApps = new ArrayList<>();
+
+
+//    @ManyToMany(fetch = EAGER)
+//    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_app_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id"))
+//    @Cascade(ALL)
+
+//    @ManyToMany
+//    @JoinTable(
+//            name = "role",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id"))
+//    private Collection<RoleApp> roleApps = new ArrayList<>();
 
 //    @OneToMany(mappedBy = "user")
 //    private Set<Report> reports;
 
-
     public UserApp() {
-        isActive = false;
+        isActive = true;
         createdStamp = new Timestamp(System.currentTimeMillis());
     }
 
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-//        for (Role role : this.roles) {
-//            authorities.add(new SimpleGrantedAuthority(role.getName()));
-//        }
-//        return authorities;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return false;
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return false;
-//    }
+    public UserApp(String userCode, String firstName, String lastname, Gender gender, Date dob, String phoneNumber, String email, String password, List<RoleApp> roleApps) {
+        this.userCode = userCode;
+        this.firstName = firstName;
+        this.lastName = lastname;
+        this.gender = gender;
+        this.dob = dob;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = password;
+        this.isActive = true;
+        this.createdStamp = new Timestamp(System.currentTimeMillis());
+        this.roleApps = roleApps;
+    }
 }

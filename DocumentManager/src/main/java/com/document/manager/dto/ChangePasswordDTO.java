@@ -22,7 +22,7 @@ public class ChangePasswordDTO {
     @Size(min = 8, message = "New Password must be at least 8 characters")
     private String newPassword;
 
-    @NotBlank(message = "Confirm password is mandatory")
-    @Size(min = 8, message = "Confirm Password must be at least 8 characters")
-    private String confirmPassword;
+//    @NotBlank(message = "Confirm password is mandatory")
+//    @Size(min = 8, message = "Confirm Password must be at least 8 characters")
+//    private String confirmPassword;
 }

@@ -1,0 +1,11 @@
+
+E
+java:S3740("/Provide the parametrized type for this generic.(…’øã
+E
+java:S3740("/Provide the parametrized type for this generic.(…’øã
+
+java:S1130!"lRemove the declaration of thrown exception 'java.io.IOException', as it cannot be thrown from method's body.(†ĞÖĞüÿÿÿÿ8÷ÊÎ×/
+E
+java:S19055")Remove this unnecessary cast to "String".(áÇa8‚ËÎ×/
+e	java:S1172"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(óûåt
+k	java:S1174"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(û÷º¤úÿÿÿÿ

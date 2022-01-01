@@ -1,25 +1,27 @@
 package com.document.manager.domain;
 
+import com.document.manager.dto.enums.ReferenceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.AUTO;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "user_reference")
 public class UserReference implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne(fetch = LAZY)
@@ -33,4 +35,7 @@ public class UserReference implements Serializable {
 
     @Column(name = "expired_stamp")
     private Date expiredStamp;
+
+    @Enumerated(EnumType.STRING)
+    private ReferenceType type;
 }
