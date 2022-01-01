@@ -148,7 +148,7 @@ const Profile = () => {
                   <Image
                     alt="..."
                     className="w-full align-middle rounded-full"
-                    src={avtPreview ? avtPreview : user.avatar && user.avatar}
+                    src={avtPreview ? avtPreview : user.avatar ? user.avatar:'/static/img/avt.jpg'}
                     width={150}
                     height={150}
                   />

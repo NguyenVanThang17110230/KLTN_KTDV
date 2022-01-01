@@ -180,3 +180,10 @@ body{
     width: 100% !important; 
 } */
 
+.view-pdf-s{
+    height: 500px;
+}
+.view-pdf-s .pg-viewer-wrapper{
+    overflow: hidden;
+}
+
