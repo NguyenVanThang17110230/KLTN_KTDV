@@ -1,13 +1,40 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { Formik, Field, Form } from "formik";
 
 import { UserLayout } from "../../layouts/User";
 import DocumentFile from "../../package/document/component/Document";
 import AddNewDocumentModal from "../../package/document/component/AddNewDocumentModal";
+import { documentService } from "../../package/RestConnector";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);
+  const [document,setDocument] = useState([])
+  useEffect(() => {
+    getData()
+  }, [])
+  const getData = async() =>{
+    try {
+      const data = await documentService.getDocument();
+      console.log('res',data);
+      setDocument(data.data)
+
+      // const list = await data.map(x => new Blob([new Uint8Array(x.content)], { type: 'application/pdf' }))
+      // console.log('list',list);
+      // const testUnit8 = new Uint8Array(data.data[0].contents)
+      // let blob = new Blob([testUnit8], { type: 'application/pdf' });
+      // window.open(URL.createObjectURL(blob))
+      // setDocument(URL.createObjectURL(blob))
+    } catch (err) {
+      let msg;
+      switch (err.code) {
+        default: {
+          msg = err.message;
+        }
+      }
+      console.log("err", msg);
+    }
+  }
   return (
     <>
       <Head>
@@ -19,6 +46,7 @@ const Document = () => {
             <div className="font-medium text-2xl text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
               List document
             </div>
+            <a className="abc"></a>
             <div
               className="flex p-3 items-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer rounded-md relative"
               onClick={() => setIsShowAddNewDocument(true)}
@@ -45,7 +73,7 @@ const Document = () => {
               <div className="ml-2 font-medium">Add new document</div>
             </div>
           </div>
-          <DocumentFile />
+          <DocumentFile file={document} />
         </div>
       </div>
       <AddNewDocumentModal

@@ -7,4 +7,9 @@ export default class DocumentGateway {
     const resp = await this.restConnector.post("/document/upload", file);
     return resp.data;
   }
+
+  async getDocument(){
+    const resp = await this.restConnector.get("/document/documents");
+    return resp.data;
+  }
 }

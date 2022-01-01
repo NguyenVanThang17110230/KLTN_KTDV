@@ -6,4 +6,8 @@ export default class DocumentService{
     async uploadDocument(file){
         return this.documentGateway.uploadDocument(file);
     }
+    
+    async getDocument(){
+        return this.documentGateway.getDocument();
+    }
 }
