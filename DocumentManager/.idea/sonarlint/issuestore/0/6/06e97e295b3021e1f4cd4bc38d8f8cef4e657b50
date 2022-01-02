@@ -1,6 +1,0 @@
-
-G
-java:S1602@",Remove useless curly braces around statement(ù¦­Ñÿÿÿÿÿ
-V	java:S125K"<This block of commented-out lines of code should be removed.(­šÌËþÿÿÿÿ
-e
-java:S2259:"JA "NullPointerException" could be thrown; "getProperty()" can return null.(ƒì²þÿÿÿÿ

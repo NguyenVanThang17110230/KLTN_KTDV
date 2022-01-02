@@ -88,7 +88,7 @@ public class AlgorithmTest {
     public void testSentencesZero() {
         String s1 = "I want to know";
         String s2 = "I am want to know";
-        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        float actual = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
         Assert.assertEquals(82.0, actual, 2);
     }
 
@@ -96,7 +96,7 @@ public class AlgorithmTest {
     public void testSentencesOne() {
         String s1 = "Hello everyone";
         String s2 = "Hello everyone";
-        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        float actual = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
         Assert.assertEquals(100.0, actual, 2);
     }
 
@@ -104,15 +104,38 @@ public class AlgorithmTest {
     public void testSentencesTwo() {
         String s1 = "This is my message to test function";
         String s2 = "I send to message to test my function";
-        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        float actual = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
         Assert.assertEquals(70.0, actual, 2);
     }
+
     @Test
     public void testSentencesThree() {
         String s1 = "I want to know";
         String s2 = "And I want to know is working well";
-        float actual =  Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        float actual = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
         Assert.assertEquals(41.0, actual, 2);
+    }
+
+    @Test
+    public void testByCopyKiller() {
+        String s1 = "In the formal theory of neural networks the weight wij of a connection from neuron j to i is considered " +
+                "as a parameter that can be adjusted so as to optimize the performance of a network for a given task.";
+        String s2 = "basis of long-lasting memories. In the formal theory of neural networks the wei ght wij of a connection " +
+                "from neuron j to i is considered a parameter that can be adjusted so as to optimize the performance " +
+                "of a network for a given task. The process of parameter adaptation";
+        float actual = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        Assert.assertEquals(100.00, actual, 2);
+    }
+
+    @Test
+    public void testByCopyKiller_2() {
+        String s1 = "Electrophysiological experiments, however, show that the response amplitud e is not fixed but " +
+                "can change over time. Appropriate stimulation paradigms can systematically induce changes of the " +
+                "post- synaptic response that last for h ours or days.";
+        String s2 = "should always be the same. Electrophysiological experiments, however, show that the response " +
+                "amplitude is not fixed but can change over time. In experimental neuroscience changes of";
+        float actual = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
+        Assert.assertEquals(49.00, actual, 2);
     }
 
 }

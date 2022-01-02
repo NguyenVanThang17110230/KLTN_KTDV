@@ -49,7 +49,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || request.getServletPath().equals("/api/user/welcome")
                 || request.getServletPath().equals("/api/user/forgot-password")
                 || request.getServletPath().equals("/api/user/resend")
-                || request.getServletPath().equals("/api/user/reset-password")) {
+                || request.getServletPath().equals("/api/user/reset-password")
+                || request.getServletPath().equals("/api/document/test")
+                || request.getServletPath().equals("/api/document/res")
+                || request.getServletPath().equals("/api/document/pdf")
+                || request.getServletPath().equals("/api/document/test")
+                || request.getServletPath().equals("/api/document/json")
+        ) {
             filterChain.doFilter(request, response);
         } else {
             String token = tokenProvider.getJwtFromRequest(request);
@@ -67,8 +73,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(username, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    log.info("Set to holder successful");
                     filterChain.doFilter(request, response);
                 } catch (Exception e) {
+                    log.info("Request path is: " + request.getServletPath());
                     log.error("Error logging in: {}", e.getMessage());
                     response.setHeader("error", e.getMessage());
                     response.setStatus(FORBIDDEN.value());

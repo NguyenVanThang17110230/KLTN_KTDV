@@ -18,6 +18,7 @@ import com.document.manager.service.SentencesService;
 import com.document.manager.service.UserService;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -79,6 +80,11 @@ public class DocumentServiceImpl implements DocumentService {
         return documentRepo.save(documentApp);
     }
 
+    @Override
+    public long count() {
+        return documentRepo.count();
+    }
+
     @Transactional
     @Override
     public PlagiarismDocumentDTO uploadDocument(UploadDocumentDTO uploadDTO) throws IOException {
@@ -90,14 +96,10 @@ public class DocumentServiceImpl implements DocumentService {
             throw new FileNotFoundException("File document not found!");
         }
         try {
-            // TODO: Save file
-            String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+            File documentFile = new File(file.getOriginalFilename());
+            FileUtils.writeByteArrayToFile(documentFile, file.getBytes());
 
-            // TODO: Get file to read content
-            File documentFile = new File(link);
-            if (!documentFile.exists()) {
-                throw new IllegalArgumentException("Can't get file");
-            }
+            // TODO: Read content of file
             String[] targets = this.divisionToSentences(fileService.readContentDocument(documentFile));
 
             // TODO: Get tokenizer of targets
@@ -105,8 +107,8 @@ public class DocumentServiceImpl implements DocumentService {
 
             // TODO: Check plagiarism
             PlagiarismDocumentDTO plagiarismDocumentDTO = this.getPlagiarism(targets, tokenizerOfTarget);
+
             if (existPlagiarism(plagiarismDocumentDTO)) {
-                documentFile.delete();
                 plagiarismDocumentDTO.setStatus(false);
                 if (plagiarismDocumentDTO.getRate() == 100) {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SAME.name());
@@ -127,11 +129,13 @@ public class DocumentServiceImpl implements DocumentService {
                             .build();
                     sentences.add(sentence);
                 }
+                // TODO: Save file
+                String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+
                 DocumentApp documentApp = DocumentApp.builder()
                         .title(uploadDTO.getTitle())
                         .fileName(file.getOriginalFilename())
                         .link(link)
-                        .mark(uploadDTO.getMark())
                         .note(uploadDTO.getNote())
                         .createdStamp(new Date())
                         .userApp(userService.getCurrentUser())
@@ -246,15 +250,6 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public DocumentApp findById(Long id) throws NotFoundException {
-        Optional<DocumentApp> optionalDocumentApp = documentRepo.findById(id);
-        if (!optionalDocumentApp.isPresent()) {
-            throw new NotFoundException("Document not found");
-        }
-        return optionalDocumentApp.get();
-    }
-
-    @Override
     public List<DocumentApp> findByUserId(Long userId) {
         return documentRepo.findByUserId(userId);
     }
@@ -282,7 +277,50 @@ public class DocumentServiceImpl implements DocumentService {
 
         // TODO: Loop all document to check plagiarism with target
         documentApps.forEach(d -> updatePlagiarism(targets, d.getId(), allSentences, tokenizerOfTarget, plagiarismDocumentDTO));
+
         return plagiarismDocumentDTO;
+    }
+
+    @Override
+    public void delete(Long documentId) {
+        try {
+            UserApp userApp = userService.getCurrentUser();
+            if (userApp == null) {
+                throw new IllegalArgumentException("Can't get information of user current");
+            }
+            Optional<DocumentApp> documentOptional = documentRepo.findByDocumentIdAndUserId(documentId, userApp.getId());
+            if (!documentOptional.isPresent()) {
+                throw new NotFoundException("Document of user not found");
+            }
+            documentRepo.delete(documentOptional.get());
+            log.info("Delete document with id {} successful", documentId);
+        } catch (Exception e) {
+            log.error("Delete document with id {} failed because: {}", documentId, e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void update(Long documentId, UpdateDocumentDTO updateDocumentDTO) {
+        try {
+            UserApp userApp = userService.getCurrentUser();
+            if (userApp == null) {
+                throw new IllegalArgumentException("Can't get information of user current");
+            }
+            Optional<DocumentApp> documentOptional = documentRepo.findByDocumentIdAndUserId(documentId, userApp.getId());
+            if (!documentOptional.isPresent()) {
+                throw new NotFoundException("Document of user not found");
+            }
+            DocumentApp documentApp = documentOptional.get();
+            documentApp.setTitle(updateDocumentDTO.getTitle());
+            documentApp.setNote(updateDocumentDTO.getNote());
+            documentApp.setModifiedStamp(new Date());
+            documentRepo.save(documentOptional.get());
+            log.info("Update document with id {} successful", documentId);
+        } catch (Exception e) {
+            log.error("Update document with id {} failed because: {}", documentId, e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public Map<Long, List<Sentences>> getAllSentences() {
@@ -345,25 +383,68 @@ public class DocumentServiceImpl implements DocumentService {
         Map<String, Integer> saveIndexOfMatching = new HashMap<>();
         List<IndexDTO> indexList = new ArrayList<>();
         for (String s : tokenizerOfMatching) {
+            int flagTarget = 1;
+            int flagMatching = 1;
             String sLower = s.toLowerCase();
-            if (targetLower.contains(sLower) && matchingLower.contains(sLower)) {
-                int startTarget = targetLower.indexOf(sLower);
-                if (saveIndexOfTarget.containsKey(sLower) && saveIndexOfTarget.get(sLower) < targetLower.length()) {
-                    startTarget = targetLower.indexOf(sLower, saveIndexOfTarget.get(sLower));
+            if (sLower.length() > 3) {
+                if (targetLower.contains(sLower) && matchingLower.contains(sLower)) {
+                    int startTarget = targetLower.indexOf(" " + sLower + " ");
+                    if (startTarget == -1) {
+                        flagTarget = 0;
+                        startTarget = targetLower.indexOf(s.toLowerCase());
+                    }
+                    if (saveIndexOfTarget.containsKey(sLower) && saveIndexOfTarget.get(sLower) < targetLower.length()) {
+                        startTarget = targetLower.indexOf(sLower, saveIndexOfTarget.get(sLower));
+                    }
+                    saveIndexOfTarget.put(sLower, startTarget + sLower.length() - 1);
+                    int startMatching = matchingLower.indexOf(" " + sLower + " ");
+                    if (startMatching == -1) {
+                        flagMatching = 0;
+                        startMatching = matchingLower.indexOf(s.toLowerCase());
+                    }
+                    if (saveIndexOfMatching.containsKey(sLower) && saveIndexOfMatching.get(sLower) < matchingLower.length()) {
+                        startMatching = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
+                    }
+                    saveIndexOfMatching.put(sLower, startMatching + sLower.length() - 1);
+                    if (startTarget != -1 && startMatching != -1) {
+                        indexList.add(IndexDTO.builder().startTarget(startTarget + flagTarget)
+                                .startMatching(startMatching + flagMatching)
+                                .length(sLower.length())
+                                .build());
+                    }
                 }
-                saveIndexOfTarget.put(sLower, startTarget + sLower.length() - 1);
-                int startMatching = matchingLower.indexOf(sLower);
-                if (saveIndexOfMatching.containsKey(sLower) && saveIndexOfMatching.get(sLower) < matchingLower.length()) {
-                    startMatching = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
-                }
-                saveIndexOfMatching.put(sLower, startMatching + sLower.length() - 1);
-                indexList.add(IndexDTO.builder().startTarget(startTarget)
-                        .startMatching(startMatching)
-                        .length(sLower.length())
-                        .build());
             }
         }
         return indexList;
+    }
+
+    private void find(String target, String matching, List<String> tokenizerOfTarget, List<String> tokenizerOfMatching) {
+        List<Integer> rTarget = new ArrayList<>();
+        List<Integer> rMatching = new ArrayList<>();
+        for (int i = 0; i < tokenizerOfTarget.size(); i++) {
+            if (tokenizerOfMatching.contains(tokenizerOfTarget.get(i))) {
+                String f = tokenizerOfTarget.get(i);
+                int sMatching = tokenizerOfMatching.indexOf(f);
+                check(i, sMatching, tokenizerOfTarget, tokenizerOfMatching, rTarget, rMatching);
+            }
+        }
+    }
+
+    private void check(int sTarget, int sMatching, List<String> tokenizerOfTarget,
+                       List<String> tokenizerOfMatching, List<Integer> rTarget, List<Integer> rMatching) {
+        List<Integer> iTarget = new ArrayList<>();
+        List<Integer> iMatching = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            if (sTarget + i < tokenizerOfTarget.size() && sMatching + i < tokenizerOfMatching.size()) {
+                if (!tokenizerOfTarget.get(sTarget + i).equalsIgnoreCase(tokenizerOfMatching.get(sMatching + i))) {
+                    return;
+                }
+                iTarget.add(sTarget + i);
+                iMatching.add(sMatching + i);
+            }
+        }
+        rTarget.addAll(iTarget);
+        rMatching.addAll(iMatching);
     }
 
     private Map<Integer, Sentences> buildMapSentences(List<Sentences> parts) {

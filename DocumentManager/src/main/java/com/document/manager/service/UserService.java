@@ -3,6 +3,7 @@ package com.document.manager.service;
 import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
+import com.document.manager.dto.DashboardDTO;
 import com.document.manager.dto.ResetPasswordDTO;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserInfoDTO;
@@ -57,4 +58,6 @@ public interface UserService {
     void lockAccount(Long userId) throws NotFoundException;
 
     void activeAccount(Long userId, String uuid) throws NotFoundException;
+
+    DashboardDTO getDashboard();
 }

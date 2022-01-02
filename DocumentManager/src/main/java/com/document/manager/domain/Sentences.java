@@ -7,7 +7,11 @@ import java.io.Serializable;
 
 
 @Entity
-@Table(name = "sentences")
+@Table(name = "sentences", indexes = {
+        @Index(name = "index_document_id", columnList = "document_id"),
+        @Index(name = "index_raw_text", columnList = "raw_text"),
+        @Index(name = "index_tokenizers", columnList = "tokenizer")
+})
 @Getter
 @Setter
 @NoArgsConstructor

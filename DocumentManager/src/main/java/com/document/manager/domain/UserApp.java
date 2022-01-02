@@ -1,6 +1,5 @@
 package com.document.manager.domain;
 
-import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
