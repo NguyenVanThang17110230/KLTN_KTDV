@@ -435,8 +435,6 @@ public class DocumentServiceImpl implements DocumentService {
             String sLower = s.toLowerCase();
             if (sLower.length() > 3) {
 
-                int rootMatching = -1;
-
                 int startTarget = targetLower.indexOf(" " + sLower + " ");
                 if (startTarget == -1) {
                     flagTarget = 0;
