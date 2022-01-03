@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import Head from "next/head";
 import { Formik, Field, Form } from "formik";
 
 import { UserLayout } from "../../layouts/User";
 import DocumentFile from "../../package/document/component/Document";
 import AddNewDocumentModal from "../../package/document/component/AddNewDocumentModal";
+import { documentService } from "../../package/RestConnector";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);
