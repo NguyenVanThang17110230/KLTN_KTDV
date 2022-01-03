@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Head from "next/head";
 import { Formik, Field, Form } from "formik";
 
 import { UserLayout } from "../../layouts/User";
 import DocumentFile from "../../package/document/component/Document";
 import AddNewDocumentModal from "../../package/document/component/AddNewDocumentModal";
-import { documentService } from "../../package/RestConnector";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);
@@ -42,7 +41,6 @@ const Document = () => {
             <div className="font-medium text-2xl text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
               List document
             </div>
-            <a className="abc"></a>
             <div
               className="flex p-3 items-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer rounded-md relative"
               onClick={() => setIsShowAddNewDocument(true)}

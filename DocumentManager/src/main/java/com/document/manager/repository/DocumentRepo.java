@@ -5,9 +5,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface DocumentRepo extends JpaRepository<DocumentApp, Long> {
 
-    @Query(value = "select d.* from document d where d.created_id =:userId", nativeQuery = true)
+    @Query(value = "SELECT d.* FROM document d WHERE d.created_id =:userId", nativeQuery = true)
     List<DocumentApp> findByUserId(Long userId);
+
+    long count();
+
+    void delete(DocumentApp documentApp);
+
+    @Query(value = "SELECT d.* FROM document d WHERE d.id = :documentId AND d.created_id =:userId", nativeQuery = true)
+    Optional<DocumentApp> findByDocumentIdAndUserId(Long documentId, Long userId);
 }

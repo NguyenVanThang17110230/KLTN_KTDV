@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class UserAppDTO {
+
     private Long id;
     private String userCode;
     private String email;

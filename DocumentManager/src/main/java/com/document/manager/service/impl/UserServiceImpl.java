@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.document.manager.domain.RoleApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.domain.UserReference;
+import com.document.manager.dto.DashboardDTO;
 import com.document.manager.dto.ResetPasswordDTO;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserInfoDTO;
@@ -15,12 +16,8 @@ import com.document.manager.dto.enums.Gender;
 import com.document.manager.dto.enums.ReferenceType;
 import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.repository.RoleRepo;
-import com.document.manager.repository.UserReferenceRepo;
 import com.document.manager.repository.UserRepo;
-import com.document.manager.service.FileService;
-import com.document.manager.service.MailService;
-import com.document.manager.service.UserReferenceService;
-import com.document.manager.service.UserService;
+import com.document.manager.service.*;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -84,6 +81,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private DocumentService documentService;
 
 
     @Override
@@ -287,6 +287,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public Map<String, Object> signIn(String email, String password) {
+        UserApp userApp = this.findByEmail(email);
+        if (userApp == null) {
+            throw new IllegalArgumentException("Account does not exist in the system!");
+        }
+        if (!userApp.getIsActive()) {
+            throw new IllegalArgumentException("Account is locked!");
+        }
         try {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -312,19 +319,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return mapData;
         } catch (Exception e) {
             log.error(e.getMessage());
-            throw new IllegalArgumentException(e.getMessage());
+            throw new IllegalArgumentException("Email or password incorrect!");
         }
     }
 
     @Override
+    @Transactional
     public void updateAvatar(MultipartFile file) throws NotFoundException {
         if (file == null) {
             throw new NotFoundException("Avatar not found");
         }
         try {
             UserApp userApp = getCurrentUser();
-            userApp.setAvatar(file.getOriginalFilename());
-            fileService.saveFile(Constants.DIR_UPLOADED_USER, file.getOriginalFilename(), file.getBytes());
+            userApp.setAvatar(fileService.saveFile(Constants.DIR_UPLOADED_USER, file.getOriginalFilename(), file.getBytes()));
             this.save(userApp);
         } catch (NotFoundException | IOException e) {
             throw new NotFoundException(e.getMessage());
@@ -347,7 +354,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Map<String, String> refreshToken(String authorization) {
+    public Map<String, String>  refreshToken(String authorization) {
         if (StringUtils.isEmpty(authorization) || !authorization.startsWith("Bearer ")) {
             log.error("Refresh token is missing");
             throw new IllegalArgumentException("Refresh token is missing");
@@ -370,6 +377,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return tokens;
         } catch (Exception e) {
             log.error("Refresh token with error: " + e.getMessage());
+            log.info("Refresh token error is: {}", authorization.substring("Bearer ".length()));
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -435,6 +443,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public void createData() {
+        log.info("Root dir of user: " + System.getProperty("user.dir"));
         if (this.findRoleByName(Constants.ROLE_USER) == null) {
             RoleApp roleUser = new RoleApp(null, Constants.ROLE_USER);
             this.save(roleUser);
@@ -488,7 +497,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         List<UserReference> userReferences = this.userReferenceService.findUserReferenceByEmailAndType(email, ReferenceType.RESET_PASSWORD);
         if (userReferences != null && userReferences.size() > 0) {
-           userReferenceService.deleteUserReferences(userReferences.stream().map(UserReference::getId).collect(Collectors.toList()));
+            userReferenceService.deleteUserReferences(userReferences.stream().map(UserReference::getId).collect(Collectors.toList()));
         }
         String uuid = UUID.randomUUID().toString();
 
@@ -545,5 +554,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         this.save(userApp);
         userReferenceService.deleteUserReference(userReference);
         log.info("Active user with id {} successful", userId);
+    }
+
+    @Override
+    public DashboardDTO getDashboard() {
+        return DashboardDTO.builder()
+                .countUserActive(userRepo.countUserByIsActive(Boolean.TRUE))
+                .countUserNotActive(userRepo.countUserByIsActive(Boolean.FALSE))
+                .countDocument(documentService.count())
+                .build();
     }
 }

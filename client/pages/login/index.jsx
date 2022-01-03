@@ -31,8 +31,12 @@ const Login = () => {
       setSubmitting(false);
       router.replace(nextPage);
     } catch (e) {
-      console.log('e',e.response);
-      let msg = e.response.data.message;
+      let msg;
+      switch (e.code) {
+        default: {
+          msg = e.message;
+        }
+      }
       toastr.error(msg);
       setSubmitting(false);
     }

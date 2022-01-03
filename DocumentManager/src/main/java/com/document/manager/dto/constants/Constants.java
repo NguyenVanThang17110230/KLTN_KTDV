@@ -1,6 +1,12 @@
 package com.document.manager.dto.constants;
 
+import marmot.util.Sys;
+
 public final class Constants {
+
+    private String test() {
+        return System.getProperty("user.dir");
+    }
 
     public static final String ROLE_USER = "ROLE_USER";
     public static final String ROLE_ADMIN = "ROLE_ADMIN";

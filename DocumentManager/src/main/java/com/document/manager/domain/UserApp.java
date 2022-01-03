@@ -1,6 +1,5 @@
 package com.document.manager.domain;
 
-import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -60,22 +59,6 @@ public class UserApp implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private List<RoleApp> roleApps = new ArrayList<>();
-
-
-//    @ManyToMany(fetch = EAGER)
-//    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_app_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_id"))
-//    @Cascade(ALL)
-
-//    @ManyToMany
-//    @JoinTable(
-//            name = "role",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_id"))
-//    private Collection<RoleApp> roleApps = new ArrayList<>();
-
-//    @OneToMany(mappedBy = "user")
-//    private Set<Report> reports;
 
     public UserApp() {
         isActive = true;

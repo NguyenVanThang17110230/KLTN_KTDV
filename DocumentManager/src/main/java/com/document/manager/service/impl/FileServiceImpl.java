@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Date;
 public class FileServiceImpl implements FileService {
 
     @Override
+    @Transactional
     public String saveFile(String dir, String fileName, byte[] bytes) throws IOException {
         try {
             Date date = new Date();

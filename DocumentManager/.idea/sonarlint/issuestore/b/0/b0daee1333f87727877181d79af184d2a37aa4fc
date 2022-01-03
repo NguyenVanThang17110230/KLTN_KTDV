@@ -5,16 +5,20 @@ java:S5786"Remove this 'public' modifier.(¥´ÿÊ
 java:S5786""Remove this 'public' modifier.(û‰Õ§
 9
 java:S5786X"Remove this 'public' modifier.(ÜÇº“ÿÿÿÿÿ
-4
-java:S5786`"Remove this 'public' modifier.(è›Şö
-@
-java:S5786h"Remove this 'public' modifier.(ÜûÒãşÿÿÿÿ8ëÌ¥¦Û/
-:
-java:S5786o"Remove this 'public' modifier.(®ú‰_8Ìª®¦Û/
 ;
-java:S5786"Remove this 'public' modifier.(şú±å8È‚Ù¦Û/
-X
-java:S5976X"6Replace these 4 tests with a single Parameterized one.(ÜÇº“ÿÿÿÿÿ8È‚Ù¦Û/
+java:S5786`"Remove this 'public' modifier.(è›Şö8œ‰ŞÍá/
+@
+java:S5786h"Remove this 'public' modifier.(ÜûÒãşÿÿÿÿ8şÙâÍá/
+:
+java:S5786p"Remove this 'public' modifier.(®ú‰_8şÙâÍá/
+@
+java:S5786x"Remove this 'public' modifier.(ÒÑëøÿÿÿÿ8şÙâÍá/
+A
+java:S5786ƒ"Remove this 'public' modifier.(Í“Ê¦şÿÿÿÿ8ÿÙâÍá/
+;
+java:S5786"Remove this 'public' modifier.(şú±å8ÿÙâÍá/
+Q
+java:S5976X"6Replace these 4 tests with a single Parameterized one.(ÜÇº“ÿÿÿÿÿ
 C
 java:S2699"-Add at least one assertion to this test case.(¥´ÿÊ
 C

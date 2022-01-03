@@ -3,6 +3,7 @@ package com.document.manager.dto.mapper.impl;
 import com.document.manager.domain.DocumentApp;
 import com.document.manager.domain.UserApp;
 import com.document.manager.dto.DocumentDTO;
+import com.document.manager.dto.ManagerDocumentDTO;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserAppDTO;
 import com.document.manager.dto.constants.Constants;
@@ -15,7 +16,11 @@ import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -95,7 +100,8 @@ public class DTOMapperImpl implements DTOMapper {
             userAppDTO.setRoleApps(userAppDTO.getRoleApps());
         }
         if (!StringUtils.isEmpty(userApp.getAvatar())) {
-            File image = new File(Constants.DIR_UPLOADED_USER + userApp.getAvatar());
+            File image = new File(userApp.getAvatar());
+            //File image = new File(System.getProperty("user.dir") + userApp.getAvatar());
             byte[] fileContent = IOUtils.toByteArray(new FileInputStream(image));
             MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
             String mimeType = fileTypeMap.getContentType(image.getName());
@@ -110,7 +116,7 @@ public class DTOMapperImpl implements DTOMapper {
     }
 
     @Override
-    public DocumentDTO toDocumentDTO(DocumentApp documentApp) {
+    public DocumentDTO toDocumentDTO(DocumentApp documentApp) throws IOException {
         DocumentDTO documentDTO = new DocumentDTO();
         if (documentApp != null) {
             if (documentApp.getId() != null) {
@@ -122,11 +128,13 @@ public class DTOMapperImpl implements DTOMapper {
             if (StringUtils.isNotEmpty(documentApp.getNote())) {
                 documentDTO.setNote(documentApp.getNote());
             }
-            if (documentApp.getMark() != null) {
-                documentDTO.setMark(documentApp.getMark());
-            }
             if (documentApp.getCreatedStamp() != null) {
                 documentDTO.setCreatedStamp(documentApp.getCreatedStamp());
+            }
+            if (StringUtils.isNotEmpty(documentApp.getLink())) {
+                File file = new File(documentApp.getLink());
+                Path path = Paths.get(file.getAbsolutePath());
+                documentDTO.setContents(toBytesArray(Files.readAllBytes(path)));
             }
         }
         return documentDTO;
@@ -136,8 +144,58 @@ public class DTOMapperImpl implements DTOMapper {
     public List<DocumentDTO> toDocumentDTO(List<DocumentApp> documentApps) {
         List<DocumentDTO> documentDTOS = new ArrayList<>();
         if (documentApps != null && documentApps.size() > 0) {
-            documentApps.forEach(d -> documentDTOS.add(this.toDocumentDTO(d)));
+            documentApps.forEach(d -> {
+                try {
+                    documentDTOS.add(this.toDocumentDTO(d));
+                } catch (IOException e) {
+                    // ignore exception
+                }
+            });
         }
         return documentDTOS;
+    }
+
+    @Override
+    public ManagerDocumentDTO toManagerDocumentDTO(DocumentApp documentApp) {
+        ManagerDocumentDTO managerDocument = new ManagerDocumentDTO();
+        if (documentApp != null) {
+            if (documentApp.getId() != null) {
+                managerDocument.setDocumentId(documentApp.getId());
+            }
+            if (StringUtils.isNotEmpty(documentApp.getTitle())) {
+                managerDocument.setTitle(documentApp.getTitle());
+            }
+            if (StringUtils.isNotEmpty(documentApp.getNote())) {
+                managerDocument.setNote(documentApp.getNote());
+            }
+            if (documentApp.getCreatedStamp() != null) {
+                managerDocument.setCreatedStamp(documentApp.getCreatedStamp());
+            }
+            if (documentApp.getUserApp() != null && StringUtils.isNotEmpty(documentApp.getUserApp().getEmail())) {
+                managerDocument.setAuthor(documentApp.getUserApp().getEmail());
+            }
+        }
+        return managerDocument;
+    }
+
+    @Override
+    public List<ManagerDocumentDTO> toManagerDocumentDTO(List<DocumentApp> documentApps) {
+        List<ManagerDocumentDTO> managerDocumentDTOS = new ArrayList<>();
+        if (documentApps != null || documentApps.size() > 0) {
+            documentApps.stream().forEach(d -> {
+                try {
+                    managerDocumentDTOS.add(this.toManagerDocumentDTO(d));
+                } catch (Exception e) {
+                    // ignore exception
+                }
+            });
+        }
+        return managerDocumentDTOS;
+    }
+
+    private Byte[] toBytesArray(byte[] bytesPrim) {
+        Byte[] bytes = new Byte[bytesPrim.length];
+        Arrays.setAll(bytes, n -> bytesPrim[n]);
+        return bytes;
     }
 }

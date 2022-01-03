@@ -16,7 +16,7 @@ public class DocumentDTO implements Serializable {
 
     private Long documentId;
     private String title;
-    private Double mark;
     private String note;
     private Date createdStamp;
+    private Byte[] contents;
 }
