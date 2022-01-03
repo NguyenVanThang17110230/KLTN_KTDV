@@ -33,13 +33,13 @@ const ForgotPassword = () => {
       toastr.success("Send email reset success");
       setSubmitting(false);
     } catch (e) {
-      let msg;
-      switch (e.code) {
-        default: {
-          msg = e.message;
-        }
-      }
-      toastr.error(msg);
+      // let msg;
+      // switch (e.code) {
+      //   default: {
+      //     msg = e.message;
+      //   }
+      // }
+      toastr.error("This email does not exist in the system");
       setSubmitting(false);
     }
   };
@@ -57,13 +57,13 @@ const ForgotPassword = () => {
       }, 60000);
       toastr.success("Send email reset success");
     } catch (e) {
-      let msg;
-      switch (e.code) {
-        default: {
-          msg = e.message;
-        }
-      }
-      toastr.error(msg);
+      // let msg;
+      // switch (e.code) {
+      //   default: {
+      //     msg = e.message;
+      //   }
+      // }
+      toastr.error("This email does not exist in the system");
     }
   }
 

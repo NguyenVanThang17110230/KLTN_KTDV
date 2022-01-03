@@ -9,30 +9,60 @@ const CompareFileModal = ({ style, value, closeModal }) => {
         <div
           className={
             "fixed p-0 top-0 left-0 right-0 bottom-0 flex justify-center w-full h-full  bg-black bg-opacity-50 antialiased overflow-x-hidden overflow-y-auto " +
-            (style ? "opacity-1 visible z-10" : "opacity-0 invisible z-0")
+            (style ? "opacity-100 visible z-10" : "opacity-0 invisible z-0")
           }
           style={{ transition: "all 0.4s" }}
         >
-          <div className="my-10 mx-auto w-auto relative lg:max-w-xl lg:min-w-1/2">
+          <div
+            className="my-10 mx-auto w-auto relative lg:min-w-2/3 overflow-y-auto"
+            style={{ maxWidth: "80%", maxHeight: "90%" }}
+          >
             <div className="border-gray-300 shadow-xl box-border w-full bg-white p-6">
-            <div className="flex flex-row justify-between py-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
-            <p className="font-semibold text-gray-800">Document</p>
-            <svg
-              className="w-6 h-6 cursor-pointer"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-              onClick={() => closeModal()}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </div>
+              <div className="flex flex-row justify-between py-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
+                <p className="font-semibold text-gray-800">Document</p>
+                <svg
+                  className="w-6 h-6 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  onClick={() => closeModal()}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+              <div className="mb-5">
+                <div className="w-full px-2 py-3 border-r border-l text-center font-bold text-2xl bg-gradient-to-r from-green-300 to-blue-400">
+                  Comparison Summary
+                </div>
+                <table className="w-full border">
+                  <thead>
+                    <tr className="border-b bg-gradient-to-r from-green-500 to-blue-500">
+                      <th className="border-r p-2">Plagiarism Rate</th>
+                      <th className="border-r p-2">All Sentences</th>
+                      <th className="border-r p-2">Same Sentences</th>
+                      <th className="border-r p-2">Similar Sentences</th>
+                      <th className="border-r p-2">Quoted/Cited</th>
+                      <th className="border-r p-2">Law/Religious text</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="bg-gray-50">
+                      <td className="p-2 border-r text-center">{value.rate.toFixed(2)}%</td>
+                      <td className="p-2 border-r text-center">{value.plagiarism.length}</td>
+                      <td className="p-2 border-r text-center">{value.plagiarism.filter(x=> x.rate == 100).length}</td>
+                      <td className="p-2 border-r text-center">{value.plagiarism.filter(x=> x.rate != 100).length}</td>
+                      <td className="p-2 border-r text-center">30</td>
+                      <td className="p-2 border-r text-center">0</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
               <div className="grid grid-cols-2 mb-5 gap-1">
                 <div className="bg-green-400 text-center font-semibold py-2">
                   Target Document
@@ -64,8 +94,22 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         ) : (
                           <>
                             {arrTarget.map((data1, index) => {
-                              if (index > 1) {
+                              if (index >= 1) {
                                 if (
+                                  arrTarget[index].startTarget -
+                                    (arrTarget[index - 1].startTarget +
+                                      arrTarget[index - 1].length) ==
+                                  0
+                                ) {
+                                  return (
+                                    <mark key={index}>
+                                      {data.target.substring(
+                                        data1.startTarget,
+                                        data1.startTarget + data1.length
+                                      )}
+                                    </mark>
+                                  );
+                                } else if (
                                   arrTarget[index].startTarget -
                                     (arrTarget[index - 1].startTarget +
                                       arrTarget[index - 1].length) ==
@@ -80,21 +124,23 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                     </mark>
                                   );
                                 } else {
-                                  <>
-                                    <span>
-                                      {data.target.substring(
-                                        arrTarget[index - 1].startTarget +
-                                          arrTarget[index - 1].length,
-                                        data1.startTarget - 1
-                                      )}
+                                  return (
+                                    <span key={index}>
+                                      <span>
+                                        {data.target.substring(
+                                          arrTarget[index - 1].startTarget +
+                                            arrTarget[index - 1].length,
+                                          data1.startTarget
+                                        )}
+                                      </span>
+                                      <mark>
+                                        {data.target.substring(
+                                          data1.startTarget,
+                                          data1.startTarget + data1.length
+                                        )}
+                                      </mark>
                                     </span>
-                                    <mark>
-                                      {data.target.substring(
-                                        data1.startTarget,
-                                        data1.startTarget + data1.length
-                                      )}
-                                    </mark>
-                                  </>;
+                                  );
                                 }
                               }
                               return (
@@ -121,12 +167,28 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         ) : (
                           <>
                             {arrMatching.map((data1, index) => {
-                              if (index > 1) {
+                              if (index >= 1) {
                                 if (
                                   arrMatching[index].startMatching -
                                     (arrMatching[index - 1].startMatching +
-                                      arrMatching[index - 1].length) ==
+                                      arrMatching[index - 1].length -
+                                      1) ==
                                   1
+                                ) {
+                                  return (
+                                    <mark key={index}>
+                                      {data.matching.substring(
+                                        data1.startMatching,
+                                        data1.startMatching + data1.length
+                                      )}
+                                    </mark>
+                                  );
+                                } else if (
+                                  arrMatching[index].startMatching -
+                                    (arrMatching[index - 1].startMatching +
+                                      arrMatching[index - 1].length -
+                                      1) ==
+                                  2
                                 ) {
                                   return (
                                     <mark key={index}>
@@ -137,31 +199,34 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                     </mark>
                                   );
                                 } else {
-                                  <>
-                                    <span>
-                                      {data.matching.substring(
-                                        arrMatching[index - 1].startMatching +
-                                        arrMatching[index - 1].length,
-                                        data1.startMatching - 1
-                                      )}
+                                  return (
+                                    <span key={index}>
+                                      <span>
+                                        {data.matching.substring(
+                                          arrMatching[index - 1].startMatching +
+                                            arrMatching[index - 1].length,
+                                          data1.startMatching - 1
+                                        )}
+                                      </span>
+                                      <mark>
+                                        {data.matching.substring(
+                                          data1.startMatching,
+                                          data1.startMatching + data1.length
+                                        )}
+                                      </mark>
                                     </span>
-                                    <mark>
-                                      {data.matching.substring(
-                                        data1.startMatching,
-                                        data1.startMatching + data1.length
-                                      )}
-                                    </mark>
-                                  </>;
+                                  );
                                 }
+                              } else {
+                                return (
+                                  <mark key={index}>
+                                    {data.matching.substring(
+                                      data1.startMatching,
+                                      data1.startMatching + data1.length
+                                    )}
+                                  </mark>
+                                );
                               }
-                              return (
-                                <mark key={index}>
-                                  {data.matching.substring(
-                                    data1.startMatching,
-                                    data1.startMatching + data1.length
-                                  )}
-                                </mark>
-                              );
                             })}
                           </>
                         )}

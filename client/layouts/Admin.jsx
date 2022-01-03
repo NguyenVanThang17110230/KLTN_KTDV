@@ -16,7 +16,7 @@ export const AdminLayout = ({ children }) => {
   return (
     <>
       {/* {token !== undefined && ( */}
-        <div className="relative md:ml-64 bg-gray-100 h-full min-h-screen">
+        <div className="relative md:ml-72 bg-gray-100 h-full min-h-screen">
           <SidebarAdmin />
           <Header />
           <div className="w-full">{children}</div>

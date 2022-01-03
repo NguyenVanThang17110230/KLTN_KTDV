@@ -186,4 +186,11 @@ body{
 .view-pdf-s .pg-viewer-wrapper{
     overflow: hidden;
 }
+.view-pdf-s .pg-viewer-wrapper .pg-viewer{
+    width: 100%;
+}
+.view-pdf-s .pg-viewer-wrapper .pg-viewer .pdf-canvas{
+    display: flex;
+    justify-content: center;
+}
 

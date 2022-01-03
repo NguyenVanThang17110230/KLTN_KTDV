@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import * as Yup from "yup";
 import { Formik, Field, Form } from "formik";
 import toastr from "toastr";
+import moment from "moment";
 import { accountService } from "../../RestConnector";
 
 const InfoProfile = ({user}) => {
@@ -46,7 +47,7 @@ const InfoProfile = ({user}) => {
             firstName: user && user.firstName,
             lastName: user && user.lastName,
             email: user && user.email,
-            dob: "",
+            dob: user && moment(user.dob).format("YYYY-MM-DD"),
             gender: user && user.gender,
             phoneNumber: user && user.phoneNumber,
             userCode: user && user.userCode,

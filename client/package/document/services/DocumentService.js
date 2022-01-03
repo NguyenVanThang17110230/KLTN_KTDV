@@ -10,4 +10,12 @@ export default class DocumentService{
     async getDocument(){
         return this.documentGateway.getDocument();
     }
+
+    async deleteDocument(id){
+        return this.documentGateway.deleteDocument(id);
+    }
+
+    async updateDocument(id,value){
+        return this.documentGateway.updateDocument(id,value);
+    }
 }

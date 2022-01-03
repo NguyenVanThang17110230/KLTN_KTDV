@@ -7,7 +7,17 @@ export default class DocumentGateway {
     const resp = await this.restConnector.post("/document/upload", file);
     return resp.data;
   }
+  
+  async deleteDocument(id) {
+    const resp = await this.restConnector.delete("/document/"+id);
+    return resp.data;
+  }
 
+  async updateDocument(id,value) {
+    const resp = await this.restConnector.patch("/document/"+id, value);
+    return resp.data;
+  }
+  
   async getDocument(){
     const resp = await this.restConnector.get("/document/documents");
     return resp.data;

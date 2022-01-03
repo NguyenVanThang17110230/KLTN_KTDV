@@ -15,6 +15,7 @@ const Profile = () => {
   const [avtPreview, setAvtPreview] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [user, setUser] = useState([]);
+  const [isChangeAvt,setIsChangeAvt] = useState(false);
 
   const SignupSchema = Yup.object().shape({
     currentPassword: Yup.string().required("Your password required!"),
@@ -75,9 +76,12 @@ const Profile = () => {
   };
 
   const changeAvatar = async () => {
+    setIsChangeAvt(true)
     try {
       await accountService.changeAvatar(avt);
       toastr.success("Change avatar success");
+      setShowConfirm(false);
+      setIsChangeAvt(false)
     } catch (e) {
       let msg;
       switch (e.code) {
@@ -85,6 +89,7 @@ const Profile = () => {
           msg = e.message;
         }
       }
+      setIsChangeAvt(false);
       toastr.error(msg);
     }
   };
@@ -102,7 +107,7 @@ const Profile = () => {
             <div className="p-0.5 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
               <Image
                 alt="..."
-                className="w-full align-middle rounded-full border"
+                className="w-full align-middle rounded-full border object-cover"
                 src={avtPreview ? avtPreview : "/static/img/avt.jpg"}
                 width={150}
                 height={150}
@@ -113,18 +118,42 @@ const Profile = () => {
               Are you sure you want to change this avatar?
             </div>
             <div className="flex mt-5">
-              <div
-                className="mr-3 bg-blue-500 text-white px-8 py-2 rounded-md cursor-pointer"
+              <button
+                className="mr-3 bg-blue-500 text-white px-8 py-2 rounded-md cursor-pointer flex items-center"
                 onClick={() => changeAvatar()}
+                disabled={isChangeAvt}
               >
+                {isChangeAvt && (
+                    <svg
+                      className="animate-spin mr-2 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx={12}
+                        cy={12}
+                        r={10}
+                        stroke="currentColor"
+                        strokeWidth={4}
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                  )}
                 Yes
-              </div>
-              <div
+              </button>
+              <button
                 className="bg-red-500 text-white px-8 py-2 rounded-md cursor-pointer"
                 onClick={() => setShowConfirm(false)}
+                disabled={isChangeAvt}
               >
                 No
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -147,7 +176,7 @@ const Profile = () => {
                 <div className="text-center relative group">
                   <Image
                     alt="..."
-                    className="w-full align-middle rounded-full"
+                    className="w-full align-middle rounded-full object-cover"
                     src={avtPreview ? avtPreview : user.avatar ? user.avatar:'/static/img/avt.jpg'}
                     width={150}
                     height={150}
@@ -185,9 +214,9 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="text-center mt-3 font-bold text-gray-600 text-lg">
-                  Name
+                  {user && user.firstName.concat(" ",user.lastName)}
                 </div>
-                <div className="text-center">Admin@gmail.com</div>
+                <div className="text-center">{user && user.email}</div>
               </div>
               <div className="p-4 w-3/4">
                 <div className="border-b border-red-500">

@@ -9,22 +9,18 @@ import { documentService } from "../../package/RestConnector";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);
-  const [document,setDocument] = useState([])
+  const [document, setDocument] = useState([]);
+  const [flag, setFlag] = useState(false);
   useEffect(() => {
-    getData()
-  }, [])
-  const getData = async() =>{
+    getData();
+  }, []);
+  const getData = async () => {
+    setFlag(false);
     try {
       const data = await documentService.getDocument();
-      console.log('res',data);
-      setDocument(data.data)
-
-      // const list = await data.map(x => new Blob([new Uint8Array(x.content)], { type: 'application/pdf' }))
-      // console.log('list',list);
-      // const testUnit8 = new Uint8Array(data.data[0].contents)
-      // let blob = new Blob([testUnit8], { type: 'application/pdf' });
-      // window.open(URL.createObjectURL(blob))
-      // setDocument(URL.createObjectURL(blob))
+      console.log("res", data);
+      setDocument(data.data);
+      setFlag(true);
     } catch (err) {
       let msg;
       switch (err.code) {
@@ -34,7 +30,7 @@ const Document = () => {
       }
       console.log("err", msg);
     }
-  }
+  };
   return (
     <>
       <Head>
@@ -73,12 +69,13 @@ const Document = () => {
               <div className="ml-2 font-medium">Add new document</div>
             </div>
           </div>
-          <DocumentFile file={document} />
+          {flag ? <DocumentFile file={document} /> : <div>Loading data...</div>}
         </div>
       </div>
       <AddNewDocumentModal
         style={isShowAddNewDocument}
         closeModal={() => setIsShowAddNewDocument(false)}
+        reloadData={() => getData()}
       />
     </>
   );

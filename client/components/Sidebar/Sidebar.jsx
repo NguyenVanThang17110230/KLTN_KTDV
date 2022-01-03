@@ -69,10 +69,10 @@ export default function Sidebar() {
       : " text-white hover:text-blueGray-500";
   };
 
-  const logout = async()=>{
-    await accountService.logout()
-    await router.replace("/")
-  }
+  const logout = async () => {
+    await accountService.logout();
+    await router.replace("/");
+  };
 
   return (
     <>

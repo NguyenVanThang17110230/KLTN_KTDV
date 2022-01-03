@@ -54,7 +54,7 @@ const ResetPassword = () => {
   };
   return (
     <div className="relative z-10 w-full h-full flex items-center justify-center">
-      {isReset === false && isCheck == 0 ? (
+      {isReset == false && isCheck == 0 && (
         <div className="min-w-1/4 p-14 bg-white rounded-lg shadow-md">
           <h1 className="text-gray-600 font-bold uppercase text-2xl text-center">
             Reset password
@@ -202,11 +202,11 @@ const ResetPassword = () => {
             )}
           </Formik>
         </div>
-      ) : (
+      )}
+      {isReset == true && isCheck == 1 && (
         <div className="w-full max-w-md">
           <div className="p-20 bg-success flex items-center flex-col">
             <div className="w-20 h-20 rounded-full bg-transparent border-2 flex items-center justify-center">
-              
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="icon icon-tabler icon-tabler-check"
