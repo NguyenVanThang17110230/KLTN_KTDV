@@ -376,13 +376,13 @@ public class DocumentServiceImpl implements DocumentService {
         return result.stream().collect(Collectors.toList());
     }
 
-    private List<IndexDTO> getPlagiarism(String target, String matching, List<String> tokenizerOfMatching) {
+    private List<IndexDTO> getPlagiarism(String target, String matching, List<String> tokenizers) {
         String targetLower = target.toLowerCase();
         String matchingLower = matching.toLowerCase();
         Map<String, Integer> saveIndexOfTarget = new HashMap<>();
         Map<String, Integer> saveIndexOfMatching = new HashMap<>();
         List<IndexDTO> indexList = new ArrayList<>();
-        for (String s : tokenizerOfMatching) {
+        for (String s : tokenizers) {
             int flagTarget = 1;
             int flagMatching = 1;
             String sLower = s.toLowerCase();
@@ -418,33 +418,100 @@ public class DocumentServiceImpl implements DocumentService {
         return indexList;
     }
 
-    private void find(String target, String matching, List<String> tokenizerOfTarget, List<String> tokenizerOfMatching) {
-        List<Integer> rTarget = new ArrayList<>();
-        List<Integer> rMatching = new ArrayList<>();
-        for (int i = 0; i < tokenizerOfTarget.size(); i++) {
-            if (tokenizerOfMatching.contains(tokenizerOfTarget.get(i))) {
-                String f = tokenizerOfTarget.get(i);
-                int sMatching = tokenizerOfMatching.indexOf(f);
-                check(i, sMatching, tokenizerOfTarget, tokenizerOfMatching, rTarget, rMatching);
+    private List<IndexDTO> getPlagiarismTest(String target, String matching, List<String> tokenizerOfTarget, List<String> tokenizerOfMatching) {
+        Map<String, Integer> saveIndexOfTarget = new HashMap<>();
+        Map<String, Integer> saveIndexOfMatching = new HashMap<>();
+        List<IndexDTO> indexList = new ArrayList<>();
+
+        List<String> tLower = toLowercase(tokenizerOfTarget);
+        List<String> mLower = toLowercase(tokenizerOfMatching);
+
+        String targetLower = target.toLowerCase();
+        String matchingLower = matching.toLowerCase();
+
+        for (String s : tokenizerOfMatching) {
+            int flagTarget = 1;
+            int flagMatching = 1;
+            String sLower = s.toLowerCase();
+            if (sLower.length() > 3) {
+
+                int rootMatching = -1;
+
+                int startTarget = targetLower.indexOf(" " + sLower + " ");
+                if (startTarget == -1) {
+                    flagTarget = 0;
+                    startTarget = targetLower.indexOf(s.toLowerCase());
+                }
+                if (saveIndexOfTarget.containsKey(sLower) && saveIndexOfTarget.get(sLower) < targetLower.length()) {
+                    startTarget = targetLower.indexOf(sLower, saveIndexOfTarget.get(sLower));
+                }
+                saveIndexOfTarget.put(sLower, startTarget + sLower.length() - 1);
+
+                int flagIndex = 0;
+                int startMatching = -1;
+                int position = -1;
+                int max = 0;
+                do {
+                    startMatching = matchingLower.indexOf(sLower, flagIndex);
+                    flagIndex = startMatching + sLower.length();
+                    int count = count(target.substring(startTarget), matching.substring(startMatching));
+                    if (count > max) {
+                        max = count;
+                        position = startMatching;
+                    }
+                } while (startMatching != -1);
+
+                if (position == -1) {
+                    flagMatching = 0;
+                    position = matchingLower.indexOf(s.toLowerCase());
+                }
+                if (saveIndexOfMatching.containsKey(sLower) && saveIndexOfMatching.get(sLower) < matchingLower.length()) {
+                    position = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
+                }
+                saveIndexOfMatching.put(sLower, position + sLower.length() - 1);
+                if (startTarget != -1 && startMatching != -1) {
+                    indexList.add(IndexDTO.builder().startTarget(startTarget + flagTarget)
+                            .startMatching(position + flagMatching)
+                            .length(sLower.length())
+                            .build());
+                }
             }
         }
+        return indexList;
     }
 
-    private void check(int sTarget, int sMatching, List<String> tokenizerOfTarget,
-                       List<String> tokenizerOfMatching, List<Integer> rTarget, List<Integer> rMatching) {
-        List<Integer> iTarget = new ArrayList<>();
-        List<Integer> iMatching = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            if (sTarget + i < tokenizerOfTarget.size() && sMatching + i < tokenizerOfMatching.size()) {
-                if (!tokenizerOfTarget.get(sTarget + i).equalsIgnoreCase(tokenizerOfMatching.get(sMatching + i))) {
-                    return;
-                }
-                iTarget.add(sTarget + i);
-                iMatching.add(sMatching + i);
+    private int count(String target, String matching) {
+        int count = 0;
+        String[] targets = target.trim().split("\\s+");
+        String[] matchings = matching.trim().split("\\s+");
+        for (int i = 0; i < targets.length; i++) {
+            if (i < targets.length && i < matchings.length
+                    && targets[i].toLowerCase().equalsIgnoreCase(matchings[i])) {
+                count++;
+            } else {
+                return count;
             }
         }
-        rTarget.addAll(iTarget);
-        rMatching.addAll(iMatching);
+        return count;
+    }
+
+    private boolean checkCondition(int sTarget, int sMatching, List<String> target, List<String> matching) {
+        for (int i = 0; i < 4; i++) {
+            if (sTarget + i < target.size() && sMatching + i < matching.size()) {
+                if (!target.get(sTarget + i).equalsIgnoreCase(matching.get(sMatching + i))) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<String> toLowercase(List<String> strings) {
+        List<String> result = new ArrayList<>();
+        strings.forEach(s -> result.add(s.toLowerCase()));
+        return result;
     }
 
     private Map<Integer, Sentences> buildMapSentences(List<Sentences> parts) {

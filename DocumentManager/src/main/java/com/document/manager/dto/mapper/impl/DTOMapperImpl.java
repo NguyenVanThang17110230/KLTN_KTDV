@@ -6,6 +6,7 @@ import com.document.manager.dto.DocumentDTO;
 import com.document.manager.dto.ManagerDocumentDTO;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserAppDTO;
+import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.mapper.DTOMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -99,8 +100,8 @@ public class DTOMapperImpl implements DTOMapper {
             userAppDTO.setRoleApps(userAppDTO.getRoleApps());
         }
         if (!StringUtils.isEmpty(userApp.getAvatar())) {
-            //File image = new File(Constants.DIR_UPLOADED_USER + userApp.getAvatar());
-            File image = new File(System.getProperty("user.dir") + userApp.getAvatar());
+            File image = new File(userApp.getAvatar());
+            //File image = new File(System.getProperty("user.dir") + userApp.getAvatar());
             byte[] fileContent = IOUtils.toByteArray(new FileInputStream(image));
             MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
             String mimeType = fileTypeMap.getContentType(image.getName());

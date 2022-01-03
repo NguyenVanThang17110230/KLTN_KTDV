@@ -324,15 +324,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional
     public void updateAvatar(MultipartFile file) throws NotFoundException {
         if (file == null) {
             throw new NotFoundException("Avatar not found");
         }
         try {
             UserApp userApp = getCurrentUser();
-            userApp.setAvatar(file.getOriginalFilename());
-            //fileService.saveFile(Constants.DIR_UPLOADED_USER, file.getOriginalFilename(), file.getBytes());
-            fileService.saveFile(System.getProperty("user.dir"), file.getOriginalFilename(), file.getBytes());
+            userApp.setAvatar(fileService.saveFile(Constants.DIR_UPLOADED_USER, file.getOriginalFilename(), file.getBytes()));
             this.save(userApp);
         } catch (NotFoundException | IOException e) {
             throw new NotFoundException(e.getMessage());
@@ -355,7 +354,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Map<String, String> refreshToken(String authorization) {
+    public Map<String, String>  refreshToken(String authorization) {
         if (StringUtils.isEmpty(authorization) || !authorization.startsWith("Bearer ")) {
             log.error("Refresh token is missing");
             throw new IllegalArgumentException("Refresh token is missing");
@@ -378,6 +377,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return tokens;
         } catch (Exception e) {
             log.error("Refresh token with error: " + e.getMessage());
+            log.info("Refresh token error is: {}", authorization.substring("Bearer ".length()));
             throw new RuntimeException(e.getMessage());
         }
     }

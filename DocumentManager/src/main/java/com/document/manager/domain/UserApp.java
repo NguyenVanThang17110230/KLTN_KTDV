@@ -60,22 +60,6 @@ public class UserApp implements Serializable {
     )
     private List<RoleApp> roleApps = new ArrayList<>();
 
-
-//    @ManyToMany(fetch = EAGER)
-//    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_app_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_id"))
-//    @Cascade(ALL)
-
-//    @ManyToMany
-//    @JoinTable(
-//            name = "role",
-//            joinColumns = @JoinColumn(name = "user_id"),
-//            inverseJoinColumns = @JoinColumn(name = "role_id"))
-//    private Collection<RoleApp> roleApps = new ArrayList<>();
-
-//    @OneToMany(mappedBy = "user")
-//    private Set<Report> reports;
-
     public UserApp() {
         isActive = true;
         createdStamp = new Timestamp(System.currentTimeMillis());
