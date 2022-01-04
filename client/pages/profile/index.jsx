@@ -9,6 +9,8 @@ import { accountService } from "../../package/RestConnector";
 import { UserLayout } from "../../layouts/User";
 import InfoProfile from "../../package/account/component/InfoProfile";
 
+const avtDefault = "https://res.cloudinary.com/ddxkbr7ma/image/upload/v1641305022/images/qmlkihv5sjhqihnq39y3.jpg"
+
 const Profile = () => {
   const [isProfile, setIsProfile] = useState(true);
   const [avt, setAvt] = useState(null);
@@ -16,6 +18,7 @@ const Profile = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [user, setUser] = useState([]);
   const [isChangeAvt,setIsChangeAvt] = useState(false);
+  
 
   const SignupSchema = Yup.object().shape({
     currentPassword: Yup.string().required("Your password required!"),
@@ -51,6 +54,11 @@ const Profile = () => {
       toastr.error(msg);
     }
   };
+  
+  const cancelFileAvt = () =>{
+    setShowConfirm(false)
+    setAvtPreview(null)
+  }
 
   const handleChangePassword = async (values, actions) => {
     const data = {
@@ -69,6 +77,7 @@ const Profile = () => {
 
   const setImageAvt = async (file) => {
     if (file) {
+      console.log('file',file);
       setAvt(file);
       setAvtPreview(URL.createObjectURL(file));
       setShowConfirm(true);
@@ -94,6 +103,8 @@ const Profile = () => {
     }
   };
 
+  console.log('preview image',avtPreview);
+
   const confirmSaveImageModal = () => {
     return (
       <>
@@ -108,7 +119,7 @@ const Profile = () => {
               <Image
                 alt="..."
                 className="w-full align-middle rounded-full border object-cover"
-                src={avtPreview ? avtPreview : "/static/img/avt.jpg"}
+                src={avtPreview?avtPreview:avtDefault}
                 width={150}
                 height={150}
               />
@@ -149,7 +160,7 @@ const Profile = () => {
               </button>
               <button
                 className="bg-red-500 text-white px-8 py-2 rounded-md cursor-pointer"
-                onClick={() => setShowConfirm(false)}
+                onClick={() => cancelFileAvt()}
                 disabled={isChangeAvt}
               >
                 No

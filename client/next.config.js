@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 module.exports = {
   reactStrictMode: true,
   publicRuntimeConfig: {
@@ -9,10 +9,15 @@ module.exports = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: 'https://document-manager-app.herokuapp.com/api/:path*',
+        source: "/api/:path*",
+        destination: "https://document-manager-app.herokuapp.com/api/:path*",
         // destination: 'https://document-manager-app.herokuapp.com/api/:path*',
       },
-    ]
+    ];
   },
-}
+  images: {
+    domains: [
+      'res.cloudinary.com'
+    ],
+},
+};
