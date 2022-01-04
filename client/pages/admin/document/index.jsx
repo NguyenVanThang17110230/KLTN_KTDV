@@ -1,17 +1,17 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useTable, usePagination } from "react-table";
-import { AdminLayout } from "../../../layouts/Admin";
-import { COLUMN_ACOUNT } from "../../../package/account/columns/Columns";
-import ViewProfileUserModal from "../../../package/account/component/ViewProfileUserModal";
-import { accountService } from "../../../package/RestConnector";
+import { COLUMN_DOCUMENT } from "../../../package/document/columns/ColumnDocument";
 
-export default function ManagerUsers() {
-  const [listUser, setListUser] = useState([]);
+import { AdminLayout } from "../../../layouts/Admin";
+import { documentService } from "../../../package/RestConnector";
+
+const ManageDocument = () => {
+  const [listDocument, setListDocument] = useState([]);
   const [isShowInfo, setIsShowInfo] = useState(false);
   const [dataEdit, setDataEdit] = useState([]);
-  const columns = useMemo(() => COLUMN_ACOUNT, []);
-  const data = useMemo(() => listUser, [listUser]);
 
+  const columns = useMemo(() => COLUMN_DOCUMENT, []);
+  const data = useMemo(() => listDocument, [listDocument]);
   const tableInstance = useTable(
     {
       columns,
@@ -27,9 +27,9 @@ export default function ManagerUsers() {
 
   const getData = async () => {
     try {
-      const data = await accountService.getListUser();
+      const data = await documentService.getListDocumentByAdmin();
       console.log("data", data);
-      setListUser(data.data);
+      setListDocument(data.data);
     } catch (err) {
       let msg;
       switch (err.code) {
@@ -64,12 +64,11 @@ export default function ManagerUsers() {
     setPageSize,
     state: { pageIndex, pageSize },
   } = tableInstance;
-
   return (
     <>
       <div className="px-20 py-10">
         <div className="p-3 bg-white rounded-md shadow">
-          <div className="mb-4 text-2xl font-semibold">List account</div>
+          <div className="mb-4 text-2xl font-semibold">List document</div>
           <table
             className=" w-full table text-gray-600 border-separate space-y-6 text-sm"
             {...getTableProps()}
@@ -181,15 +180,12 @@ export default function ManagerUsers() {
           </div>
         </div>
       </div>
-      <ViewProfileUserModal
-        style={isShowInfo}
-        value={dataEdit}
-        closeModal={() => setIsShowInfo(false)}
-      />
     </>
   );
-}
+};
 
-ManagerUsers.getLayout = function getLayout(page) {
+ManageDocument.getLayout = function getLayout(page) {
   return <AdminLayout>{page}</AdminLayout>;
 };
+
+export default ManageDocument;

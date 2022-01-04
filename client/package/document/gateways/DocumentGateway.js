@@ -22,4 +22,9 @@ export default class DocumentGateway {
     const resp = await this.restConnector.get("/document/documents");
     return resp.data;
   }
+
+  async getListDocumentByAdmin(){
+    const resp = await this.restConnector.get("/document/manager");
+    return resp.data;
+  }
 }

@@ -10,7 +10,7 @@ module.exports = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://document-manager-app.herokuapp.com/api/:path*",
+        destination: "http://localhost:8090/api/:path*",
         // destination: 'https://document-manager-app.herokuapp.com/api/:path*',
       },
     ];

@@ -18,4 +18,8 @@ export default class DocumentService{
     async updateDocument(id,value){
         return this.documentGateway.updateDocument(id,value);
     }
+
+    async getListDocumentByAdmin(){
+        return this.documentGateway.getListDocumentByAdmin();
+    }
 }

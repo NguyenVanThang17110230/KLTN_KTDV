@@ -1,8 +1,9 @@
 import React, { ReactElement } from "react";
-import { AdminLayout } from "../../layouts/Admin";
+
 import { CellProps, Column, useTable } from "react-table";
 import { COLUMN_ACOUNT } from "../../package/account/columns/Columns";
 import { Account } from "../../package/account/model/Account";
+import { AdminLayout } from "../../layouts/Admin";
 
 export default function AdminDashboard() {
   return (
