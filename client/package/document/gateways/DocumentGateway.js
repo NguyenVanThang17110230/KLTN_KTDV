@@ -27,4 +27,9 @@ export default class DocumentGateway {
     const resp = await this.restConnector.get("/document/manager");
     return resp.data;
   }
+
+  async getDetailDocument(id){
+    const resp = await this.restConnector.get("/document/details/"+id);
+    return resp.data;
+  }
 }

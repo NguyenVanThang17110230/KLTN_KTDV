@@ -194,3 +194,10 @@ body{
     justify-content: center;
 }
 
+.detail-doc .react-pdf__Page__canvas {
+ width: 100% !important;
+}
+
+.detail-doc .react-pdf__Page__canvas .react-pdf__Page__textContent{
+ width: 100% !important;
+}

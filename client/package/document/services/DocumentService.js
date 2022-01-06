@@ -22,4 +22,9 @@ export default class DocumentService{
     async getListDocumentByAdmin(){
         return this.documentGateway.getListDocumentByAdmin();
     }
+
+    async getDetailDocument(id){
+        return this.documentGateway.getDetailDocument(id)
+    }
+
 }

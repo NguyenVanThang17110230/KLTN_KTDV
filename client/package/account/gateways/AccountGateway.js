@@ -89,4 +89,9 @@ export default class AccountGateway {
     Cookies.remove(REFRESH_TOKEN_COOKIE);
     this.restConnector.removeAccessToken();
   }
+
+  async getDashboard(){
+    const resp = await this.restConnector.get("/user/dashboard");
+    return resp.data;
+  }
 }

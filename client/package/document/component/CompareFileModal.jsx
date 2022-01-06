@@ -14,7 +14,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
           style={{ transition: "all 0.4s" }}
         >
           <div
-            className="my-10 mx-auto w-auto relative lg:min-w-2/3 overflow-y-auto"
+            className="my-10 mx-auto w-auto relative lg:min-w-2/3 overflow-y-hidden"
             style={{ maxWidth: "80%", maxHeight: "90%" }}
           >
             <div className="border-gray-300 shadow-xl box-border w-full bg-white p-6">
@@ -36,7 +36,8 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                   />
                 </svg>
               </div>
-              <div className="mb-5">
+              <div className="overflow-y-auto" style={{height:"700px"}}>
+                <div className="mb-5">
                 <div className="w-full px-2 py-3 border-r border-l text-center font-bold text-2xl bg-gradient-to-r from-green-300 to-blue-400">
                   Comparison Summary
                 </div>
@@ -205,7 +206,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                         {data.matching.substring(
                                           arrMatching[index - 1].startMatching +
                                             arrMatching[index - 1].length,
-                                          data1.startMatching - 1
+                                          data1.startMatching
                                         )}
                                       </span>
                                       <mark>
@@ -234,6 +235,8 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                     </div>
                   );
                 })}
+              </div>
+              
             </div>
           </div>
         </div>

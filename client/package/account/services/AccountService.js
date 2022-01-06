@@ -55,4 +55,8 @@ export default class AccountService{
     return this.accountGateway.logout()
   }
 
+  async getDashboard(){
+    return this.accountGateway.getDashboard();
+  }
+
 }
