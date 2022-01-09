@@ -32,7 +32,7 @@ const Login = () => {
       router.replace(nextPage);
     } catch (e) {
       console.log('e',e.response);
-      toastr.error(msg);
+      toastr.error(e.response.data.message);
       setSubmitting(false);
     }
   };

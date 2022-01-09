@@ -5,20 +5,21 @@ import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 import toastr from "toastr";
 
-import { accountService } from "../../package/RestConnector";
-import { UserLayout } from "../../layouts/User";
-import InfoProfile from "../../package/account/component/InfoProfile";
+import InfoProfile from "../../../package/account/component/InfoProfile";
+import { AdminLayout } from "../../../layouts/Admin";
+import { accountService } from "../../../package/RestConnector";
+import AnimationLoad from "../../../components/Animation/AnimationLoad";
 
-const avtDefault = "https://res.cloudinary.com/ddxkbr7ma/image/upload/v1641305022/images/qmlkihv5sjhqihnq39y3.jpg"
-
-const Profile = () => {
+const avtDefault =
+  "https://res.cloudinary.com/ddxkbr7ma/image/upload/v1641305022/images/qmlkihv5sjhqihnq39y3.jpg";
+const AdminProfile = () => {
   const [isProfile, setIsProfile] = useState(true);
   const [avt, setAvt] = useState(null);
   const [avtPreview, setAvtPreview] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [user, setUser] = useState([]);
-  const [isChangeAvt,setIsChangeAvt] = useState(false);
-  
+  const [isChangeAvt, setIsChangeAvt] = useState(false);
+  const [isCheck, setIsCheck] = useState(false);
 
   const SignupSchema = Yup.object().shape({
     currentPassword: Yup.string().required("Your password required!"),
@@ -39,11 +40,13 @@ const Profile = () => {
   }, []);
 
   const getDataUser = async () => {
+    setIsCheck(true);
     try {
       const dataAPI = await accountService.getUserAfterLogin();
       console.log("sss", dataAPI);
       const userData = dataAPI.data;
       setUser(userData);
+      setIsCheck(false);
     } catch (e) {
       let msg;
       switch (e.code) {
@@ -52,13 +55,14 @@ const Profile = () => {
         }
       }
       toastr.error(msg);
+      setIsCheck(false);
     }
   };
-  
-  const cancelFileAvt = () =>{
-    setShowConfirm(false)
-    setAvtPreview(null)
-  }
+
+  const cancelFileAvt = () => {
+    setShowConfirm(false);
+    setAvtPreview(null);
+  };
 
   const handleChangePassword = async (values, actions) => {
     const data = {
@@ -77,7 +81,7 @@ const Profile = () => {
 
   const setImageAvt = async (file) => {
     if (file) {
-      console.log('file',file);
+      console.log("file", file);
       setAvt(file);
       setAvtPreview(URL.createObjectURL(file));
       setShowConfirm(true);
@@ -85,12 +89,12 @@ const Profile = () => {
   };
 
   const changeAvatar = async () => {
-    setIsChangeAvt(true)
+    setIsChangeAvt(true);
     try {
       await accountService.changeAvatar(avt);
       toastr.success("Change avatar success");
       setShowConfirm(false);
-      setIsChangeAvt(false)
+      setIsChangeAvt(false);
     } catch (e) {
       let msg;
       switch (e.code) {
@@ -99,27 +103,30 @@ const Profile = () => {
         }
       }
       setIsChangeAvt(false);
-      toastr.error(msg);
+      toastr.error("Change avatar fail!!");
     }
   };
 
-  console.log('preview image',avtPreview);
+  console.log("preview image", avtPreview);
 
-  const confirmSaveImageModal = () => {
+  const ConfirmSaveImageModal = () => {
     return (
       <>
         <div
-          className={
-            "fixed z-50 h-full w-full top-0 left-0 bg-black bg-opacity-20 flex items-center justify-center " +
-            (showConfirm ? "opacity-1 visible" : "opacity-0 invisible")
-          }
+          className="fixed z-50 h-full w-full top-0 left-0 bg-black bg-opacity-20 flex items-center justify-center"
         >
-          <div className="flex items-center justify-center flex-col bg-white px-10 py-5 rounded-md translate-y-0 animate-wiggle">
+          <div className="flex items-center justify-center flex-col bg-white px-10 py-5 rounded-md">
             <div className="p-0.5 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
               <Image
                 alt="..."
                 className="w-full align-middle rounded-full border object-cover"
-                src={avtPreview?avtPreview:user.avatar?user.avatar:avtDefault}
+                src={
+                  avtPreview
+                    ? avtPreview
+                    : user.avatar
+                    ? user.avatar
+                    : avtDefault
+                }
                 width={150}
                 height={150}
               />
@@ -135,27 +142,27 @@ const Profile = () => {
                 disabled={isChangeAvt}
               >
                 {isChangeAvt && (
-                    <svg
-                      className="animate-spin mr-2 h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx={12}
-                        cy={12}
-                        r={10}
-                        stroke="currentColor"
-                        strokeWidth={4}
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                  )}
+                  <svg
+                    className="animate-spin mr-2 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx={12}
+                      cy={12}
+                      r={10}
+                      stroke="currentColor"
+                      strokeWidth={4}
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                )}
                 Yes
               </button>
               <button
@@ -176,19 +183,22 @@ const Profile = () => {
       <Head>
         <title>Profile</title>
       </Head>
-
       <div className="flex justify-center">
         <div className="w-3/4 py-10">
-          {user.length === 0 ? (
-            <div className="bg-white w-full rounded-md shadow-sm py-10 px-5">Retrieving user information...</div>
-          ) : (
+          {user.length !== 0 && (
             <div className="bg-white w-full flex rounded-md shadow-sm">
               <div className="border-r-2 p-4 w-1/4">
                 <div className="text-center relative group">
                   <Image
                     alt="..."
                     className="w-full align-middle rounded-full object-cover"
-                    src={avtPreview ? avtPreview : user.avatar ? user.avatar:avtDefault}
+                    src={
+                      avtPreview
+                        ? avtPreview
+                        : user.avatar
+                        ? user.avatar
+                        : avtDefault
+                    }
                     width={150}
                     height={150}
                   />
@@ -225,7 +235,7 @@ const Profile = () => {
                   </div>
                 </div>
                 <div className="text-center mt-3 font-bold text-gray-600 text-lg">
-                  {user && user.firstName.concat(" ",user.lastName)}
+                  {user && user.firstName.concat(" ", user.lastName)}
                 </div>
                 <div className="text-center">{user && user.email}</div>
               </div>
@@ -494,13 +504,14 @@ const Profile = () => {
         </div>
       </div>
 
-      {confirmSaveImageModal()}
+      {showConfirm && <ConfirmSaveImageModal />}
+      {isCheck && <AnimationLoad />}
     </>
   );
 };
 
-Profile.getLayout = function getLayout(page) {
-  return <UserLayout>{page}</UserLayout>;
+AdminProfile.getLayout = function getLayout(page) {
+  return <AdminLayout>{page}</AdminLayout>;
 };
 
-export default Profile;
+export default AdminProfile;

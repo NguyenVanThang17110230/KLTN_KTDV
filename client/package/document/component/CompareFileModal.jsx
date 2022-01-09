@@ -1,12 +1,12 @@
 import React from "react";
-
 const CompareFileModal = ({ style, value, closeModal }) => {
   console.log("data-similar", value);
-
+  
   return (
     <>
       {value.plagiarism && (
         <div
+        id="my-report"
           className={
             "fixed p-0 top-0 left-0 right-0 bottom-0 flex justify-center w-full h-full  bg-black bg-opacity-50 antialiased overflow-x-hidden overflow-y-auto " +
             (style ? "opacity-100 visible z-10" : "opacity-0 invisible z-0")
@@ -48,8 +48,8 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         <th className="border-r p-2">All Sentences</th>
                         <th className="border-r p-2">Same Sentences</th>
                         <th className="border-r p-2">Similar Sentences</th>
-                        <th className="border-r p-2">Quoted/Cited</th>
-                        <th className="border-r p-2">Law/Religious text</th>
+                        {/* <th className="border-r p-2">Quoted/Cited</th>
+                        <th className="border-r p-2">Law/Religious text</th> */}
                       </tr>
                     </thead>
                     <tbody>
@@ -66,8 +66,10 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         <td className="p-2 border-r text-center">
                           {value.plagiarism.filter((x) => x.rate != 100).length}
                         </td>
-                        <td className="p-2 border-r text-center">30</td>
-                        <td className="p-2 border-r text-center">0</td>
+                        {/* <td className="p-2 border-r text-center">30</td>
+                        <td className="p-2 border-r text-center">
+                          <span>download</span>
+                        </td> */}
                       </tr>
                     </tbody>
                   </table>
@@ -82,14 +84,16 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                 </div>
                 {value.plagiarism.length > 0 &&
                   value.plagiarism.map((data, index) => {
-                    const arrTarget = data.tokenizerPlagiarism.sort(
-                      (a, b) => a.startTarget - b.startTarget,
-                      0
-                    );
-                    const arrMatching = data.tokenizerPlagiarism.sort(
-                      (a, b) => a.startMatching - b.startMatching,
-                      0
-                    );
+                    let arrTarget = [];
+                    let arrMatching = [];
+                    if (data.rate !== 100) {
+                      arrTarget = data.tokenizerPlagiarism.sort(
+                        (a, b) => a.startTarget - b.startTarget,
+                        0
+                      );
+                      arrMatching = data.tokenizerPlagiarism;
+                    }
+
                     console.log("arrTarget", arrTarget);
                     return (
                       <div key={index} className="grid grid-cols-2 mb-4 gap-1">
@@ -132,7 +136,12 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                         )}
                                       </mark>
                                     );
-                                  } else {
+                                  } else if (
+                                    arrTarget[index].startTarget -
+                                      (arrTarget[index - 1].startTarget +
+                                        arrTarget[index - 1].length) >
+                                    1
+                                  ) {
                                     return (
                                       <span key={index}>
                                         <span>
@@ -152,40 +161,71 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                     );
                                   }
                                 } else {
-                                  if (data1.startTarget > 0) {
-                                    return (
-                                      <span key={index}>
-                                        <span>
-                                          {data.target.substring(
-                                            0,
-                                            data1.startTarget
-                                          )}
+                                  console.log('ssss-1');
+                                  if (arrTarget.length === 1) {
+                                    if (data1.startTarget > 0) {
+                                      return (
+                                        <span key={index}>
+                                          <span>
+                                            {data.target.substring(
+                                              0,
+                                              data1.startTarget
+                                            )}
+                                          </span>
+                                          <mark>
+                                            {data.target.substring(
+                                              data1.startTarget,
+                                              data1.startTarget + data1.length
+                                            )}
+                                          </mark>
                                         </span>
-                                        <mark>
-                                          {data.target.substring(
-                                            data1.startTarget,
-                                            data1.startTarget + data1.length
-                                          )}
-                                        </mark>
-                                      </span>
-                                    );
+                                      );
+                                    } else {
+                                      return (
+                                        <span key={index}>
+                                          <mark>
+                                            {data.target.substring(
+                                              data1.startTarget,
+                                              data1.startTarget + data1.length
+                                            )}
+                                          </mark>
+                                          <span>
+                                            {data.target.substring(
+                                              data1.startTarget + data1.length,
+                                              data.target.length
+                                            )}
+                                          </span>
+                                        </span>
+                                      );
+                                    }
                                   } else {
-                                    return (
-                                      <span key={index}>
-                                        <mark>
+                                    if (data1.startTarget > 0) {
+                                      return (
+                                        <span key={index}>
+                                          <span>
+                                            {data.target.substring(
+                                              0,
+                                              data1.startTarget
+                                            )}
+                                          </span>
+                                          <mark>
+                                            {data.target.substring(
+                                              data1.startTarget,
+                                              data1.startTarget + data1.length
+                                            )}
+                                          </mark>
+                                        </span>
+                                      );
+                                    } else {
+                                      return (
+                                        <mark key={index}>
                                           {data.target.substring(
                                             data1.startTarget,
                                             data1.startTarget + data1.length
                                           )}
                                         </mark>
-                                        <span>
-                                          {data.target.substring(
-                                            data1.startTarget + data1.length,
-                                            data.target.length
-                                          )}
-                                        </span>
-                                      </span>
-                                    );
+                                      );
+                                    }
                                   }
                                 }
                               })}
@@ -196,105 +236,158 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                           <div className="bg-red-300 pl-2 bg-opacity-50 py-1 mb-2">
                             Document similar:{" "}
                             <span className="font-semibold">
-                              {value.documentId}
+                              {value.title}
                             </span>
                           </div>
                           {data.rate === 100 ? (
                             <mark>{data.matching}</mark>
                           ) : (
                             <>
-                              {arrMatching.map((data1, index) => {
-                                if (index >= 1) {
-                                  if (
-                                    arrMatching[index].startMatching -
-                                      (arrMatching[index - 1].startMatching +
-                                        arrMatching[index - 1].length -
-                                        1) ==
-                                    1
-                                  ) {
-                                    return (
-                                      <mark key={index}>
-                                        {data.matching.substring(
-                                          data1.startMatching,
-                                          data1.startMatching + data1.length
-                                        )}
-                                      </mark>
-                                    );
-                                  } else if (
-                                    arrMatching[index].startMatching -
-                                      (arrMatching[index - 1].startMatching +
-                                        arrMatching[index - 1].length -
-                                        1) ==
-                                    2
-                                  ) {
-                                    return (
-                                      <mark key={index}>
-                                        {data.matching.substring(
-                                          data1.startMatching - 1,
-                                          data1.startMatching + data1.length
-                                        )}
-                                      </mark>
-                                    );
-                                  } else {
-                                    return (
-                                      <span key={index}>
-                                        <span>
-                                          {data.matching.substring(
-                                            arrMatching[index - 1]
-                                              .startMatching +
-                                              arrMatching[index - 1].length,
-                                            data1.startMatching
-                                          )}
-                                        </span>
-                                        <mark>
-                                          {data.matching.substring(
-                                            data1.startMatching,
-                                            data1.startMatching + data1.length
-                                          )}
-                                        </mark>
-                                      </span>
-                                    );
-                                  }
-                                } else {
-                                  if (data1.startMatching > 0) {
-                                    return (
-                                      <span key={index}>
-                                        <span>
-                                          {data.matching.substring(
-                                            0,
-                                            data1.startMatching
-                                          )}
-                                        </span>
-                                        <mark>
-                                          <span>
+                              {arrMatching &&
+                                arrMatching
+                                  .sort(
+                                    (a, b) => a.startMatching - b.startMatching,
+                                    0
+                                  )
+                                  .map((data1, index) => {
+                                    if (index >= 1) {
+                                      if (
+                                        arrMatching[index].startMatching -
+                                          (arrMatching[index - 1]
+                                            .startMatching +
+                                            arrMatching[index - 1].length -
+                                            1) ==
+                                        1
+                                      ) {
+                                        return (
+                                          <mark key={index}>
                                             {data.matching.substring(
                                               data1.startMatching,
                                               data1.startMatching + data1.length
                                             )}
+                                          </mark>
+                                        );
+                                      } else if (
+                                        arrMatching[index].startMatching -
+                                          (arrMatching[index - 1]
+                                            .startMatching +
+                                            arrMatching[index - 1].length -
+                                            1) ==
+                                        2
+                                      ) {
+                                        return (
+                                          <mark key={index}>
+                                            {data.matching.substring(
+                                              data1.startMatching - 1,
+                                              data1.startMatching + data1.length
+                                            )}
+                                          </mark>
+                                        );
+                                      } else if (
+                                        arrMatching[index].startMatching -
+                                          (arrMatching[index - 1]
+                                            .startMatching +
+                                            arrMatching[index - 1].length -
+                                            1) >
+                                        2
+                                      ) {
+                                        return (
+                                          <span key={index}>
+                                            <span>
+                                              {data.matching.substring(
+                                                arrMatching[index - 1]
+                                                  .startMatching +
+                                                  arrMatching[index - 1].length,
+                                                data1.startMatching
+                                              )}
+                                            </span>
+                                            <mark>
+                                              {data.matching.substring(
+                                                data1.startMatching,
+                                                data1.startMatching +
+                                                  data1.length
+                                              )}
+                                            </mark>
                                           </span>
-                                        </mark>
-                                      </span>
-                                    );
-                                  } else {
-                                    return (
-                                      <span key={index}>
-                                        <mark key={index}>
-                                          {data.matching.substring(
-                                            data1.startMatching,
-                                            data1.startMatching + data1.length
-                                          )}
-                                        </mark>
-                                        <span>
-                                          {data.matching.substring(
-                                            data1.startMatching + data1.length,
-                                            data.matching.length
-                                          )}
-                                        </span>
-                                      </span>
-                                    );
-                                  }
-                                }
-                              })}
+                                        );
+                                      }
+                                    } else {
+                                      if (arrMatching.length === 1) {
+                                        if (data1.startMatching > 0) {
+                                          return (
+                                            <span key={index}>
+                                              <span>
+                                                {data.matching.substring(
+                                                  0,
+                                                  data1.startMatching
+                                                )}
+                                              </span>
+                                              <mark>
+                                                <span>
+                                                  {data.matching.substring(
+                                                    data1.startMatching,
+                                                    data1.startMatching +
+                                                      data1.length
+                                                  )}
+                                                </span>
+                                              </mark>
+                                            </span>
+                                          );
+                                        } else {
+                                          return (
+                                            <span key={index}>
+                                              <mark>
+                                                {data.matching.substring(
+                                                  data1.startMatching,
+                                                  data1.startMatching +
+                                                    data1.length
+                                                )}
+                                              </mark>
+                                              <span>
+                                                {data.matching.substring(
+                                                  data1.startMatching +
+                                                    data1.length,
+                                                  data.matching.length
+                                                )}
+                                              </span>
+                                            </span>
+                                          );
+                                        }
+                                      } else {
+                                        if (data1.startMatching > 0) {
+                                          return (
+                                            <span key={index}>
+                                              <span>
+                                                {data.matching.substring(
+                                                  0,
+                                                  data1.startMatching
+                                                )}
+                                              </span>
+                                              <mark>
+                                                <span>
+                                                  {data.matching.substring(
+                                                    data1.startMatching,
+                                                    data1.startMatching +
+                                                      data1.length
+                                                  )}
+                                                </span>
+                                              </mark>
+                                            </span>
+                                          );
+                                        } else {
+                                          return (
+                                            <mark key={index}>
+                                              {data.matching.substring(
+                                                data1.startMatching,
+                                                data1.startMatching +
+                                                  data1.length
+                                              )}
+                                            </mark>
+                                          );
+                                        }
+                                      }
+                                    }
+                                  })}
                             </>
                           )}
                         </div>

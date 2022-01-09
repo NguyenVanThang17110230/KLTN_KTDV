@@ -59,4 +59,8 @@ export default class AccountService{
     return this.accountGateway.getDashboard();
   }
 
+  async activeAccount(id,uuid){
+    return this.accountGateway.activeAccount(id,uuid);
+  }
+
 }

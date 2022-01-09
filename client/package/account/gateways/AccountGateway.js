@@ -94,4 +94,9 @@ export default class AccountGateway {
     const resp = await this.restConnector.get("/user/dashboard");
     return resp.data;
   }
+
+  async activeAccount(id,uuid){
+    const resp = await this.restConnector.get(`/user/active?id=${id}&uuid=${uuid}`)
+    return resp
+  }
 }

@@ -28,11 +28,10 @@ const ViewFileDetail = ({ style, value, closeModal }) => {
         "fixed p-0 top-0 left-0 right-0 bottom-0 flex justify-center w-full h-full  bg-black bg-opacity-50 antialiased overflow-x-hidden overflow-y-auto " +
         (style ? "opacity-1 visible z-10" : "opacity-0 invisible z-0")
       }
-      style={{ transition: "all 0.4s" }}
+      style={{ transition: "all 0.1s" }}
     >
-      <div className="my-10 mx-auto w-auto relative lg:max-w-xl lg:min-w-1/2">
-        <div className="border-gray-300 shadow-xl box-border w-full bg-white p-6">
-          <div className="flex justify-between items-center mb-5">
+      <div className="my-10 mx-auto w-auto relative lg:max-w-xl lg:min-w-1/2 rounded-lg overflow-hidden bg-white">
+      <div className="flex justify-between items-center border-b-2 px-6 py-3">
             <div className="text-2xl font-semibold text-gray-700">
               Information User
             </div>
@@ -43,9 +42,11 @@ const ViewFileDetail = ({ style, value, closeModal }) => {
               x
             </div>
           </div>
-          <div className="flex">
+        <div className="border-gray-300 shadow-xl box-border w-full h-full p-6">
+          
+          <div className="flex" style={{height:'90%'}}>
             <div className="w-1/2 border shadow-md">
-              <div className="w-full detail-doc">
+              <div className="w-full h-full detail-doc">
                 {value.contents && (
                   <Document
                     file={URL.createObjectURL(

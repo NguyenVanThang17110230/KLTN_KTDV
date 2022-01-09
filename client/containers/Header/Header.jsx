@@ -33,7 +33,7 @@ const Header = () => {
           </div>
         </form> */}
         {/* User */}
-        <ul className="flex-col md:flex-row list-none items-center md:flex relative">
+        {/* <ul className="flex-col md:flex-row list-none items-center md:flex relative">
           <div className="text-blueGray-500 block relative">
             <div className="items-center flex">
               <span className="w-12 h-12 text-sm text-white bg-blueGray-200 inline-flex items-center justify-center rounded-full overflow-hidden bg-gradient-to-r from-green-400 to-blue-500">
@@ -47,7 +47,7 @@ const Header = () => {
               </span>
             </div>
           </div>
-        </ul>
+        </ul> */}
       </div>
     </nav>
   );

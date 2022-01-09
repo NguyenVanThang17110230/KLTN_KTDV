@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useTable, usePagination } from "react-table";
+import AnimationLoad from "../../../components/Animation/AnimationLoad";
 import { AdminLayout } from "../../../layouts/Admin";
 import { COLUMN_ACOUNT } from "../../../package/account/columns/Columns";
 import ViewProfileUserModal from "../../../package/account/component/ViewProfileUserModal";
@@ -8,7 +9,8 @@ import { accountService } from "../../../package/RestConnector";
 export default function ManagerUsers() {
   const [listUser, setListUser] = useState([]);
   const [isShowInfo, setIsShowInfo] = useState(false);
-  const [dataEdit, setDataEdit] = useState([]);
+  const [dataEdit, setDataEdit] = useState(null);
+  const [isGetData, setIsGetData] = useState(false);
   const columns = useMemo(() => COLUMN_ACOUNT, []);
   const data = useMemo(() => listUser, [listUser]);
 
@@ -26,10 +28,12 @@ export default function ManagerUsers() {
   }, []);
 
   const getData = async () => {
+    setIsGetData(true);
     try {
       const data = await accountService.getListUser();
       console.log("data", data);
       setListUser(data.data);
+      setIsGetData(false);
     } catch (err) {
       let msg;
       switch (err.code) {
@@ -38,6 +42,7 @@ export default function ManagerUsers() {
         }
       }
       console.log("err", msg);
+      setIsGetData(false);
     }
   };
 
@@ -46,6 +51,14 @@ export default function ManagerUsers() {
     setDataEdit(data.row.original);
     setIsShowInfo(true);
   };
+
+  const reNewData = (id) =>{
+    const newList = [...listUser]
+    const selectIndex = listUser.findIndex((item)=>item.id === id)
+    newList[selectIndex].isActive = false
+    console.log('kkk',selectIndex);
+    setListUser(newList)
+  }
 
   const {
     getTableProps,
@@ -181,11 +194,16 @@ export default function ManagerUsers() {
           </div>
         </div>
       </div>
-      <ViewProfileUserModal
-        style={isShowInfo}
-        value={dataEdit}
-        closeModal={() => setIsShowInfo(false)}
-      />
+      {dataEdit && (
+        <ViewProfileUserModal
+          style={isShowInfo}
+          value={dataEdit}
+          closeModal={() => setIsShowInfo(false)}
+          changeBlock={(id) => reNewData(id)}
+        />
+      )}
+
+      {isGetData && <AnimationLoad />}
     </>
   );
 }

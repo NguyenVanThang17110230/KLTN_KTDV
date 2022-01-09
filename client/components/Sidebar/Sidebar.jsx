@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { accountService } from "../../package/RestConnector";
+import AnimationLoad from "../Animation/AnimationLoad";
 
 const menuItem = [
   {
@@ -56,6 +57,7 @@ const menuItem = [
 ];
 
 export default function Sidebar() {
+  const [isCheck, setIsCheck] = React.useState(false);
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
 
@@ -70,7 +72,14 @@ export default function Sidebar() {
   };
 
   const logout = async () => {
-    await accountService.logout();
+    setIsCheck(true)
+    try{
+      await accountService.logout();
+      setIsCheck(false)
+    }catch(e){
+      toastr.error('Logout fail!!!')
+      setIsCheck(false)
+    }
     await router.replace("/");
   };
 
@@ -164,6 +173,7 @@ export default function Sidebar() {
           </div>
         </div>
       </nav>
+      {isCheck && <AnimationLoad />}
     </>
   );
 }

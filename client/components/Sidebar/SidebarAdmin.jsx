@@ -2,6 +2,8 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { accountService } from "../../package/RestConnector";
+import toastr from "toastr";
+import AnimationLoad from "../Animation/AnimationLoad";
 
 const menuItem = [
   {
@@ -74,9 +76,56 @@ const menuItem = [
       </svg>
     ),
   },
+  {
+    link: "/admin/upload-document",
+    label: "Upload document",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="icon icon-tabler icon-tabler-file-symlink"
+        width={26}
+        height={26}
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="#ffffff"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <path d="M4 21v-4a3 3 0 0 1 3 -3h5" />
+        <path d="M9 17l3 -3l-3 -3" />
+        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+        <path d="M5 11v-6a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2h-9.5" />
+      </svg>
+    ),
+  },
+  {
+    link: "/admin/profile",
+    label: "Profile",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="icon icon-tabler icon-tabler-user"
+        width={26}
+        height={26}
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="#ffffff"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        <circle cx={12} cy={7} r={4} />
+        <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {
+  const [isCheck, setIsCheck] = React.useState(false);
   const [collapseShow, setCollapseShow] = React.useState("hidden");
   const router = useRouter();
 
@@ -90,7 +139,14 @@ export default function Sidebar() {
       : " text-Gray-500 hover:text-blueGray-500";
   };
   const logout = async () => {
-    await accountService.logout();
+    setIsCheck(true)
+    try{
+      await accountService.logout();
+      setIsCheck(false)
+    }catch(e){
+      toastr.error('Logout fail!!!')
+      setIsCheck(false)
+    }
     await router.replace("/");
   };
   return (
@@ -156,6 +212,7 @@ export default function Sidebar() {
           </div>
         </div>
       </nav>
+      {isCheck && <AnimationLoad />}
     </>
   );
 }

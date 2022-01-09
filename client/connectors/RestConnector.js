@@ -32,7 +32,7 @@ export function create ({baseUrl}) {
       console.log('errr-123',err);
       if (err.message === 'Network Error') {
         err.code = ApplicationError.name
-        err.message = 'errNetwork'
+        err.message = 'Network error!!!'
       }
       const originalConfig  = err.config
       if (originalConfig.url !== "/user/sign-in" && err.response) {

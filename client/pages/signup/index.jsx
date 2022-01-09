@@ -44,8 +44,9 @@ const SignUp = () => {
             msg = e.message;
           }
         }
+        console.log('res',e.response);
         setSubmitting(false);
-        toastr.error(msg);
+        toastr.error(e.response.data.message);
       }
     } else {
       toastr.warning("Password and confirm password must be the same!");

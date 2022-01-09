@@ -7,6 +7,7 @@ import { documentService } from "../../RestConnector";
 import SinglePdfPage from "./SinglePdf";
 import AnimationCheckDoc from "./AnimationCheckDoc";
 import CompareFileModal from "./CompareFileModal";
+import SameModal from "./SameModal";
 // import { Modal } from 'reactstrap'
 const readFile =(file)=> {
   return new Promise((resolve, reject) => {
@@ -24,7 +25,9 @@ const readFile =(file)=> {
 const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const [fileDocumentPriview, setFileDocumentPriview] = useState([]);
   const [isSimilar, setIsSimilar] = useState(false);
-  const [dataSimilar, setDataSimilar] = useState([]);
+  const [isSame,setIsSame] = useState(false)
+  const [dataSame,setDataSame] = useState(null)
+  const [dataSimilar, setDataSimilar] = useState(null);
   const handleUpload = async (values, actions) => {
     const { setSubmitting, resetForm } = actions;
     const { document, title, mark, note } = values;
@@ -48,6 +51,9 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
       } else {
         if (dataAPI.data.rate === 100) {
           console.log("same");
+          setDataSame(dataAPI.data)
+          setIsSame(true)
+
         } else {
           console.log("data-same", dataAPI.data);
           setDataSimilar(dataAPI.data);
@@ -337,11 +343,16 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
           </div>
         </div>
       </div>
-      <CompareFileModal
+      {dataSimilar && <CompareFileModal
         style={isSimilar}
         value={dataSimilar}
         closeModal={() => setIsSimilar(false)}
-      />
+      />}
+      {dataSame && <SameModal
+        style={isSame}
+        value={dataSame}
+        closeModal={() => setIsSame(false)}
+      />}
     </>
   );
 };
