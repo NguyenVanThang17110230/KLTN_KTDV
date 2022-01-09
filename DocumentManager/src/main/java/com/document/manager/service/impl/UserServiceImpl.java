@@ -38,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -84,6 +83,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private DocumentService documentService;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
 
     @Override
@@ -137,13 +139,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             // Send mail
             Map<String, Object> mapData = new HashMap<>();
             String uuid = UUID.randomUUID().toString();
-            mapData.put("link", environment.getProperty("server.host") + "/api/user/active?id=" + userApp.getId() + "&uuid=" + uuid);
+            mapData.put("link", environment.getProperty("server.fe") + "/confirm-account?id=" + userApp.getId() + "&uuid=" + uuid);
             LocalDateTime now = LocalDateTime.now();
             Date createdStamp = Date.from(now.atZone(ZoneId.systemDefault()).toInstant());
-            Date expiredStamp = Date.from(now.plusMinutes(Long.parseLong(environment.getProperty("server.time.expired.register")))
-                    .atZone(ZoneId.systemDefault()).toInstant());
             UserReference userReference = UserReference.builder().userApp(userApp).uuid(uuid)
-                    .createdStamp(createdStamp).expiredStamp(expiredStamp).type(ReferenceType.REGISTER).build();
+                    .createdStamp(createdStamp).type(ReferenceType.REGISTER).build();
             userReferenceService.save(userReference);
             mailService.sendMailRegister(userApp.getEmail(), userApp.getFirstName() + userApp.getLastName(), mapData);
             log.info("Sign up successful with email {}", userApp.getEmail());
@@ -235,7 +235,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public List<UserApp> getUsers() {
         log.info("Get all users");
-        return userRepo.findAll();
+        return userRepo.findUsers();
     }
 
     @Override
@@ -292,7 +292,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new IllegalArgumentException("Account does not exist in the system!");
         }
         if (!userApp.getIsActive()) {
-            throw new IllegalArgumentException("Account is locked!");
+            if (userApp.getModifiedStamp() != null) {
+                throw new IllegalArgumentException("Account is locked!");
+            }
+            throw new IllegalArgumentException("Account not activated");
         }
         try {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
@@ -331,9 +334,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         try {
             UserApp userApp = getCurrentUser();
-            userApp.setAvatar(fileService.saveFile(Constants.DIR_UPLOADED_USER, file.getOriginalFilename(), file.getBytes()));
+            String oldAvatar = userApp.getAvatar();
+            if (StringUtils.isNotEmpty(oldAvatar) && oldAvatar.contains(".")) {
+                String oldPublicId = oldAvatar.substring(0, oldAvatar.indexOf("."));
+                cloudinaryService.delete(oldPublicId, Constants.CLOUD_IMAGE);
+            }
+            userApp.setAvatar(cloudinaryService.upload(file, Constants.CLOUD_IMAGE));
             this.save(userApp);
-        } catch (NotFoundException | IOException e) {
+        } catch (NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
@@ -354,7 +362,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public Map<String, String>  refreshToken(String authorization) {
+    public Map<String, String> refreshToken(String authorization) {
         if (StringUtils.isEmpty(authorization) || !authorization.startsWith("Bearer ")) {
             log.error("Refresh token is missing");
             throw new IllegalArgumentException("Refresh token is missing");
@@ -545,7 +553,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             log.error("User with id {} not found", userId);
             throw new NotFoundException("User not found");
         }
-        UserReference userReference = userReferenceService.findByUserIdAndUuidAndTypeOrderByExpiredStamp(userId, uuid, ReferenceType.REGISTER.name());
+        if (userApp.getIsActive()) {
+            throw new RuntimeException("This account is now activated");
+        }
+        UserReference userReference = userReferenceService.findByUserIdAndUuidAndType(userId, uuid, ReferenceType.REGISTER.name());
         if (userReference == null) {
             log.error("Can't found info active user with id {} and uuid {}", userId, uuid);
             throw new NotFoundException("Can't found info active user");
@@ -563,5 +574,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .countUserNotActive(userRepo.countUserByIsActive(Boolean.FALSE))
                 .countDocument(documentService.count())
                 .build();
+    }
+
+    @Override
+    public boolean isAdmin() throws NotFoundException {
+        UserApp userApp = this.getCurrentUser();
+        if (userApp != null && userApp.getRoleApps() != null) {
+            for (RoleApp roleApp : userApp.getRoleApps()) {
+                if (roleApp.getName().equalsIgnoreCase(Constants.ROLE_ADMIN)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

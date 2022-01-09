@@ -32,4 +32,6 @@ public interface DocumentService {
     void delete(Long documentId) throws NotFoundException;
 
     void update(Long documentId, UpdateDocumentDTO updateDocumentDTO);
+
+    DocumentDTO getDetailDocument(Long documentId) throws NotFoundException, IOException;
 }

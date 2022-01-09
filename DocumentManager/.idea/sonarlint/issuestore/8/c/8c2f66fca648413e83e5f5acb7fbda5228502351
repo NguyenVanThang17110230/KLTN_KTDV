@@ -1,16 +1,15 @@
 
-o
-java:S3776@"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(пШиШ8µЃоФб/
-]	java:S125h"<This block of commented-out lines of code should be removed.(ВЏпИыяяяя8ГЬ•Хб/
-k
-java:S1128	"IRemove this unused import 'com.document.manager.dto.constants.Constants'.(™Н™хэяяяя8авКШб/
-`
-java:S1155c">Use isEmpty() to check whether the collection is empty or not.(жулюяяяя8МЃоФб/
-`
-java:S1155p">Use isEmpty() to check whether the collection is empty or not.(жулюяяяя8МЃоФб/
+m
+java:S3776<"RRefactor this method to reduce its Cognitive Complexity from 16 to the 15 allowed.(Юєх юяяяя
+Y
+java:S1155_">Use isEmpty() to check whether the collection is empty or not.(жулюяяяя
+Y
+java:S1155e">Use isEmpty() to check whether the collection is empty or not.(жулюяяяя
+Z
+java:S1155‡">Use isEmpty() to check whether the collection is empty or not.(ЄъЅЅщяяяя
+U
+java:S1155­">Use isEmpty() to check whether the collection is empty or not.(Ц©Ш”
 a
-java:S1155’">Use isEmpty() to check whether the collection is empty or not.(ЄъЅЅщяяяя8МЃоФб/
-\
-java:S1155ё">Use isEmpty() to check whether the collection is empty or not.(Ц©Ш”8НЃоФб/
-h
-java:S2259ё"JA "NullPointerException" could be thrown; "documentApps" is nullable here.(Ц©Ш”8РѓоФб/
+java:S2259­"JA "NullPointerException" could be thrown; "documentApps" is nullable here.(Ц©Ш”
+]
+java:S2259ј"FA "NullPointerException" could be thrown; "userApps" is nullable here.(¦сРж

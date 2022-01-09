@@ -33,8 +33,8 @@ public class UserReferenceImpl implements UserReferenceService {
     }
 
     @Override
-    public UserReference findByUserIdAndUuidAndTypeOrderByExpiredStamp(Long userId, String uuid, String type) {
-        return userReferenceRepo.findByUserIdAndUuidAndTypeOrderByExpiredStamp(userId, uuid, type);
+    public UserReference findByUserIdAndUuidAndType(Long userId, String uuid, String type) {
+        return userReferenceRepo.findByUserIdAndUuidAndType(userId, uuid, type);
     }
 
     @Override

@@ -156,7 +156,7 @@ public class UserController {
         return new ResponseEntity<>(ResponseData.builder()
                 .status(SUCCESS.name())
                 .message("Get all users success")
-                .data(userService.getUsers()).build(), OK);
+                .data(dtoMapper.toUserAppDTO(userService.getUsers())).build(), OK);
     }
 
     @PatchMapping(value = "/{id}")
@@ -190,11 +190,11 @@ public class UserController {
         }
     }
 
-    @PatchMapping(value = "/active")
+    @GetMapping(value = "/active")
     @ApiOperation(value = "API active account (set is_active = true)")
-    public ResponseEntity<ResponseData> activeAccount(@RequestParam("id") Long userId, @RequestParam("uuid") String uuid) {
+    public ResponseEntity<ResponseData> activeAccount(@RequestParam("id") String userId, @RequestParam("uuid") String uuid) {
         try {
-            userService.activeAccount(userId, uuid);
+            userService.activeAccount(Long.parseLong(userId), uuid);
             return new ResponseEntity<>(ResponseData.builder()
                     .status(SUCCESS.name())
                     .message("Active account successful").build(), OK);

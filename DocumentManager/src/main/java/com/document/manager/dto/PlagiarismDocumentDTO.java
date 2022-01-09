@@ -11,8 +11,11 @@ import java.util.List;
 public class PlagiarismDocumentDTO implements Serializable {
 
     private Long documentId;
+    private String title;
+    private String note;
     private boolean status;
     private String message;
     private float rate;
     private List<PlagiarismSentencesDTO> plagiarism;
+    private Byte[] contents;
 }

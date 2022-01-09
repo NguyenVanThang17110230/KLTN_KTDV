@@ -10,7 +10,7 @@ public interface UserReferenceService {
 
     UserReference save(UserReference userReference);
 
-    UserReference findByUserIdAndUuidAndTypeOrderByExpiredStamp(Long userId, String uuid, String type);
+    UserReference findByUserIdAndUuidAndType(Long userId, String uuid, String type);
 
     void deleteUserReference(UserReference userReference);
 

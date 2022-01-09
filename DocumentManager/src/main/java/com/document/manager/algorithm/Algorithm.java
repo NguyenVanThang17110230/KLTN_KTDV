@@ -77,12 +77,10 @@ public class Algorithm {
         for (int i = 0; i < charArr.length; i++) {
             System.out.print(charArr[i] + " ");
         }
-
-        System.out.println("");
     }
 
     /**
-     * Prints a the Levenshtein matrix.
+     * Prints the Levenshtein matrix.
      * @param arr The Levenshtein matrix.
      * @param n Rows in the matrix.
      * @param m Columns in the matrix.
@@ -92,8 +90,6 @@ public class Algorithm {
             for (int col = 0; col < m + 1; col++) {
                 System.out.print(arr[row][col] + " ");
             }
-
-            System.out.println();
         }
     }
 

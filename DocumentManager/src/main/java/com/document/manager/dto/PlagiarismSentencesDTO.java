@@ -14,6 +14,4 @@ public class PlagiarismSentencesDTO implements Serializable {
     private String matching;
     private float rate;
     private List<IndexDTO> tokenizerPlagiarism;
-    private List<IndexPart> targetPlagiarism;
-    private List<IndexPart> matchingPlagiarism;
 }

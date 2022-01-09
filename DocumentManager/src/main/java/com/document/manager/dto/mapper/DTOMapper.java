@@ -7,7 +7,6 @@ import com.document.manager.dto.ManagerDocumentDTO;
 import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserAppDTO;
 
-import javax.print.Doc;
 import java.io.IOException;
 import java.util.List;
 
@@ -15,7 +14,9 @@ public interface DTOMapper {
 
     UserApp toUser(SignUpDTO signUpDTO);
 
-    UserAppDTO toUserAppDTO(UserApp userApp) throws IOException;
+    UserAppDTO toUserAppDTO(UserApp userApp);
+
+    List<UserAppDTO> toUserAppDTO(List<UserApp> userApps);
 
     DocumentDTO toDocumentDTO(DocumentApp documentApp) throws IOException;
 

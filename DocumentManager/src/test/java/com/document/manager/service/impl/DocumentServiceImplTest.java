@@ -4,7 +4,6 @@ package com.document.manager.service.impl;
 import com.document.manager.domain.DocumentApp;
 import com.document.manager.domain.Sentences;
 import com.document.manager.dto.PlagiarismDocumentDTO;
-import com.document.manager.dto.PlagiarismSentencesDTO;
 import com.document.manager.repository.DocumentRepo;
 import com.document.manager.service.SentencesService;
 import org.junit.Assert;
@@ -17,7 +16,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -116,7 +114,7 @@ public class DocumentServiceImplTest {
         matching.add("this");
         matching.add("function");
 
-        List<String> actual = documentService.getPartPlagiarism(targets, matching);
+        List<String> actual = documentService.getCommonTokenizer(targets, matching);
         Assert.assertNotNull(actual);
         Assert.assertEquals(4, actual.size());
     }

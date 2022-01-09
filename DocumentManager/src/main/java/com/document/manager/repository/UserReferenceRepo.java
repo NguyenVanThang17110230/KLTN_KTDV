@@ -12,7 +12,7 @@ public interface UserReferenceRepo extends JpaRepository<UserReference, Long> {
     UserReference findByUuid(String uuid);
 
     @Query(value = "SELECT u.* FROM user_reference u WHERE u.user_id =:userId AND u.uuid=:uuid AND u.type=:type", nativeQuery = true)
-    UserReference findByUserIdAndUuidAndTypeOrderByExpiredStamp(Long userId, String uuid, String type);
+    UserReference findByUserIdAndUuidAndType(Long userId, String uuid, String type);
 
     @Query(value = "SELECT u.* FROM user_reference u WHERE u.user_id =:userId AND u.type=:type", nativeQuery = true)
     List<UserReference> findUserReferenceByUserIdAndType(Long userId, String type);

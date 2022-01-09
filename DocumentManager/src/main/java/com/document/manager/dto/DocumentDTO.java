@@ -18,5 +18,6 @@ public class DocumentDTO implements Serializable {
     private String title;
     private String note;
     private Date createdStamp;
+    private String link;
     private Byte[] contents;
 }

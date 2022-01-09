@@ -31,8 +31,6 @@ public class MailServiceImpl implements MailService {
     private Environment env;
 
     public MailResponse sendMail(MailRequest request, String templateName, Map<String, Object> mapData) {
-        log.info("User mail: " + env.getProperty("spring.mail.username"));
-        log.info("Pass mail: " + env.getProperty("spring.mail.password"));
         MailResponse mailResponse = new MailResponse();
         MimeMessage message = sender.createMimeMessage();
         try {

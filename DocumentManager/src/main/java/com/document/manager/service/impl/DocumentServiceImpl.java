@@ -12,10 +12,7 @@ import com.document.manager.pipeline.Annotation;
 import com.document.manager.pipeline.VnCoreNLP;
 import com.document.manager.pipeline.Word;
 import com.document.manager.repository.DocumentRepo;
-import com.document.manager.service.DocumentService;
-import com.document.manager.service.FileService;
-import com.document.manager.service.SentencesService;
-import com.document.manager.service.UserService;
+import com.document.manager.service.*;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -26,8 +23,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.BreakIterator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,9 +53,25 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired
     private DTOMapper dtoMapper;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     private static final String REGEX_DIVISION = "[?!.;]";
     private static final Integer LIMIT_CHARACTER = 30;
-    private static final String DIVISION = "\\*";
+    private static final String DIVISION = "\\~~";
+    private static final String PUNCTUATION = "[?!.;,!@#$%^&*()_+=-`:<>/|]";
+
+    @Override
+    public DocumentDTO getDetailDocument(Long documentId) throws NotFoundException, IOException {
+        if (documentId == null) {
+            throw new IllegalArgumentException("Document id can't null");
+        }
+        Optional<DocumentApp> documentOptional = documentRepo.findById(documentId);
+        if (!documentOptional.isPresent()) {
+            throw new NotFoundException("Document of user not found");
+        }
+        return dtoMapper.toDocumentDTO(documentOptional.get());
+    }
 
     @Override
     public List<DocumentDTO> getDocumentOfCurrentUser() throws NotFoundException {
@@ -105,14 +122,50 @@ public class DocumentServiceImpl implements DocumentService {
             // TODO: Get tokenizer of targets
             Map<Integer, List<String>> tokenizerOfTarget = getTokenizer(targets);
 
+            // TODO: Admin should be upload which don't check plagiarism
+            if (userService.isAdmin()) {
+                List<Sentences> sentences = new ArrayList<>();
+                for (int i = 0; i < targets.length; i = i + 3) {
+                    Sentences sentence = Sentences.builder()
+                            .rawText(getRawTextOfPart(i, targets))
+                            .tokenizer(getTokenizerOfPart(i, tokenizerOfTarget))
+                            .build();
+                    sentences.add(sentence);
+                }
+
+                String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+
+                DocumentApp documentApp = DocumentApp.builder()
+                        .title(uploadDTO.getTitle())
+                        .fileName(file.getOriginalFilename())
+                        .link(link)
+                        .note(uploadDTO.getNote())
+                        .createdStamp(new Date())
+                        .userApp(userService.getCurrentUser())
+                        .sentences(sentences)
+                        .build();
+                this.save(documentApp);
+                return null;
+            }
+
             // TODO: Check plagiarism
             PlagiarismDocumentDTO plagiarismDocumentDTO = this.getPlagiarism(targets, tokenizerOfTarget);
+
+            if (plagiarismDocumentDTO.getDocumentId() != null) {
+                Optional<DocumentApp> optionalDocumentApp = documentRepo.findById(plagiarismDocumentDTO.getDocumentId());
+                if (optionalDocumentApp.isPresent()) {
+                    plagiarismDocumentDTO.setTitle(optionalDocumentApp.get().getTitle());
+                    plagiarismDocumentDTO.setNote(optionalDocumentApp.get().getNote());
+                }
+            }
 
             if (existPlagiarism(plagiarismDocumentDTO)) {
                 plagiarismDocumentDTO.setStatus(false);
                 if (plagiarismDocumentDTO.getRate() == 100) {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SAME.name());
                     plagiarismDocumentDTO.setPlagiarism(null);
+                    Path path = Paths.get(documentFile.getAbsolutePath());
+                    plagiarismDocumentDTO.setContents(toBytesArray(Files.readAllBytes(path)));
                 } else {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SIMILAR.name());
                 }
@@ -122,15 +175,15 @@ public class DocumentServiceImpl implements DocumentService {
                 // TODO: Build data and store into DB
                 List<Sentences> sentences = new ArrayList<>();
                 for (int i = 0; i < targets.length; i = i + 3) {
-                    //String rawText = targets[i];
                     Sentences sentence = Sentences.builder()
                             .rawText(getRawTextOfPart(i, targets))
-                            .tokenizer(getTokenizerOfPart(i, tokenizerOfTarget))                    // tokenizerOfTarget.get(i).stream().collect(Collectors.joining("|"))
+                            .tokenizer(getTokenizerOfPart(i, tokenizerOfTarget))
                             .build();
                     sentences.add(sentence);
                 }
                 // TODO: Save file
                 String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+                //String link = cloudinaryService.upload(file, Constants.CLOUD_DOCUMENT);
 
                 DocumentApp documentApp = DocumentApp.builder()
                         .title(uploadDTO.getTitle())
@@ -154,7 +207,7 @@ public class DocumentServiceImpl implements DocumentService {
         for (int i = index; i < index + 3; i++) {
             if (i < array.length) {
                 if (StringUtils.isNotBlank(s.toString())) {
-                    s.append("*");
+                    s.append("~~");
                 }
                 s.append(array[i]);
             }
@@ -167,25 +220,12 @@ public class DocumentServiceImpl implements DocumentService {
         for (int i = index; i < index + 3; i++) {
             if (tokenizers.containsKey(i)) {
                 if (StringUtils.isNotBlank(s.toString())) {
-                    s.append("*");
+                    s.append("~~");
                 }
                 s.append(tokenizers.get(i).stream().collect(Collectors.joining("|")));
             }
         }
         return s.toString();
-    }
-
-    private String[] getContentToArray(File file) {
-        List<String> contents = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file.getPath()), StandardCharsets.UTF_8))) {
-            for (String line = null; (line = br.readLine()) != null; ) {
-                contents.add(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String[] arrays = new String[contents.size()];
-        return contents.toArray(arrays);
     }
 
     @Override
@@ -219,18 +259,6 @@ public class DocumentServiceImpl implements DocumentService {
             throw new Exception(e.getMessage());
         }
     }
-
-//    private void handleSentences(String[] sentences) {
-//        if (sentences == null || sentences.length <= 0 ) {
-//            return;
-//        }
-//        for (int i = 0 ; i < sentences.length; i ++ ) {
-//            if (sentences[i].trim().length() < 15 && sentences[i+1].trim().length() < 15) {
-//                sentences[i] = sentences[i] + " " + sentences[i+1];
-//
-//            }
-//        }
-//    }
 
     private String[] division(String content) {
         content = content.replaceAll("\r\n", " ");
@@ -276,7 +304,13 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         // TODO: Loop all document to check plagiarism with target
-        documentApps.forEach(d -> updatePlagiarism(targets, d.getId(), allSentences, tokenizerOfTarget, plagiarismDocumentDTO));
+        documentApps.forEach(d -> {
+            try {
+                updatePlagiarism(targets, d.getId(), allSentences, tokenizerOfTarget, plagiarismDocumentDTO);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 
         return plagiarismDocumentDTO;
     }
@@ -365,11 +399,11 @@ public class DocumentServiceImpl implements DocumentService {
         return map;
     }
 
-    public List<String> getPartPlagiarism(List<String> tokenizersOfTarget, List<String> tokenizerOfMatching) {
+    public List<String> getCommonTokenizer(List<String> tokenizersOfTarget, List<String> tokenizerOfMatching) {
         List<String> tokenizerOfMatchingLower = tokenizerOfMatching.stream().map(t -> t.toLowerCase()).collect(Collectors.toList());
         List<String> result = new ArrayList<>();
         tokenizersOfTarget.stream().forEach(t -> {
-            if (tokenizerOfMatchingLower.contains(t.toLowerCase())) {
+            if (!PUNCTUATION.contains(t.toLowerCase().trim()) && tokenizerOfMatchingLower.contains(t.toLowerCase())) {
                 result.add(t);
             }
         });
@@ -377,139 +411,106 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private List<IndexDTO> getPlagiarism(String target, String matching, List<String> tokenizers) {
-        String targetLower = target.toLowerCase();
-        String matchingLower = matching.toLowerCase();
-        Map<String, Integer> saveIndexOfTarget = new HashMap<>();
         Map<String, Integer> saveIndexOfMatching = new HashMap<>();
         List<IndexDTO> indexList = new ArrayList<>();
-        for (String s : tokenizers) {
-            int flagTarget = 1;
-            int flagMatching = 1;
-            String sLower = s.toLowerCase();
-            if (sLower.length() > 3) {
-                if (targetLower.contains(sLower) && matchingLower.contains(sLower)) {
-                    int startTarget = targetLower.indexOf(" " + sLower + " ");
-                    if (startTarget == -1) {
-                        flagTarget = 0;
-                        startTarget = targetLower.indexOf(s.toLowerCase());
+
+        String targetLower = target.toLowerCase();
+        String matchingLower = matching.toLowerCase();
+
+        try {
+            int flagGlobal = 0;
+            for (int k = 0; k < tokenizers.size(); k++) {
+                String s = tokenizers.get(k);
+                int length = 0;
+                String sLower = s.toLowerCase();
+                int startTarget = -1;
+                if (k == 0) {
+                    startTarget = targetLower.indexOf(sLower + " ", flagGlobal);
+                } else if (k == tokenizers.size() - 1) {
+                    startTarget = targetLower.indexOf(" " + sLower, flagGlobal);
+                    if (startTarget != -1) {
+                        startTarget++;
                     }
-                    if (saveIndexOfTarget.containsKey(sLower) && saveIndexOfTarget.get(sLower) < targetLower.length()) {
-                        startTarget = targetLower.indexOf(sLower, saveIndexOfTarget.get(sLower));
+                } else {
+                    startTarget = targetLower.indexOf(" " + sLower + " ", flagGlobal);
+                    if (startTarget != -1) {
+                        startTarget++;
                     }
-                    saveIndexOfTarget.put(sLower, startTarget + sLower.length() - 1);
-                    int startMatching = matchingLower.indexOf(" " + sLower + " ");
-                    if (startMatching == -1) {
-                        flagMatching = 0;
-                        startMatching = matchingLower.indexOf(s.toLowerCase());
+                }
+                if (startTarget != -1 && !isCover(startTarget, indexList, true)) {
+                    int flagIndex = 0;
+                    int startMatching = matchingLower.indexOf(sLower, flagIndex);
+
+                    int position = -1;
+                    int max = 0;
+                    while (flagIndex < matching.length() && startMatching != -1) {
+                        flagIndex = startMatching + sLower.length();
+                        if (!isCover(startMatching, indexList, false)) {
+                            CountDTO countDTO = count(targetLower.substring(startTarget), matchingLower.substring(startMatching));
+                            if (countDTO.getCount() > max) {
+                                max = countDTO.getCount();
+                                position = startMatching;
+                                length = countDTO.getEnd();
+                                flagGlobal = startTarget + length;
+                                flagIndex = startMatching + length;
+                            }
+                        }
+                        startMatching = matchingLower.indexOf(sLower, flagIndex);
                     }
                     if (saveIndexOfMatching.containsKey(sLower) && saveIndexOfMatching.get(sLower) < matchingLower.length()) {
-                        startMatching = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
+                        position = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
                     }
-                    saveIndexOfMatching.put(sLower, startMatching + sLower.length() - 1);
-                    if (startTarget != -1 && startMatching != -1) {
-                        indexList.add(IndexDTO.builder().startTarget(startTarget + flagTarget)
-                                .startMatching(startMatching + flagMatching)
-                                .length(sLower.length())
+                    saveIndexOfMatching.put(sLower, position + sLower.length() - 1);
+                    if (startTarget != -1 && position != -1 && length != 0) {
+                        indexList.add(IndexDTO.builder().startTarget(startTarget)
+                                .startMatching(position)
+                                .length(length)
                                 .build());
                     }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return indexList;
     }
 
-    private List<IndexDTO> getPlagiarismTest(String target, String matching, List<String> tokenizerOfTarget, List<String> tokenizerOfMatching) {
-        Map<String, Integer> saveIndexOfTarget = new HashMap<>();
-        Map<String, Integer> saveIndexOfMatching = new HashMap<>();
-        List<IndexDTO> indexList = new ArrayList<>();
-
-        List<String> tLower = toLowercase(tokenizerOfTarget);
-        List<String> mLower = toLowercase(tokenizerOfMatching);
-
-        String targetLower = target.toLowerCase();
-        String matchingLower = matching.toLowerCase();
-
-        for (String s : tokenizerOfMatching) {
-            int flagTarget = 1;
-            int flagMatching = 1;
-            String sLower = s.toLowerCase();
-            if (sLower.length() > 3) {
-
-                int startTarget = targetLower.indexOf(" " + sLower + " ");
-                if (startTarget == -1) {
-                    flagTarget = 0;
-                    startTarget = targetLower.indexOf(s.toLowerCase());
-                }
-                if (saveIndexOfTarget.containsKey(sLower) && saveIndexOfTarget.get(sLower) < targetLower.length()) {
-                    startTarget = targetLower.indexOf(sLower, saveIndexOfTarget.get(sLower));
-                }
-                saveIndexOfTarget.put(sLower, startTarget + sLower.length() - 1);
-
-                int flagIndex = 0;
-                int startMatching = -1;
-                int position = -1;
-                int max = 0;
-                do {
-                    startMatching = matchingLower.indexOf(sLower, flagIndex);
-                    flagIndex = startMatching + sLower.length();
-                    int count = count(target.substring(startTarget), matching.substring(startMatching));
-                    if (count > max) {
-                        max = count;
-                        position = startMatching;
-                    }
-                } while (startMatching != -1);
-
-                if (position == -1) {
-                    flagMatching = 0;
-                    position = matchingLower.indexOf(s.toLowerCase());
-                }
-                if (saveIndexOfMatching.containsKey(sLower) && saveIndexOfMatching.get(sLower) < matchingLower.length()) {
-                    position = matchingLower.indexOf(sLower, saveIndexOfMatching.get(sLower));
-                }
-                saveIndexOfMatching.put(sLower, position + sLower.length() - 1);
-                if (startTarget != -1 && startMatching != -1) {
-                    indexList.add(IndexDTO.builder().startTarget(startTarget + flagTarget)
-                            .startMatching(position + flagMatching)
-                            .length(sLower.length())
-                            .build());
-                }
+    private boolean isCover(int index, List<IndexDTO> indexDTOS, boolean isTarget) {
+        if (indexDTOS == null || indexDTOS.size() <= 0) {
+            return false;
+        }
+        for (IndexDTO indexDTO : indexDTOS) {
+            int start = isTarget ? indexDTO.getStartTarget() : indexDTO.getStartMatching();
+            if (index >= start && index <= start + indexDTO.getLength()) {
+                return true;
             }
         }
-        return indexList;
+        return false;
     }
 
-    private int count(String target, String matching) {
+    private CountDTO count(String target, String matching) {
         int count = 0;
+        int end = 0;
         String[] targets = target.trim().split("\\s+");
         String[] matchings = matching.trim().split("\\s+");
+        boolean isFinal = false;
         for (int i = 0; i < targets.length; i++) {
-            if (i < targets.length && i < matchings.length
-                    && targets[i].toLowerCase().equalsIgnoreCase(matchings[i])) {
+            if (i < matchings.length && targets[i].toLowerCase().equalsIgnoreCase(matchings[i])) {
+                if (i == targets.length - 1) {
+                    isFinal = true;
+                    end += targets[i].length();
+                } else {
+                    end += targets[i].length() + 1;
+                }
                 count++;
             } else {
-                return count;
+                break;
             }
         }
-        return count;
-    }
-
-    private boolean checkCondition(int sTarget, int sMatching, List<String> target, List<String> matching) {
-        for (int i = 0; i < 4; i++) {
-            if (sTarget + i < target.size() && sMatching + i < matching.size()) {
-                if (!target.get(sTarget + i).equalsIgnoreCase(matching.get(sMatching + i))) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+        if (!isFinal) {
+            end--;
         }
-        return true;
-    }
-
-    private List<String> toLowercase(List<String> strings) {
-        List<String> result = new ArrayList<>();
-        strings.forEach(s -> result.add(s.toLowerCase()));
-        return result;
+        return CountDTO.builder().count(count).end(end).build();
     }
 
     private Map<Integer, Sentences> buildMapSentences(List<Sentences> parts) {
@@ -541,6 +542,7 @@ public class DocumentServiceImpl implements DocumentService {
         // TODO: Loop all target to check with sentences of this document
         List<PlagiarismSentencesDTO> plagiarismSentences = new ArrayList<>();
         float totalRateMatchingCondition = 0;
+
         for (int i = 0; i < targets.length; i++) {
             String target = targets[i];
             // TODO: Get tokenizer of target (Key of tokenizerOfTarget equal i)
@@ -558,49 +560,61 @@ public class DocumentServiceImpl implements DocumentService {
                         target.length(), sentences.getRawText().length());
 
                 // TODO: Check with constant number
-                if (percent > 80 && percent > sentenceHighestRate) {
+                plagiarismSentencesDTO.setTarget(target);
+                if (percent > sentenceHighestRate && percent > Constants.CONSTANT_RATE_SENTENCES) {
                     sentenceHighestRate = percent;
+                    if (percent == 100) {
+                        plagiarismSentencesDTO.setTarget(target);
+                        plagiarismSentencesDTO.setMatching(sentences.getRawText());
+                        plagiarismSentencesDTO.setRate(percent);
+                        break;
+                    }
 
                     // TODO : Convert to list tokenizer from sentences in database
                     List<String> tokenizerOfMatching = this.getTokenizerFromSentences(sentences);
 
                     // TODO: Get part plagiarism
-                    List<String> partPlagiarism = this.getPartPlagiarism(tokenizers, tokenizerOfMatching);
+                    List<String> partPlagiarism = this.getCommonTokenizer(tokenizers, tokenizerOfMatching);
                     List<IndexDTO> indexDTOS = this.getPlagiarism(target, sentences.getRawText(), partPlagiarism);
 
                     // TODO: Store data plagiarism of sentences
-                    plagiarismSentencesDTO.setTarget(target);
-                    //plagiarismSentencesDTO.setPositionTarget(i + 1); // Start from 0
+
                     plagiarismSentencesDTO.setMatching(sentences.getRawText());
-                    //plagiarismSentencesDTO.setPositionMatching(position); // Start from 1
                     plagiarismSentencesDTO.setRate(percent);
                     plagiarismSentencesDTO.setTokenizerPlagiarism(indexDTOS);
                 }
             }
+
             // TODO: Store sentence have highest rate
-            if (plagiarismSentencesDTO.getRate() > 0) {
+//            if (plagiarismSentencesDTO.getRate() > 0) {
                 plagiarismSentences.add(plagiarismSentencesDTO);
-            }
+//            }
 
             // TODO: Store data of target sentences have highest rate
-            if (sentenceHighestRate != 0) {
-                totalRateMatchingCondition += sentenceHighestRate;
-            }
-            // TODO: Calculate plagiarism of document
-            int totalSentences = targets.length > mapSentences.size() ? targets.length : mapSentences.size();
-            float rateOfDocument = totalRateMatchingCondition / totalSentences;
-            if (rateOfDocument > 70 && rateOfDocument > plagiarismDocumentDTO.getRate()) {
-                // TODO: Build data store plagiarism info of document
-                plagiarismDocumentDTO.setDocumentId(documentMatchingId);
-                plagiarismDocumentDTO.setRate(rateOfDocument);
-                plagiarismDocumentDTO.setPlagiarism(plagiarismSentences);
-            }
+            totalRateMatchingCondition += sentenceHighestRate;
+        }
+        // TODO: Calculate plagiarism of document
+        int totalSentences = targets.length;
+        float rateOfDocument = totalRateMatchingCondition / totalSentences;
+        //rateOfDocument > 70 &&
+        if (rateOfDocument > Constants.CONSTANT_RATE_DOCUMENT && rateOfDocument > plagiarismDocumentDTO.getRate()) {
+            // TODO: Build data store plagiarism info of document
+            plagiarismDocumentDTO.setDocumentId(documentMatchingId);
+            plagiarismDocumentDTO.setRate(rateOfDocument);
+            plagiarismDocumentDTO.setPlagiarism(plagiarismSentences);
         }
     }
 
     private boolean existPlagiarism(PlagiarismDocumentDTO plagiarismDocumentDTO) {
         return plagiarismDocumentDTO != null && plagiarismDocumentDTO.getDocumentId() != null
-                && plagiarismDocumentDTO.getRate() > 80 && plagiarismDocumentDTO.getPlagiarism() != null
+                && plagiarismDocumentDTO.getRate() > Constants.CONSTANT_RATE_DOCUMENT
+                && plagiarismDocumentDTO.getPlagiarism() != null
                 && plagiarismDocumentDTO.getPlagiarism().size() > 0;
+    }
+
+    private Byte[] toBytesArray(byte[] bytesPrim) {
+        Byte[] bytes = new Byte[bytesPrim.length];
+        Arrays.setAll(bytes, n -> bytesPrim[n]);
+        return bytes;
     }
 }

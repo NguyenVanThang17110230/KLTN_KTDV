@@ -60,4 +60,6 @@ public interface UserService {
     void activeAccount(Long userId, String uuid) throws NotFoundException;
 
     DashboardDTO getDashboard();
+
+    boolean isAdmin() throws NotFoundException;
 }

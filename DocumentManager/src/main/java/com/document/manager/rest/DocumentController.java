@@ -111,4 +111,19 @@ public class DocumentController {
                     .build(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping(value = "/details/{id}")
+    public ResponseEntity<ResponseData> getDetailDocument(@PathVariable("id") Long id) {
+        try {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.name())
+                    .message("Get detail document successful")
+                    .data(documentService.getDetailDocument(id))
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name()).message(e.getMessage())
+                    .build(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }

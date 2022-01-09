@@ -8,20 +8,16 @@ import com.document.manager.dto.SignUpDTO;
 import com.document.manager.dto.UserAppDTO;
 import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.mapper.DTOMapper;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 import static com.document.manager.dto.enums.Gender.FEMALE;
@@ -61,7 +57,7 @@ public class DTOMapperImpl implements DTOMapper {
     }
 
     @Override
-    public UserAppDTO toUserAppDTO(UserApp userApp) throws IOException {
+    public UserAppDTO toUserAppDTO(UserApp userApp) {
         UserAppDTO userAppDTO = new UserAppDTO();
         if (userApp.getId() != null) {
             userAppDTO.setId(userApp.getId());
@@ -99,15 +95,8 @@ public class DTOMapperImpl implements DTOMapper {
         if (userApp.getRoleApps() != null && userApp.getRoleApps().size() > 0) {
             userAppDTO.setRoleApps(userAppDTO.getRoleApps());
         }
-        if (!StringUtils.isEmpty(userApp.getAvatar())) {
-            File image = new File(userApp.getAvatar());
-            //File image = new File(System.getProperty("user.dir") + userApp.getAvatar());
-            byte[] fileContent = IOUtils.toByteArray(new FileInputStream(image));
-            MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
-            String mimeType = fileTypeMap.getContentType(image.getName());
-            String contentOfImage = Base64.getEncoder().encodeToString(fileContent);
-            String base64 = "data:" + mimeType + ";base64," + contentOfImage;
-            userAppDTO.setAvatar(base64);
+        if (StringUtils.isNotEmpty(userApp.getAvatar())) {
+            userAppDTO.setAvatar(Constants.CLOUDINARY + userApp.getAvatar());
         }
         if (userApp.getRoleApps() != null && userApp.getRoleApps().size() > 0) {
             userAppDTO.setRoleApps(userApp.getRoleApps());
@@ -191,6 +180,17 @@ public class DTOMapperImpl implements DTOMapper {
             });
         }
         return managerDocumentDTOS;
+    }
+
+    @Override
+    public List<UserAppDTO> toUserAppDTO(List<UserApp> userApps) {
+        List<UserAppDTO> userAppDTOS = new ArrayList<>();
+        if (userApps != null || userApps.size() > 00) {
+            for (UserApp userApp : userApps) {
+                userAppDTOS.add(this.toUserAppDTO(userApp));
+            }
+        }
+        return userAppDTOS;
     }
 
     private Byte[] toBytesArray(byte[] bytesPrim) {
