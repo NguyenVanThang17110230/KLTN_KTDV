@@ -1,12 +1,12 @@
 import React from "react";
 const CompareFileModal = ({ style, value, closeModal }) => {
   console.log("data-similar", value);
-  
+
   return (
     <>
       {value.plagiarism && (
         <div
-        id="my-report"
+          id="my-report"
           className={
             "fixed p-0 top-0 left-0 right-0 bottom-0 flex justify-center w-full h-full  bg-black bg-opacity-50 antialiased overflow-x-hidden overflow-y-auto " +
             (style ? "opacity-100 visible z-10" : "opacity-0 invisible z-0")
@@ -86,12 +86,14 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                   value.plagiarism.map((data, index) => {
                     let arrTarget = [];
                     let arrMatching = [];
-                    if (data.rate !== 100) {
-                      arrTarget = data.tokenizerPlagiarism.sort(
-                        (a, b) => a.startTarget - b.startTarget,
-                        0
-                      );
-                      arrMatching = data.tokenizerPlagiarism;
+                    if (0<data.rate < 100) {
+                      if (data.tokenizerPlagiarism&&data.tokenizerPlagiarism.length > 0) {
+                        arrTarget = data.tokenizerPlagiarism.sort(
+                          (a, b) => a.startTarget - b.startTarget,
+                          0
+                        );
+                        arrMatching = data.tokenizerPlagiarism;
+                      }
                     }
 
                     console.log("arrTarget", arrTarget);
@@ -104,7 +106,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                           </div>
                           {data.rate === 100 ? (
                             <mark>{data.target}</mark>
-                          ) : (
+                          ) : data.rate===0?<span>{data.target}</span>: (
                             <>
                               {arrTarget.map((data1, index) => {
                                 if (index >= 1) {
@@ -161,7 +163,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                     );
                                   }
                                 } else {
-                                  console.log('ssss-1');
+                                  console.log("ssss-1");
                                   if (arrTarget.length === 1) {
                                     if (data1.startTarget > 0) {
                                       return (
@@ -235,9 +237,7 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         <div>
                           <div className="bg-red-300 pl-2 bg-opacity-50 py-1 mb-2">
                             Document similar:{" "}
-                            <span className="font-semibold">
-                              {value.title}
-                            </span>
+                            <span className="font-semibold">{value.title}</span>
                           </div>
                           {data.rate === 100 ? (
                             <mark>{data.matching}</mark>

@@ -6,6 +6,7 @@ import { AdminLayout } from "../../../layouts/Admin";
 import { documentService } from "../../../package/RestConnector";
 import ViewFileDetail from "../../../package/account/component/ViewFileDetail";
 import AnimationLoad from "../../../components/Animation/AnimationLoad";
+import moment from "moment";
 
 const ManageDocument = () => {
   const [listDocument, setListDocument] = useState([]);
@@ -33,7 +34,10 @@ const ManageDocument = () => {
     try {
       const data = await documentService.getListDocumentByAdmin();
       console.log("data", data);
-      setListDocument(data.data);
+      const dataDoc = data.data
+      dataDoc.sort((x,y)=>new Date(y.createdStamp)-new Date(x.createdStamp),0)
+     
+      setListDocument(dataDoc);
       setIsGetData(false);
     } catch (err) {
       let msg;

@@ -48,7 +48,7 @@ const DocumentFile = ({ file, flag }) => {
       {listDocument.length > 0 ? (
         <div id="list-doc" className="grid grid-cols-3 gap-5">
           {listDocument.map((data, index) => (
-            <div key={index} className="p-3 bg-white">
+            <div className="p-3 bg-white" key={index}>
               <div className="w-full view-pdf-s relative group">
                 <FileViewer
                   fileType="pdf"

@@ -1,6 +1,5 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
-import { Formik, Field, Form } from "formik";
 
 import { UserLayout } from "../../layouts/User";
 import DocumentFile from "../../package/document/component/Document";
@@ -9,6 +8,7 @@ import { documentService } from "../../package/RestConnector";
 
 const Document = () => {
   const [isShowAddNewDocument, setIsShowAddNewDocument] = useState(false);
+  const [isSearch,setIsSearch] = useState(false);
   const [document, setDocument] = useState([]);
   const [flag, setFlag] = useState(false);
   useEffect(() => {
@@ -18,8 +18,12 @@ const Document = () => {
     setFlag(false);
     try {
       const data = await documentService.getDocument();
-      console.log("res", data);
-      setDocument(data.data);
+      const dataDoc = data.data;
+      dataDoc.sort(
+        (x, y) => new Date(y.createdStamp) - new Date(x.createdStamp),
+        0
+      );
+      setDocument(dataDoc);
       setFlag(true);
     } catch (err) {
       let msg;
@@ -31,6 +35,13 @@ const Document = () => {
       console.log("err", msg);
     }
   };
+
+  const modalSearch = () =>{
+    return(
+      <div className="fixed"></div>
+    )
+  }
+
   return (
     <>
       <Head>
@@ -42,30 +53,51 @@ const Document = () => {
             <div className="font-medium text-2xl text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
               List document
             </div>
-            <div
-              className="flex p-3 items-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer rounded-md relative"
-              onClick={() => setIsShowAddNewDocument(true)}
-              style={{ cursor: "pointer" }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="icon icon-tabler icon-tabler-file-plus"
-                width={26}
-                height={26}
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="#ffffff"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <div className="flex items-center">
+              <div className="flex p-3 items-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer rounded-md relative mr-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="icon icon-tabler icon-tabler-search"
+                  width={26}
+                  height={26}
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="#ffffff"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <circle cx={10} cy={10} r={7} />
+                  <line x1={21} y1={21} x2={15} y2={15} />
+                </svg>
+                <div className="ml-2 font-medium">Search</div>
+              </div>
+              <div
+                className="flex p-3 items-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 cursor-pointer rounded-md relative"
+                onClick={() => setIsShowAddNewDocument(true)}
+                style={{ cursor: "pointer" }}
               >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
-                <line x1={12} y1={11} x2={12} y2={17} />
-                <line x1={9} y1={14} x2={15} y2={14} />
-              </svg>
-              <div className="ml-2 font-medium">Add new document</div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="icon icon-tabler icon-tabler-file-plus"
+                  width={26}
+                  height={26}
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="#ffffff"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                  <line x1={12} y1={11} x2={12} y2={17} />
+                  <line x1={9} y1={14} x2={15} y2={14} />
+                </svg>
+                <div className="ml-2 font-medium">Add new document</div>
+              </div>
             </div>
           </div>
           {flag ? <DocumentFile file={document} /> : <div>Loading data...</div>}
