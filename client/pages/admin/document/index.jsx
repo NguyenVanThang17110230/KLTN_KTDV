@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { useTable, usePagination } from "react-table";
+import { useTable, usePagination, useGlobalFilter } from "react-table";
 import { COLUMN_DOCUMENT } from "../../../package/document/columns/ColumnDocument";
 
 import { AdminLayout } from "../../../layouts/Admin";
@@ -7,6 +7,7 @@ import { documentService } from "../../../package/RestConnector";
 import ViewFileDetail from "../../../package/account/component/ViewFileDetail";
 import AnimationLoad from "../../../components/Animation/AnimationLoad";
 import moment from "moment";
+import { ColumnFilter } from "../../../package/account/columns/ColumnFilter";
 
 const ManageDocument = () => {
   const [listDocument, setListDocument] = useState([]);
@@ -22,7 +23,9 @@ const ManageDocument = () => {
       data,
       initialState: { pageIndex: 0 },
     },
+    useGlobalFilter,
     usePagination
+    
   );
 
   useEffect(() => {
@@ -91,13 +94,15 @@ const ManageDocument = () => {
     nextPage,
     previousPage,
     setPageSize,
-    state: { pageIndex, pageSize },
+    state: { pageIndex, pageSize, globalFilter },
+    setGlobalFilter
   } = tableInstance;
   return (
     <>
       <div className="px-20 py-10">
         <div className="p-3 bg-white rounded-md shadow">
           <div className="mb-4 text-2xl font-semibold">List document</div>
+          <ColumnFilter filter={globalFilter} setFilter={setGlobalFilter} />
           <table
             className=" w-full table text-gray-600 border-separate space-y-6 text-sm"
             {...getTableProps()}

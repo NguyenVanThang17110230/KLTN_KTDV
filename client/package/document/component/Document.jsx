@@ -20,6 +20,10 @@ const DocumentFile = ({ file, flag }) => {
     window.open(url);
   };
 
+  useEffect(() => {
+    setListDocument(file)
+  }, [file])
+
   const setNewDoc = (id, title, note) => {
     const data = listDocument.find((x) => x.documentId == id);
     if (data) {

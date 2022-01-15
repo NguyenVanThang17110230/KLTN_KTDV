@@ -9,24 +9,24 @@ import AnimationCheckDoc from "./AnimationCheckDoc";
 import CompareFileModal from "./CompareFileModal";
 import SameModal from "./SameModal";
 // import { Modal } from 'reactstrap'
-const readFile =(file)=> {
+const readFile = (file) => {
   return new Promise((resolve, reject) => {
     // Create file reader
-    let reader = new FileReader()
+    let reader = new FileReader();
 
     // Register event listeners
-    reader.addEventListener("loadend", e => resolve(e.target.result))
-    reader.addEventListener("error", reject)
+    reader.addEventListener("loadend", (e) => resolve(e.target.result));
+    reader.addEventListener("error", reject);
 
     // Read file
-    reader.readAsArrayBuffer(file)
-  })
-}
+    reader.readAsArrayBuffer(file);
+  });
+};
 const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const [fileDocumentPriview, setFileDocumentPriview] = useState([]);
   const [isSimilar, setIsSimilar] = useState(false);
-  const [isSame,setIsSame] = useState(false)
-  const [dataSame,setDataSame] = useState(null)
+  const [isSame, setIsSame] = useState(false);
+  const [dataSame, setDataSame] = useState(null);
   const [dataSimilar, setDataSimilar] = useState(null);
   const handleUpload = async (values, actions) => {
     const { setSubmitting, resetForm } = actions;
@@ -51,9 +51,8 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
       } else {
         if (dataAPI.data.rate === 100) {
           console.log("same");
-          setDataSame(dataAPI.data)
-          setIsSame(true)
-
+          setDataSame(dataAPI.data);
+          setIsSame(true);
         } else {
           console.log("data-same", dataAPI.data);
           setDataSimilar(dataAPI.data);
@@ -67,7 +66,7 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
           msg = e.message;
         }
       }
-      toastr.error(msg);
+      toastr.error("Upload fail!");
       setSubmitting(false);
     }
   };
@@ -343,16 +342,20 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
           </div>
         </div>
       </div>
-      {dataSimilar && <CompareFileModal
-        style={isSimilar}
-        value={dataSimilar}
-        closeModal={() => setIsSimilar(false)}
-      />}
-      {dataSame && <SameModal
-        style={isSame}
-        value={dataSame}
-        closeModal={() => setIsSame(false)}
-      />}
+      {dataSimilar && (
+        <CompareFileModal
+          style={isSimilar}
+          value={dataSimilar}
+          closeModal={() => setIsSimilar(false)}
+        />
+      )}
+      {dataSame && (
+        <SameModal
+          style={isSame}
+          value={dataSame}
+          closeModal={() => setIsSame(false)}
+        />
+      )}
     </>
   );
 };

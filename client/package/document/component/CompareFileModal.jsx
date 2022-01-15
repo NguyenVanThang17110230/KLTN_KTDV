@@ -48,8 +48,6 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         <th className="border-r p-2">All Sentences</th>
                         <th className="border-r p-2">Same Sentences</th>
                         <th className="border-r p-2">Similar Sentences</th>
-                        {/* <th className="border-r p-2">Quoted/Cited</th>
-                        <th className="border-r p-2">Law/Religious text</th> */}
                       </tr>
                     </thead>
                     <tbody>
@@ -66,10 +64,6 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                         <td className="p-2 border-r text-center">
                           {value.plagiarism.filter((x) => x.rate != 100).length}
                         </td>
-                        {/* <td className="p-2 border-r text-center">30</td>
-                        <td className="p-2 border-r text-center">
-                          <span>download</span>
-                        </td> */}
                       </tr>
                     </tbody>
                   </table>
@@ -86,8 +80,11 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                   value.plagiarism.map((data, index) => {
                     let arrTarget = [];
                     let arrMatching = [];
-                    if (0<data.rate < 100) {
-                      if (data.tokenizerPlagiarism&&data.tokenizerPlagiarism.length > 0) {
+                    if (0 < data.rate < 100) {
+                      if (
+                        data.tokenizerPlagiarism &&
+                        data.tokenizerPlagiarism.length > 0
+                      ) {
                         arrTarget = data.tokenizerPlagiarism.sort(
                           (a, b) => a.startTarget - b.startTarget,
                           0
@@ -106,7 +103,9 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                           </div>
                           {data.rate === 100 ? (
                             <mark>{data.target}</mark>
-                          ) : data.rate===0?<span>{data.target}</span>: (
+                          ) : data.rate === 0 ? (
+                            <span>{data.target}</span>
+                          ) : (
                             <>
                               {arrTarget.map((data1, index) => {
                                 if (index >= 1) {

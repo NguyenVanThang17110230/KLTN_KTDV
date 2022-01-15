@@ -1,7 +1,8 @@
 import React, { useMemo, useEffect, useState } from "react";
-import { useTable, usePagination } from "react-table";
+import { useTable, usePagination, useFilters,useGlobalFilter } from "react-table";
 import AnimationLoad from "../../../components/Animation/AnimationLoad";
 import { AdminLayout } from "../../../layouts/Admin";
+import { ColumnFilter } from "../../../package/account/columns/ColumnFilter";
 import { COLUMN_ACOUNT } from "../../../package/account/columns/Columns";
 import ViewProfileUserModal from "../../../package/account/component/ViewProfileUserModal";
 import { accountService } from "../../../package/RestConnector";
@@ -20,6 +21,8 @@ export default function ManagerUsers() {
       data,
       initialState: { pageIndex: 0 },
     },
+    useFilters,
+    useGlobalFilter,
     usePagination
   );
 
@@ -75,14 +78,17 @@ export default function ManagerUsers() {
     nextPage,
     previousPage,
     setPageSize,
-    state: { pageIndex, pageSize },
+    state: { pageIndex, pageSize, globalFilter },
+    setGlobalFilter
   } = tableInstance;
+
 
   return (
     <>
       <div className="px-20 py-10">
         <div className="p-3 bg-white rounded-md shadow">
           <div className="mb-4 text-2xl font-semibold">List account</div>
+          <ColumnFilter filter={globalFilter} setFilter={setGlobalFilter} />
           <table
             className=" w-full table text-gray-600 border-separate space-y-6 text-sm"
             {...getTableProps()}
@@ -97,6 +103,7 @@ export default function ManagerUsers() {
                       {...column.getHeaderProps()}
                     >
                       {column.render("Header")}
+                      {/* <div>{column.render("Filter")}</div> */}
                     </th>
                   ))}
                 </tr>

@@ -1,4 +1,5 @@
 import moment from "moment";
+import { ColumnFilter } from "./ColumnFilter";
 
 export const COLUMN_ACOUNT = [
   {

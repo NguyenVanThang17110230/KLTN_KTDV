@@ -31,7 +31,7 @@ const InfoProfile = ({user}) => {
             msg = e.message;
           }
         }
-        toastr.error(msg);
+        toastr.error("Get info fail!");
         setSubmitting(false);
       }
     }

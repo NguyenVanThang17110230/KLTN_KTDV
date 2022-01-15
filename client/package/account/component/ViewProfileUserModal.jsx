@@ -33,7 +33,7 @@ const ViewProfileUserModal = ({ style, value, closeModal,changeBlock }) => {
           }
         }
         setIsCheck(false);
-        toastr.error(msg);
+        toastr.error("Lock account fail!");
       }
     }
   };

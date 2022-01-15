@@ -54,7 +54,7 @@ const AdminProfile = () => {
           msg = e.message;
         }
       }
-      toastr.error(msg);
+      toastr.error("Get data user fail!");
       setIsCheck(false);
     }
   };

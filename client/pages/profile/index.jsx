@@ -51,7 +51,7 @@ const Profile = () => {
           msg = e.message;
         }
       }
-      toastr.error(msg);
+      toastr.error("Get info fail!");
     }
   };
   
@@ -99,7 +99,7 @@ const Profile = () => {
         }
       }
       setIsChangeAvt(false);
-      toastr.error(msg);
+      toastr.error("Change avatar fail!!");
     }
   };
 

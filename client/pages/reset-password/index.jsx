@@ -48,7 +48,7 @@ const ResetPassword = () => {
           msg = e.message;
         }
       }
-      toastr.error(msg);
+      toastr.error("Reset password fail!");
       setSubmitting(false);
     }
   };
