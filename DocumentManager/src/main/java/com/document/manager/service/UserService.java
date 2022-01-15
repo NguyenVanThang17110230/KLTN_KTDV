@@ -62,4 +62,6 @@ public interface UserService {
     DashboardDTO getDashboard();
 
     boolean isAdmin() throws NotFoundException;
+
+    void unlockAccount(Long userId) throws NotFoundException;
 }
