@@ -20,6 +20,7 @@ import com.document.manager.repository.UserRepo;
 import com.document.manager.service.*;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -587,5 +588,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             }
         }
         return false;
+    }
+
+    @Override
+    public void unlockAccount(Long userId) throws NotFoundException {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id can't null");
+        }
+        UserApp userApp = this.findUserById(userId);
+        if (userApp == null) {
+            log.error("User with id {} not found", userId);
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        userApp.setIsActive(Boolean.TRUE);
+        this.save(userApp);
+        List<UserReference> userReferences = userReferenceService.findUserReferenceByEmailAndType(userApp.getEmail(), ReferenceType.REGISTER);
+        if (!CollectionUtils.isEmpty(userReferences)) {
+            userReferenceService.deleteUserReferences(userReferences.stream().map(u -> u.getId()).collect(Collectors.toList()));
+        }
     }
 }

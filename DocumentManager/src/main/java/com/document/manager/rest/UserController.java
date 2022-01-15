@@ -267,4 +267,20 @@ public class UserController {
                     .message(e.getMessage()).build(), BAD_REQUEST);
         }
     }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PatchMapping(value = "/unlock/{id}")
+    @ApiOperation(value = "API unlock account (set is_active = true)         (Role: Admin)")
+    public ResponseEntity<ResponseData> unlockAccount(@PathVariable("id") Long userId) {
+        try {
+            userService.unlockAccount(userId);
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.name())
+                    .message("Unlock account successful").build(), OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name())
+                    .message(e.getMessage()).build(), BAD_REQUEST);
+        }
+    }
 }
