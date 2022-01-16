@@ -70,6 +70,8 @@ public class DocumentServiceImpl implements DocumentService {
         }
         DocumentDTO documentDTO = dtoMapper.toDocumentDTO(documentOptional.get());
         if (!StringUtils.isEmpty(documentDTO.getLink())) {
+            log.info("Start get content of details document with id: {} and link {}",
+                    documentDTO.getDocumentId(), documentDTO.getLink());
             documentDTO.setContents(dtoMapper.toBytesArray(sftpService.getFileFromSFTP(documentDTO.getLink())));
         }
         return documentDTO;
@@ -194,6 +196,7 @@ public class DocumentServiceImpl implements DocumentService {
                     if (plagiarismDocumentDTO.getDocumentId() != null) {
                         Optional<DocumentApp> documentAppOptional = documentRepo.findById(plagiarismDocumentDTO.getDocumentId());
                         if (documentAppOptional.isPresent()) {
+                            log.info("Start get file the same with link: {}", documentAppOptional.get().getLink());
                             plagiarismDocumentDTO.setContents(dtoMapper.toBytesArray(sftpService
                                     .getFileFromSFTP(documentAppOptional.get().getLink())));
                         }
@@ -201,7 +204,7 @@ public class DocumentServiceImpl implements DocumentService {
                 } else {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SIMILAR.name());
                 }
-                this.printResultTest(plagiarismDocumentDTO);
+//                this.printResultTest(plagiarismDocumentDTO);
                 return plagiarismDocumentDTO;
             } else {
                 plagiarismDocumentDTO.setMessage(PlagiarismStatus.DIFFERENT.name());

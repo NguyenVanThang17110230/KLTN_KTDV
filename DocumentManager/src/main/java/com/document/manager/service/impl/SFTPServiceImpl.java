@@ -55,7 +55,7 @@ public class SFTPServiceImpl implements SFTPService {
             if (channelSftp == null) {
                 throw new RuntimeException("Can't connect channel sftp...");
             }
-            InputStream inputStream = channelSftp.get("/root/" + path);
+            InputStream inputStream = channelSftp.get(path);
             byte[] bytes = IOUtils.toByteArray(inputStream);
             closeConnect(session, channelSftp);
             return bytes;

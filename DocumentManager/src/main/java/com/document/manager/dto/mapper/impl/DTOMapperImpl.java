@@ -116,6 +116,9 @@ public class DTOMapperImpl implements DTOMapper {
             if (documentApp.getCreatedStamp() != null) {
                 documentDTO.setCreatedStamp(documentApp.getCreatedStamp());
             }
+            if (!StringUtils.isEmpty(documentApp.getLink())) {
+                documentDTO.setLink(documentApp.getLink());
+            }
 //            if (StringUtils.isNotEmpty(documentApp.getLink())) {
 //                File file = new File(documentApp.getLink());
 //                Path path = Paths.get(file.getAbsolutePath());
