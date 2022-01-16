@@ -25,4 +25,6 @@ public interface DTOMapper {
     ManagerDocumentDTO toManagerDocumentDTO(DocumentApp documentApp);
 
     List<ManagerDocumentDTO> toManagerDocumentDTO(List<DocumentApp> documentApps);
+
+    Byte[] toBytesArray(byte[] bytes);
 }

@@ -8,9 +8,6 @@ import com.document.manager.dto.*;
 import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.PlagiarismStatus;
 import com.document.manager.dto.mapper.DTOMapper;
-import com.document.manager.pipeline.Annotation;
-import com.document.manager.pipeline.VnCoreNLP;
-import com.document.manager.pipeline.Word;
 import com.document.manager.repository.DocumentRepo;
 import com.document.manager.service.*;
 import javassist.NotFoundException;
@@ -57,6 +54,9 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Autowired
+    private SFTPService sftpService;
+
     private static final String REGEX_DIVISION = "[?!.;]";
     private static final Integer LIMIT_CHARACTER = 30;
     private static final String DIVISION = "\\~~";
@@ -71,23 +71,43 @@ public class DocumentServiceImpl implements DocumentService {
         if (!documentOptional.isPresent()) {
             throw new NotFoundException("Document of user not found");
         }
-        return dtoMapper.toDocumentDTO(documentOptional.get());
+        DocumentDTO documentDTO = dtoMapper.toDocumentDTO(documentOptional.get());
+        if (!StringUtils.isEmpty(documentDTO.getLink())) {
+            documentDTO.setContents(dtoMapper.toBytesArray(sftpService.getFileFromSFTP(documentDTO.getLink())));
+        }
+        return documentDTO;
     }
 
     @Override
-    public List<DocumentDTO> getDocumentOfCurrentUser() throws NotFoundException {
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            log.error("Can't get info of user current!");
-            throw new IllegalArgumentException("Can't get info of user current!");
+    public List<DocumentDTO> getDocumentOfCurrentUser() {
+        try {
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                log.error("Can't get info of user current!");
+                throw new IllegalArgumentException("Can't get info of user current!");
+            }
+            String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
+            UserApp userApp = userService.findByEmail(email);
+            if (userApp == null) {
+                log.error("User with email {} not found", email);
+                throw new NotFoundException("Current user not found");
+            }
+            List<DocumentDTO> documentDTOS = new ArrayList<>();
+            List<DocumentApp> documentApps = this.findByUserId(userApp.getId());
+            if (!CollectionUtils.isEmpty(documentApps)) {
+                Map<Long, byte[]> mapContent = sftpService.getDocumentsFromSFTP(documentApps);
+                documentDTOS = dtoMapper.toDocumentDTO(documentApps);
+                if (mapContent.size() > 0) {
+                    for (DocumentDTO documentDTO : documentDTOS) {
+                        if (mapContent.containsKey(documentDTO.getDocumentId())) {
+                            documentDTO.setContents(dtoMapper.toBytesArray(mapContent.get(documentDTO.getDocumentId())));
+                        }
+                    }
+                }
+            }
+            return documentDTOS;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        String email = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-        UserApp userApp = userService.findByEmail(email);
-        if (userApp == null) {
-            log.error("User with email {} not found", email);
-            throw new NotFoundException("Current user not found");
-        }
-        List<DocumentApp> documentApps = this.findByUserId(userApp.getId());
-        return dtoMapper.toDocumentDTO(documentApps);
     }
 
     @Override
@@ -106,6 +126,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Transactional
     @Override
     public PlagiarismDocumentDTO uploadDocument(UploadDocumentDTO uploadDTO) throws IOException {
+        log.info("Start upload document");
         if (uploadDTO == null) {
             throw new FileNotFoundException("Data upload document invalid!");
         }
@@ -114,11 +135,17 @@ public class DocumentServiceImpl implements DocumentService {
             throw new FileNotFoundException("File document not found!");
         }
         try {
-            File documentFile = new File(file.getOriginalFilename());
+            // File documentFile = new File(file.getOriginalFilename());
+            log.info("Create temp file");
+            File documentFile = File.createTempFile("prefix-", "-suffix");
             FileUtils.writeByteArrayToFile(documentFile, file.getBytes());
+            documentFile.deleteOnExit();
+            log.info("Create temp file successful");
 
             // TODO: Read content of file
+            log.info("Start read file...");
             String[] targets = this.divisionToSentences(fileService.readContentDocument(documentFile));
+            log.info("Read file successful");
 
             // TODO: Get tokenizer of targets
             //Map<Integer, List<String>> tokenizerOfTarget = getTokenizer(targets);
@@ -135,7 +162,8 @@ public class DocumentServiceImpl implements DocumentService {
                     sentences.add(sentence);
                 }
 
-                String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+                //String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+                String link = sftpService.uploadFileToSFTP(Constants.LOCATION_DOCUMENT, uploadDTO.getMultipartFile());
 
                 DocumentApp documentApp = DocumentApp.builder()
                         .title(uploadDTO.getTitle())
@@ -185,8 +213,8 @@ public class DocumentServiceImpl implements DocumentService {
                     sentences.add(sentence);
                 }
                 // TODO: Save file
-                String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
-                //String link = cloudinaryService.upload(file, Constants.CLOUD_DOCUMENT);
+                //String link = fileService.saveFile(Constants.DIR_UPLOADED_REPORT, file.getOriginalFilename(), file.getBytes());
+                String link = sftpService.uploadFileToSFTP(Constants.LOCATION_DOCUMENT, uploadDTO.getMultipartFile());
 
                 DocumentApp documentApp = DocumentApp.builder()
                         .title(uploadDTO.getTitle())
@@ -330,6 +358,7 @@ public class DocumentServiceImpl implements DocumentService {
                 throw new NotFoundException("Document of user not found");
             }
             documentRepo.delete(documentOptional.get());
+            sftpService.deleteFile(documentOptional.get().getLink());
             log.info("Delete document with id {} successful", documentId);
         } catch (Exception e) {
             log.error("Delete document with id {} failed because: {}", documentId, e.getMessage());
@@ -382,25 +411,25 @@ public class DocumentServiceImpl implements DocumentService {
         return Arrays.asList(sentences.getTokenizer().split("[|]"));
     }
 
-    public Map<Integer, List<String>> getTokenizer(String[] targets) throws IOException {
-        Map<Integer, List<String>> map = new HashMap<>();
-        String[] annotators = {"wseg", "pos", "ner", "parse"};
-        VnCoreNLP pipeline = new VnCoreNLP(annotators);
-        for (int i = 0; i < targets.length; i++) {
-            Annotation annotation = new Annotation(targets[i]);
-            try {
-                pipeline.annotate(annotation);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            List<Word> words = annotation.getWords();
-            List<String> tokenizerOfTarget = new ArrayList<>();
-            words.stream().forEach(w -> tokenizerOfTarget.add(w.getForm()));
-            map.put(i, tokenizerOfTarget);
-        }
-        return map;
-    }
+//    public Map<Integer, List<String>> getTokenizer(String[] targets) throws IOException {
+//        Map<Integer, List<String>> map = new HashMap<>();
+//        String[] annotators = {"wseg", "pos", "ner", "parse"};
+//        VnCoreNLP pipeline = new VnCoreNLP(annotators);
+//        for (int i = 0; i < targets.length; i++) {
+//            Annotation annotation = new Annotation(targets[i]);
+//            try {
+//                pipeline.annotate(annotation);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            List<Word> words = annotation.getWords();
+//            List<String> tokenizerOfTarget = new ArrayList<>();
+//            words.stream().forEach(w -> tokenizerOfTarget.add(w.getForm()));
+//            map.put(i, tokenizerOfTarget);
+//        }
+//        return map;
+//    }
 
     public Map<Integer, List<String>> getTokenizerBySpace(String[] targets) throws IOException {
         Map<Integer, List<String>> map = new HashMap<>();
@@ -468,6 +497,59 @@ public class DocumentServiceImpl implements DocumentService {
                             // End loop matching
                         }
                         startTarget = targetLower.indexOf(sLower, flagTarget);
+                    }
+                    if (positionTarget != -1 && positionMatching != -1 && max > 0) {
+                        updateIndex(indexList, positionTarget, positionMatching, max);
+                    }
+                }
+                flagGlobal += s.length();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return indexList;
+    }
+
+    private List<IndexDTO> getPlagiarismTest(String target, String matching, List<String> tokenizerTargets, List<String> tokenizerMatching) {
+        List<IndexDTO> indexList = new ArrayList<>();
+
+        String targetLower = target.toLowerCase();
+        String matchingLower = matching.toLowerCase();
+        List<String> matchingLowers = this.toLower(tokenizerMatching);
+
+        try {
+            int flagGlobal = 0;
+            for (int k = 0; k < tokenizerTargets.size(); k++) {
+                String s = tokenizerTargets.get(k).trim();
+                String sLower = s.trim().toLowerCase();
+                if (matchingLowers.contains(sLower)) {
+                    int startTarget = targetLower.indexOf(sLower, flagGlobal);
+                    // TODO: Start loop
+                    int positionTarget = -1;
+                    int positionMatching = -1;
+                    int max = 0;
+                    if (startTarget != -1) {
+                        if (!isCover(startTarget, indexList, true)) {
+                            // TODO: Logic of matching
+                            int flagMatching = 0;
+                            int startMatching = matchingLower.indexOf(sLower, flagMatching);
+
+                            while (flagMatching < matching.length() && startMatching != -1) {
+                                flagMatching = startMatching + sLower.length();
+                                CountDTO countDTO = count(sLower, targetLower.substring(startTarget), matchingLower.substring(startMatching));
+                                if (!isCover(startMatching, indexList, false)) {
+                                    if (countDTO.getEnd() > max) {
+                                        max = countDTO.getEnd();
+                                        positionTarget = startTarget;
+                                        positionMatching = startMatching;
+                                        int length = countDTO.getEnd();
+                                        flagMatching = startMatching + length - sLower.length(); // Trừ cho độ dài chữ đã cộng ở trê
+                                    }
+                                }
+                                startMatching = matchingLower.indexOf(sLower, flagMatching);
+                            }
+                            // End loop matching
+                        }
                     }
                     if (positionTarget != -1 && positionMatching != -1 && max > 0) {
                         updateIndex(indexList, positionTarget, positionMatching, max);
@@ -621,7 +703,7 @@ public class DocumentServiceImpl implements DocumentService {
                     plagiarismSentencesDTO.setRate(percent);
 
                     // TODO: Get part plagiarism
-                    List<IndexDTO> indexDTOS = this.getPlagiarism(target, sentences.getRawText(), tokenizers, tokenizerOfMatching);
+                    List<IndexDTO> indexDTOS = this.getPlagiarismTest(target, sentences.getRawText(), tokenizers, tokenizerOfMatching);
                     plagiarismSentencesDTO.setTokenizerPlagiarism(indexDTOS);
                 }
             }
@@ -658,7 +740,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private void printResultTest(PlagiarismDocumentDTO dto) {
-        if (dto != null) {
+        if (dto != null && dto.getPlagiarism() != null) {
             List<PlagiarismSentencesDTO> sentencesDTOS = dto.getPlagiarism();
             System.out.println("================================================================================");
             System.out.println("Rate of document: " + dto.getRate());

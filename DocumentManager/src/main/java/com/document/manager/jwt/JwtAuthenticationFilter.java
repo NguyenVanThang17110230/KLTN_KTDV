@@ -50,6 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || request.getServletPath().equals("/api/user/forgot-password")
                 || request.getServletPath().equals("/api/user/resend")
                 || request.getServletPath().equals("/api/user/reset-password")
+                || request.getServletPath().equals("/api/user/images")
+                || request.getServletPath().equals("/api/document/ftp")
         ) {
             filterChain.doFilter(request, response);
         } else {

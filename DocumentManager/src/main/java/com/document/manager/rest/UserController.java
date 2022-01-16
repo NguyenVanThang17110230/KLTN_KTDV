@@ -1,22 +1,27 @@
 package com.document.manager.rest;
 
 
+import com.document.manager.domain.UserApp;
 import com.document.manager.dto.*;
 import com.document.manager.dto.mapper.DTOMapper;
-import com.document.manager.service.MailService;
 import com.document.manager.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import javassist.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.security.PermitAll;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
 import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
@@ -30,13 +35,9 @@ import static org.springframework.http.HttpStatus.OK;
 @Api(value = "/api/user", tags = "User Controller")
 public class UserController {
 
-    private final PasswordEncoder passwordEncoder;
-
     private final DTOMapper dtoMapper;
 
     private final UserService userService;
-
-    private final MailService mailService;
 
     @GetMapping("/welcome")
     @ApiOperation(value = "API test connection")
@@ -282,5 +283,12 @@ public class UserController {
                     .status(ERROR.name())
                     .message(e.getMessage()).build(), BAD_REQUEST);
         }
+    }
+
+    @GetMapping(value = "/images")
+    public ResponseEntity<byte[]> getImagesFormServer() throws NotFoundException, IOException {
+        UserApp userApp = userService.getCurrentUser();
+        Path path = Paths.get(System.getProperty("user.home") + File.separator + "images" + File.separator + userApp.getAvatar());
+        return new ResponseEntity<>(Files.readAllBytes(path), OK);
     }
 }

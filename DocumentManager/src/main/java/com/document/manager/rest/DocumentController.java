@@ -1,20 +1,18 @@
 package com.document.manager.rest;
 
+import com.document.manager.dto.DocumentDTO;
 import com.document.manager.dto.ResponseData;
 import com.document.manager.dto.UpdateDocumentDTO;
 import com.document.manager.dto.UploadDocumentDTO;
 import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.service.DocumentService;
-import com.document.manager.service.FileService;
-import com.document.manager.service.UserService;
+import com.document.manager.service.SFTPService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
 
 import static com.document.manager.dto.enums.ResponseDataStatus.ERROR;
 import static com.document.manager.dto.enums.ResponseDataStatus.SUCCESS;
@@ -27,13 +25,9 @@ public class DocumentController {
 
     private final DocumentService documentService;
 
-    private final UserService userService;
-
-    private final HttpServletResponse response;
-
-    private final FileService fileService;
-
     private final DTOMapper dtoMapper;
+
+    private final SFTPService sftpService;
 
 
     @PostMapping(value = "/upload")
@@ -119,6 +113,24 @@ public class DocumentController {
                     .status(SUCCESS.name())
                     .message("Get detail document successful")
                     .data(documentService.getDetailDocument(id))
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(ERROR.name()).message(e.getMessage())
+                    .build(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value = "/ftp")
+    public ResponseEntity<ResponseData> getFTPFile() {
+        try {
+            DocumentDTO documentDTO = DocumentDTO.builder()
+                    .contents(dtoMapper.toBytesArray(sftpService.getFileFromSFTP("documents/Quy dinh TT_KLTN.pdf")))
+                    .build();
+            return new ResponseEntity<>(ResponseData.builder()
+                    .status(SUCCESS.name())
+                    .message("Successful")
+                    .data(documentDTO)
                     .build(), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(ResponseData.builder()

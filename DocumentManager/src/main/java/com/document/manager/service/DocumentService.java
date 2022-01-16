@@ -25,7 +25,7 @@ public interface DocumentService {
 
     PlagiarismDocumentDTO getPlagiarism(String[] target, Map<Integer, List<String>> tokenizerOfTarget);
 
-    List<DocumentDTO> getDocumentOfCurrentUser() throws NotFoundException;
+    List<DocumentDTO> getDocumentOfCurrentUser() ;
 
     long count();
 

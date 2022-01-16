@@ -35,8 +35,6 @@ public interface UserService {
 
     List<UserApp> getUsers();
 
-    UserApp getUserByEmail(String email);
-
     UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception;
 
     Map<String, Object> signIn(String email, String password) throws Exception;

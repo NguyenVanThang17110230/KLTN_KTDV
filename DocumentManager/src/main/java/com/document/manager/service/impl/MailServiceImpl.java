@@ -61,6 +61,8 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendMailRegister(String to, String name, Map<String, Object> mapData) {
         MailRequest mailRequest = new MailRequest(name, to, env.getProperty("spring.mail.username"), "Xác nhận đăng ký tài khoản");
+        log.info("Mail to send: {}", env.getProperty("spring.mail.username"));
+        log.info("Pass of mail to send: {}", env.getProperty("spring.mail.password"));
         sendMail(mailRequest, "mail-template-register.ftl", mapData);
     }
 

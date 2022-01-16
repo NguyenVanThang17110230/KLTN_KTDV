@@ -21,6 +21,7 @@ import com.document.manager.service.*;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -39,6 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -240,21 +243,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserApp getUserByEmail(String email) {
-        if (StringUtils.isEmpty(email)) {
-            log.error("Email is empty");
-            return null;
-        }
-        UserApp userApp = userRepo.findByEmail(email);
-        if (userApp == null) {
-            log.error("User with email {} not found", email);
-            return null;
-        }
-        log.info("User with email {} found", email);
-        return userApp;
-    }
-
-    @Override
     public UserApp updateUserInfo(Long userId, UserInfoDTO userInfoDTO) throws Exception {
         UserApp userApp = this.findUserById(userId);
         if (userApp == null) {
@@ -340,9 +328,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 String oldPublicId = oldAvatar.substring(0, oldAvatar.indexOf("."));
                 cloudinaryService.delete(oldPublicId, Constants.CLOUD_IMAGE);
             }
+            File file1 = new File(Constants.DIR_SERVER + file.getOriginalFilename());
+            FileUtils.writeByteArrayToFile(file1, file.getBytes());
             userApp.setAvatar(cloudinaryService.upload(file, Constants.CLOUD_IMAGE));
             this.save(userApp);
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | IOException e) {
             throw new NotFoundException(e.getMessage());
         }
     }
@@ -369,7 +359,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new IllegalArgumentException("Refresh token is missing");
         }
         try {
-            String refresh_token = authorization.substring("Bearer ".length());
+            String refresh_token = authorization.substring("Bearer " .length());
             Algorithm algorithm = Algorithm.HMAC256(environment.getProperty("jwt.secret").getBytes());
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT decodedJWT = verifier.verify(refresh_token);
@@ -386,7 +376,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return tokens;
         } catch (Exception e) {
             log.error("Refresh token with error: " + e.getMessage());
-            log.info("Refresh token error is: {}", authorization.substring("Bearer ".length()));
+            log.info("Refresh token error is: {}", authorization.substring("Bearer " .length()));
             throw new RuntimeException(e.getMessage());
         }
     }

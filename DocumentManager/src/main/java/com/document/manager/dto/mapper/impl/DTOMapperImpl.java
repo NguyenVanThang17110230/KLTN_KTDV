@@ -11,11 +11,7 @@ import com.document.manager.dto.mapper.DTOMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -120,11 +116,11 @@ public class DTOMapperImpl implements DTOMapper {
             if (documentApp.getCreatedStamp() != null) {
                 documentDTO.setCreatedStamp(documentApp.getCreatedStamp());
             }
-            if (StringUtils.isNotEmpty(documentApp.getLink())) {
-                File file = new File(documentApp.getLink());
-                Path path = Paths.get(file.getAbsolutePath());
-                documentDTO.setContents(toBytesArray(Files.readAllBytes(path)));
-            }
+//            if (StringUtils.isNotEmpty(documentApp.getLink())) {
+//                File file = new File(documentApp.getLink());
+//                Path path = Paths.get(file.getAbsolutePath());
+//                documentDTO.setContents(toBytesArray(Files.readAllBytes(path)));
+//            }
         }
         return documentDTO;
     }
@@ -193,7 +189,11 @@ public class DTOMapperImpl implements DTOMapper {
         return userAppDTOS;
     }
 
-    private Byte[] toBytesArray(byte[] bytesPrim) {
+    @Override
+    public Byte[] toBytesArray(byte[] bytesPrim) {
+        if (bytesPrim == null || bytesPrim.length <= 0) {
+            return new Byte[]{};
+        }
         Byte[] bytes = new Byte[bytesPrim.length];
         Arrays.setAll(bytes, n -> bytesPrim[n]);
         return bytes;

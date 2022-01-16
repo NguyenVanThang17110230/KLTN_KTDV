@@ -1,6 +1,6 @@
 package com.document.manager.dto;
 
-import lombok.*;
+import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
