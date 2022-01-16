@@ -24,9 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.BreakIterator;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -194,8 +191,13 @@ public class DocumentServiceImpl implements DocumentService {
                 if (plagiarismDocumentDTO.getRate() == 100) {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SAME.name());
                     plagiarismDocumentDTO.setPlagiarism(null);
-                    Path path = Paths.get(documentFile.getAbsolutePath());
-                    plagiarismDocumentDTO.setContents(toBytesArray(Files.readAllBytes(path)));
+                    if (plagiarismDocumentDTO.getDocumentId() != null) {
+                        Optional<DocumentApp> documentAppOptional = documentRepo.findById(plagiarismDocumentDTO.getDocumentId());
+                        if (documentAppOptional.isPresent()) {
+                            plagiarismDocumentDTO.setContents(dtoMapper.toBytesArray(sftpService
+                                    .getFileFromSFTP(documentAppOptional.get().getLink())));
+                        }
+                    }
                 } else {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SIMILAR.name());
                 }
