@@ -172,7 +172,6 @@ const SignUp = () => {
                   <Field
                     id="dob"
                     name="dob"
-                    placeholder="example@hcmute.edu.vn"
                     className={
                       "appearance-none border-2 rounded-md w-full p-3 text-gray-700 leading-tight focus:outline-none text-sm " +
                       (props.errors.dob && props.touched.dob

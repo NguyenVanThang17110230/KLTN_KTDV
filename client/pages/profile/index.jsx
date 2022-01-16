@@ -375,6 +375,7 @@ const Profile = () => {
                                     : "border-green-500")
                                 }
                                 type="password"
+                                autoComplete="new-password"
                               />
                               {props.errors.newPassword &&
                               props.touched.newPassword ? (
