@@ -7,7 +7,7 @@ import { Formik, Field, Form } from "formik";
 import * as Yup from "yup";
 
 import UserGuest from "../../layouts/UserGuest";
-import { accountService } from "../../package/RestConnector";
+import { accountService, documentService } from "../../package/RestConnector";
 import { UserRole } from "../../package/account/model/Account";
 import Cookies from "js-cookie";
 
@@ -18,6 +18,22 @@ const Login = () => {
     if (res) return true;
     return false;
   };
+
+  // useEffect(() => {
+  //   test()
+  // }, [])
+
+  const test = async() =>{
+    const z = await documentService.getDocumentTest()
+    const contens = z.data.contents
+    const url = URL.createObjectURL(
+      new Blob([new Uint8Array(contens)], {
+        type: "application/pdf",
+      })
+    );
+    window.open(url)
+    console.log('document-test',z);
+  }
 
   const handleLogin = async (values, actions) => {
     const { setSubmitting } = actions;

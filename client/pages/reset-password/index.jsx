@@ -20,12 +20,13 @@ const SignupSchema = Yup.object().shape({
 
 const ResetPassword = () => {
   const [isReset, setIsReset] = useState(false);
-  const [isCheck] = useState(Cookies.get("check-reset"));
+  const [isCheck,setIscheck] = useState(Cookies.get("check-reset"));
 
   const router = useRouter();
   const uuidAndMail = router.query;
 
   console.log("check", isCheck);
+  console.log("is-re", isReset);
 
   const handleResetPassword = async (values, actions) => {
     const { uuid, email } = uuidAndMail;
@@ -41,6 +42,7 @@ const ResetPassword = () => {
       setIsReset(true);
       setSubmitting(false);
       Cookies.set("check-reset", 1);
+      setIscheck(1)
     } catch (e) {
       let msg;
       switch (e.code) {
@@ -203,7 +205,7 @@ const ResetPassword = () => {
           </Formik>
         </div>
       )}
-      {isReset == true && isCheck == 1 && (
+      {isCheck == 1 && (
         <div className="w-full max-w-md">
           <div className="p-20 bg-success flex items-center flex-col">
             <div className="w-20 h-20 rounded-full bg-transparent border-2 flex items-center justify-center">

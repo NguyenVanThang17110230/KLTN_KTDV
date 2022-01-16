@@ -22,6 +22,24 @@ const readFile = (file) => {
     reader.readAsArrayBuffer(file);
   });
 };
+
+const readFile2 = (file) =>{
+  
+    console.log(file)
+    var reader = new FileReader();
+
+    reader.onload = (e) =>
+    { 
+      var arrayBuffer = e.target.result;
+      var array = new Uint8Array(arrayBuffer);
+      // this.setState({ firmware_byte_array: array})
+      console.log('array',array);
+    }
+
+    reader.readAsArrayBuffer(file);
+  
+}
+
 const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const [fileDocumentPriview, setFileDocumentPriview] = useState([]);
   const [isSimilar, setIsSimilar] = useState(false);
@@ -30,8 +48,9 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const [dataSimilar, setDataSimilar] = useState(null);
   const handleUpload = async (values, actions) => {
     const { setSubmitting, resetForm } = actions;
-    const { document, title, mark, note } = values;
+    const { document, title, note } = values;
     setSubmitting(true);
+
     try {
       const data = new FormData();
       data.append("multipartFile", document);
@@ -85,6 +104,7 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const previewPDF = (file) => {
     if (file) {
       setFileDocumentPriview(URL.createObjectURL(file));
+      readFile2(file)
     }
   };
 

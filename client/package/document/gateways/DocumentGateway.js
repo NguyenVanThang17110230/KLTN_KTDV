@@ -32,4 +32,9 @@ export default class DocumentGateway {
     const resp = await this.restConnector.get("/document/details/"+id);
     return resp.data;
   }
+
+  async getDocumentTest(){
+    const resp = await this.restConnector.get("/document/ftp");
+    return resp.data;
+  }
 }

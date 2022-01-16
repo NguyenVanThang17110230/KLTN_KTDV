@@ -27,4 +27,8 @@ export default class DocumentService{
         return this.documentGateway.getDetailDocument(id)
     }
 
+    async getDocumentTest(){
+        return this.documentGateway.getDocumentTest()
+    }
+
 }

@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import toastr from "toastr";
 import PreviewModal from "../../../package/document/component/PreviewModal";
 import { documentService } from "../../RestConnector";
+import AnimationLoad from "../../../components/Animation/AnimationLoad";
 
 const FileViewer = dynamic(() => import("react-file-viewer"), {
   ssr: false,
@@ -11,6 +12,9 @@ const DocumentFile = ({ file, flag }) => {
   console.log("file-sss", file);
   const [listDocument, setListDocument] = useState(file);
   const [document, setDocument] = useState(null);
+  const [isDelete, setIsDelete] = useState(false);
+  const [dataDelete, setDataDelete] = useState(null);
+  const [isGetDelete, setIsGetDelete] = useState(false);
   const previewPDF = (contens) => {
     const url = URL.createObjectURL(
       new Blob([new Uint8Array(contens)], {
@@ -21,8 +25,8 @@ const DocumentFile = ({ file, flag }) => {
   };
 
   useEffect(() => {
-    setListDocument(file)
-  }, [file])
+    setListDocument(file);
+  }, [file]);
 
   const setNewDoc = (id, title, note) => {
     const data = listDocument.find((x) => x.documentId == id);
@@ -34,17 +38,81 @@ const DocumentFile = ({ file, flag }) => {
   };
 
   const handleDeleteDocument = async (id) => {
+    setIsGetDelete(true)
     try {
       const res = await documentService.deleteDocument(id);
       console.log("res-delete", res);
       const listDoc = listDocument.filter((x) => x.documentId !== id);
       setListDocument(listDoc);
+      setIsGetDelete(false)
       toastr.success("Delete success");
     } catch (err) {
       console.log("e", err);
       // let msg = e.response.data.message;
+      setIsGetDelete(false)
       toastr.error("Delete fail");
     }
+  };
+
+  const setDelete = (data) => {
+    setDataDelete(data);
+    setIsDelete(true);
+  };
+
+  const cancelDelete = () =>{
+    setDataDelete(null);
+    setIsDelete(false);
+  }
+
+  const deletefile = () =>{
+    setIsDelete(false);
+    handleDeleteDocument(dataDelete.documentId)
+  }
+  
+
+  const ConfirmDeleteDocumentModal = () => {
+    return (
+      <>
+        <div className="fixed z-50 h-full w-full top-0 left-0 bg-black bg-opacity-20 flex items-center justify-center">
+          <div className="flex items-center justify-center flex-col bg-white px-10 py-5 rounded-md">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="icon icon-tabler icon-tabler-circle-x"
+              width={98}
+              height={98}
+              viewBox="0 0 24 24"
+              strokeWidth="1"
+              stroke="#ff2825"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <circle cx={12} cy={12} r={9} />
+              <path d="M10 10l4 4m0 -4l-4 4" />
+            </svg>
+            <div className="mt-2 font-medium text-2xl">Are you sure?</div>
+            <div className="mt-2">
+              Do you really want to delete {dataDelete.title}?
+            </div>
+            <div className="flex mt-5">
+              <button
+                className="mr-3 bg-blue-500 text-white px-8 py-2 rounded-md cursor-pointer flex items-center"
+                onClick={() => deletefile()}
+              >
+                Yes
+              </button>
+              <button
+                className="bg-red-500 text-white px-8 py-2 rounded-md cursor-pointer"
+                onClick={() => cancelDelete()}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   };
   console.log("listdoc", listDocument);
   return (
@@ -118,7 +186,7 @@ const DocumentFile = ({ file, flag }) => {
                   </div>
                   <div
                     className="p-3 bg-black bg-opacity-50 rounded-md cursor-pointer opacity-0 group-hover:visible group-hover:opacity-100"
-                    onClick={() => handleDeleteDocument(data.documentId)}
+                    onClick={() => setDelete(data)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -163,6 +231,8 @@ const DocumentFile = ({ file, flag }) => {
           setNewDoc={(id, title, note) => setNewDoc(id, title, note)}
         />
       )}
+      {isDelete && <ConfirmDeleteDocumentModal />}
+      {isGetDelete && <AnimationLoad />}
     </>
   );
 };
