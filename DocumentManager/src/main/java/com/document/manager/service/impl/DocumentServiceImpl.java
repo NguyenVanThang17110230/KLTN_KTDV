@@ -458,63 +458,6 @@ public class DocumentServiceImpl implements DocumentService {
         return result.stream().collect(Collectors.toList());
     }
 
-    private List<IndexDTO> getPlagiarism(String target, String matching, List<String> tokenizerTargets, List<String> tokenizerMatching) {
-        List<IndexDTO> indexList = new ArrayList<>();
-
-        String targetLower = target.toLowerCase();
-        String matchingLower = matching.toLowerCase();
-        List<String> matchingLowers = this.toLower(tokenizerMatching);
-
-        try {
-            int flagGlobal = 0;
-            for (int k = 0; k < tokenizerTargets.size(); k++) {
-                String s = tokenizerTargets.get(k).trim();
-                String sLower = s.trim().toLowerCase();
-                if (matchingLowers.contains(sLower)) {
-                    int startTarget = targetLower.indexOf(sLower, flagGlobal);
-                    // TODO: Start loop
-                    int flagTarget = 0;
-                    int positionTarget = -1;
-                    int positionMatching = -1;
-                    int max = 0;
-                    while (flagTarget < target.length() && startTarget != -1) {
-                        flagTarget = startTarget + s.length();
-                        if (!isCover(startTarget, indexList, true)) {
-                            // TODO: Logic of matching
-                            int flagMatching = 0;
-                            int startMatching = matchingLower.indexOf(sLower, flagMatching);
-
-                            while (flagMatching < matching.length() && startMatching != -1) {
-                                flagMatching = startMatching + sLower.length();
-                                CountDTO countDTO = count(sLower, targetLower.substring(startTarget), matchingLower.substring(startMatching));
-                                if (!isCover(startMatching, indexList, false)) {
-                                    if (countDTO.getEnd() > max) {
-                                        max = countDTO.getEnd();
-                                        positionTarget = startTarget;
-                                        positionMatching = startMatching;
-                                        int length = countDTO.getEnd();
-                                        flagMatching = startMatching + length; // Trừ cho độ dài chữ đã cộng ở trê
-                                        flagTarget = startTarget + length;
-                                    }
-                                }
-                                startMatching = matchingLower.indexOf(sLower, flagMatching);
-                            }
-                            // End loop matching
-                        }
-                        startTarget = targetLower.indexOf(sLower, flagTarget);
-                    }
-                    if (positionTarget != -1 && positionMatching != -1 && max > 0) {
-                        updateIndex(indexList, positionTarget, positionMatching, max);
-                    }
-                }
-                flagGlobal += s.length();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return indexList;
-    }
-
     private List<IndexDTO> getPlagiarismTest(String target, String matching, List<String> tokenizerTargets, List<String> tokenizerMatching) {
         List<IndexDTO> indexList = new ArrayList<>();
 
@@ -538,10 +481,9 @@ public class DocumentServiceImpl implements DocumentService {
                             // TODO: Logic of matching
                             int flagMatching = 0;
                             int startMatching = matchingLower.indexOf(sLower, flagMatching);
-
                             while (flagMatching < matching.length() && startMatching != -1) {
                                 flagMatching = startMatching + sLower.length();
-                                CountDTO countDTO = count(sLower, targetLower.substring(startTarget), matchingLower.substring(startMatching));
+                                CountDTO countDTO = countWordDuplicate(sLower, targetLower.substring(startTarget), matchingLower.substring(startMatching));
                                 if (!isCover(startMatching, indexList, false)) {
                                     if (countDTO.getEnd() > max) {
                                         max = countDTO.getEnd();
@@ -614,7 +556,7 @@ public class DocumentServiceImpl implements DocumentService {
         return false;
     }
 
-    private CountDTO count(String wordFind, String target, String matching) {
+    private CountDTO countWordDuplicate(String wordFind, String target, String matching) {
         int count = 0;
         int end = 0;
         String[] targets = target.trim().split("\\s+");
@@ -767,5 +709,62 @@ public class DocumentServiceImpl implements DocumentService {
                 System.out.println("-----------------------------------------------------------------------------");
             }
         }
+    }
+
+    private List<IndexDTO> getPlagiarism(String target, String matching, List<String> tokenizerTargets, List<String> tokenizerMatching) {
+        List<IndexDTO> indexList = new ArrayList<>();
+
+        String targetLower = target.toLowerCase();
+        String matchingLower = matching.toLowerCase();
+        List<String> matchingLowers = this.toLower(tokenizerMatching);
+
+        try {
+            int flagGlobal = 0;
+            for (int k = 0; k < tokenizerTargets.size(); k++) {
+                String s = tokenizerTargets.get(k).trim();
+                String sLower = s.trim().toLowerCase();
+                if (matchingLowers.contains(sLower)) {
+                    int startTarget = targetLower.indexOf(sLower, flagGlobal);
+                    // TODO: Start loop
+                    int flagTarget = 0;
+                    int positionTarget = -1;
+                    int positionMatching = -1;
+                    int max = 0;
+                    while (flagTarget < target.length() && startTarget != -1) {
+                        flagTarget = startTarget + s.length();
+                        if (!isCover(startTarget, indexList, true)) {
+                            // TODO: Logic of matching
+                            int flagMatching = 0;
+                            int startMatching = matchingLower.indexOf(sLower, flagMatching);
+
+                            while (flagMatching < matching.length() && startMatching != -1) {
+                                flagMatching = startMatching + sLower.length();
+                                CountDTO countDTO = countWordDuplicate(sLower, targetLower.substring(startTarget), matchingLower.substring(startMatching));
+                                if (!isCover(startMatching, indexList, false)) {
+                                    if (countDTO.getEnd() > max) {
+                                        max = countDTO.getEnd();
+                                        positionTarget = startTarget;
+                                        positionMatching = startMatching;
+                                        int length = countDTO.getEnd();
+                                        flagMatching = startMatching + length; // Trừ cho độ dài chữ đã cộng ở trê
+                                        flagTarget = startTarget + length;
+                                    }
+                                }
+                                startMatching = matchingLower.indexOf(sLower, flagMatching);
+                            }
+                            // End loop matching
+                        }
+                        startTarget = targetLower.indexOf(sLower, flagTarget);
+                    }
+                    if (positionTarget != -1 && positionMatching != -1 && max > 0) {
+                        updateIndex(indexList, positionTarget, positionMatching, max);
+                    }
+                }
+                flagGlobal += s.length();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return indexList;
     }
 }
