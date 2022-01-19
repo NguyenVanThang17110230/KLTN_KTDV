@@ -1,92 +1,0 @@
-
-h
-java:S3008"RRename this field "VN_DICT" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÒîïÄ
-o
-java:S30081"YRename this field "COUNTRY_L_NAME" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(“ˆò¼
-u
-java:S3008•"YRename this field "COUNTRY_S_NAME" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(â¤»°üÿÿÿÿ
-o
-java:S3008Ö"XRename this field "WORLD_COMPANY" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ö·Úæ
-s
-java:S3008¯"WRename this field "VN_LOCATIONS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(ÜÈ“¢şÿÿÿÿ
-u
-java:S3008Ø"^Rename this field "VN_FIRST_SENT_WORDS" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.( îß¬
-q
-java:S3008Š"ZRename this field "VN_MIDDLE_NAMES" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(®â×œ
-q
-java:S3008€"ZRename this field "VN_FAMILY_NAMES" to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(Ëò½â
-P
-java:S1118":Add a private constructor to hide the implicit public one.(å¦½•
-8
-java:S2386""Make member "VN_DICT" "protected".(­Ñ‡›
-M
-java:S1135"2Complete the task associated to this TODO comment.(ÕÌ®şÿÿÿÿ
-V	java:S125"<This block of commented-out lines of code should be removed.(ò£—®ùÿÿÿÿ
-H
-java:S1135("2Complete the task associated to this TODO comment.(ÉÚõÎ
-H
-java:S1135,"2Complete the task associated to this TODO comment.(ÉÚõÎ
-?
-java:S23863")Make member "COUNTRY_L_NAME" "protected".(ÔÌæ‹
-E
-java:S2386—")Make member "COUNTRY_S_NAME" "protected".(ç½½ëûÿÿÿÿ
-D
-java:S2386Ø"(Make member "WORLD_COMPANY" "protected".(úÔ½ıûÿÿÿÿ
->
-java:S2386±"'Make member "VN_LOCATIONS" "protected".(¡÷úÑ
-E
-java:S2386Ú".Make member "VN_FIRST_SENT_WORDS" "protected".(õäª
-@
-java:S2386Œ"*Make member "VN_MIDDLE_NAMES" "protected".(é„é7
-F
-java:S2386‚"*Make member "VN_FAMILY_NAMES" "protected".(úÂ®¿ıÿÿÿÿ
-o
-java:S2293"YReplace the type specification in this constructor call with the diamond operator ("<>").(­Ñ‡›
-o
-java:S22933"YReplace the type specification in this constructor call with the diamond operator ("<>").(ÔÌæ‹
-u
-java:S2293—"YReplace the type specification in this constructor call with the diamond operator ("<>").(ç½½ëûÿÿÿÿ
-u
-java:S2293Ø"YReplace the type specification in this constructor call with the diamond operator ("<>").(úÔ½ıûÿÿÿÿ
-p
-java:S2293±"YReplace the type specification in this constructor call with the diamond operator ("<>").(¡÷úÑ
-p
-java:S2293Ú"YReplace the type specification in this constructor call with the diamond operator ("<>").(õäª
-o
-java:S2293Œ"YReplace the type specification in this constructor call with the diamond operator ("<>").(é„é7
-u
-java:S2293‚"YReplace the type specification in this constructor call with the diamond operator ("<>").(úÂ®¿ıÿÿÿÿ
-_
-java:S1192Ú	"HDefine a constant instead of duplicating this literal "nguyÃªn" 3 times.(ûŞĞÿ
-i
-java:S1104"SMake VN_DICT a static final constant or non-public and provide accessors if needed.(ÒîïÄ
-p
-java:S11041"ZMake COUNTRY_L_NAME a static final constant or non-public and provide accessors if needed.(“ˆò¼
-v
-java:S1104•"ZMake COUNTRY_S_NAME a static final constant or non-public and provide accessors if needed.(â¤»°üÿÿÿÿ
-p
-java:S1104Ö"YMake WORLD_COMPANY a static final constant or non-public and provide accessors if needed.(Ö·Úæ
-t
-java:S1104¯"XMake VN_LOCATIONS a static final constant or non-public and provide accessors if needed.(ÜÈ“¢şÿÿÿÿ
-v
-java:S1104Ø"_Make VN_FIRST_SENT_WORDS a static final constant or non-public and provide accessors if needed.( îß¬
-r
-java:S1104Š"[Make VN_MIDDLE_NAMES a static final constant or non-public and provide accessors if needed.(®â×œ
-r
-java:S1104€"[Make VN_FAMILY_NAMES a static final constant or non-public and provide accessors if needed.(Ëò½â
-C
-java:S1444"-Make this "public static VN_DICT" field final(ÒîïÄ
-J
-java:S14441"4Make this "public static COUNTRY_L_NAME" field final(“ˆò¼
-P
-java:S1444•"4Make this "public static COUNTRY_S_NAME" field final(â¤»°üÿÿÿÿ
-J
-java:S1444Ö"3Make this "public static WORLD_COMPANY" field final(Ö·Úæ
-N
-java:S1444¯"2Make this "public static VN_LOCATIONS" field final(ÜÈ“¢şÿÿÿÿ
-P
-java:S1444Ø"9Make this "public static VN_FIRST_SENT_WORDS" field final( îß¬
-L
-java:S1444Š"5Make this "public static VN_MIDDLE_NAMES" field final(®â×œ
-L
-java:S1444€"5Make this "public static VN_FAMILY_NAMES" field final(Ëò½â
