@@ -37,4 +37,24 @@ export default class DocumentGateway {
     const resp = await this.restConnector.get("/document/ftp");
     return resp.data;
   }
+
+  async getRate(){
+    const resp = await this.restConnector.get("/rate/rates")
+    return resp.data;
+  }
+
+  async updateRate(values){
+    const resp = await this.restConnector.put("/rate",values)
+    return resp.data;
+  }
+
+  async deleteRate(id){
+    const resp = await this.restConnector.delete("/rate/"+id)
+    return resp.data;
+  }
+
+  async createRate(values){
+    const resp = await this.restConnector.post("/rate",values)
+    return resp.data;
+  }
 }

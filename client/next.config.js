@@ -10,7 +10,7 @@ module.exports = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://document-manager-app.herokuapp.com/api/:path*",
+        destination: "https://3195-113-161-101-1.ngrok.io/api/:path*",
         // destination: 'https://document-manager-app.herokuapp.com/api/:path*',
       },
     ];

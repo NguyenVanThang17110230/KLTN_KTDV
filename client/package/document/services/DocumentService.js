@@ -31,4 +31,20 @@ export default class DocumentService{
         return this.documentGateway.getDocumentTest()
     }
 
+    async createRate(values){
+        return this.documentGateway.createRate(values)
+    }
+
+    async getRate(){
+        return this.documentGateway.getRate()
+    }
+
+    async updateRate(id,values){
+        return this.documentGateway.updateRate(id,values)
+    }
+
+    async deleteRate(id){
+        return this.documentGateway.deleteRate(id)
+    }
+
 }
