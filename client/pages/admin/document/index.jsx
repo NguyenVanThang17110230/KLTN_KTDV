@@ -237,7 +237,7 @@ const ManageDocument = () => {
                 <Formik
                   initialValues={{
                     rate: dataRateEdit ? dataRateEdit.rate : "",
-                    type: dataRateEdit ? dataRateEdit.type : "DOCUMENT",
+                    type: dataRateEdit ? dataRateEdit.type : rate.find((x) => x.type === "DOCUMENT")? "SENTENCE": "DOCUMENT",
                   }}
                   validationSchema={RateSchema}
                   onSubmit={handleRate}
