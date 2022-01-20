@@ -1,7 +1,6 @@
 package com.document.manager.domain;
 
 import com.document.manager.dto.enums.RateType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;

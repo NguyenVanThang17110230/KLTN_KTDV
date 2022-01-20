@@ -43,8 +43,6 @@ k
 ;src/main/java/com/document/manager/service/FileService.java,a\0\a0d5a1a3cca41e4d3d7993ef43b232beeb2f3781
 7
 pom.xml,4\4\442292b8a7efeabbe4cc176709b833b1792140ec
-o
-?src/main/java/com/document/manager/dto/constants/Constants.java,f\8\f83113a9d6fb1f214e8d852e3afc67ea3d6c6f96
 l
 <src/main/java/com/document/manager/dto/AuthorizationDTO.java,e\7\e7082778facca50756ab1fe0ace4cc7b54f3fb95
 m
@@ -119,3 +117,17 @@ l
 <src/main/java/com/document/manager/dto/ResetPasswordDTO.java,d\0\d0a5aed0b4ff859ca6314e60fb0c69eb193ee742
 h
 8src/main/java/com/document/manager/dto/ResponseData.java,0\b\0bc9f70f9c5e5bcc9cf385219a521803ca20befa
+j
+:src/main/java/com/document/manager/domain/DocumentApp.java,5\d\5d3208f407d6f55be2c08fb0882fac9fc8d4a4eb
+f
+6src/main/java/com/document/manager/dto/RateAppDTO.java,a\1\a10d7c259b10c616d181c30d9aee00a78098f924
+k
+;src/main/java/com/document/manager/rest/RateController.java,1\7\1719d594559cb706f5693d33f1abc39f1302a1ad
+k
+;src/main/java/com/document/manager/repository/RateRepo.java,2\a\2aed5c116a9d9cdb1b55993703b3cfa9584c1231
+k
+;src/main/java/com/document/manager/service/RateService.java,2\8\28b150ec8c4571a7e8666762bc0cbf232f4444c0
+t
+Dsrc/main/java/com/document/manager/service/impl/RateServiceImpl.java,f\1\f1f1d70ab4175a35ecacf8d0a64fde45e2bea618
+j
+:src/main/java/com/document/manager/dto/enums/RateType.java,b\b\bb799728bbc7633e8d49a1fc0bd071cdbf9f47b1

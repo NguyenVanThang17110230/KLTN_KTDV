@@ -2,11 +2,13 @@ package com.document.manager.service.impl;
 
 import com.document.manager.algorithm.Algorithm;
 import com.document.manager.domain.DocumentApp;
+import com.document.manager.domain.RateApp;
 import com.document.manager.domain.Sentences;
 import com.document.manager.domain.UserApp;
 import com.document.manager.dto.*;
 import com.document.manager.dto.constants.Constants;
 import com.document.manager.dto.enums.PlagiarismStatus;
+import com.document.manager.dto.enums.RateType;
 import com.document.manager.dto.mapper.DTOMapper;
 import com.document.manager.repository.DocumentRepo;
 import com.document.manager.service.*;
@@ -53,6 +55,9 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Autowired
     private SFTPService sftpService;
+
+    @Autowired
+    private RateService rateService;
 
     private static final String REGEX_DIVISION = "[?!.;]";
     private static final Integer LIMIT_CHARACTER = 30;
@@ -607,6 +612,20 @@ public class DocumentServiceImpl implements DocumentService {
 
     private void updatePlagiarism(String[] targets, Long documentMatchingId, Map<Long, List<Sentences>> allSentences,
                                   Map<Integer, List<String>> tokenizerOfTarget, PlagiarismDocumentDTO plagiarismDocumentDTO) {
+
+        // TODO: Handle constant rate
+        float constantRateDoc = Constants.CONSTANT_RATE_DOCUMENT;
+        float constantRateSen = Constants.CONSTANT_RATE_SENTENCES;
+        List<RateApp> rateApps = rateService.findAll();
+        Optional<RateApp> rateDocumentOptional = rateApps.stream().filter(t->t.getType() == RateType.DOCUMENT).findFirst();
+        Optional<RateApp> rateSentenceOptional = rateApps.stream().filter(t->t.getType() == RateType.SENTENCE).findFirst();
+        if (rateDocumentOptional.isPresent()) {
+            constantRateDoc = Float.parseFloat(rateDocumentOptional.get().getRate().toString()) ;
+        }
+        if (rateSentenceOptional.isPresent()) {
+            constantRateSen = Float.parseFloat(rateSentenceOptional.get().getRate().toString()) ;
+        }
+
         // TODO: Get all sentences of document
         Map<Integer, Sentences> mapSentences = buildMapSentences(allSentences.get(documentMatchingId));
 
@@ -632,7 +651,7 @@ public class DocumentServiceImpl implements DocumentService {
 
                 // TODO: Check with constant number
                 plagiarismSentencesDTO.setTarget(target);
-                if (percent > sentenceHighestRate && percent > Constants.CONSTANT_RATE_SENTENCES) {
+                if (percent > sentenceHighestRate && percent > constantRateSen) {
                     sentenceHighestRate = percent;
                     if (percent == 100) {
                         plagiarismSentencesDTO.setTarget(target);
@@ -665,7 +684,7 @@ public class DocumentServiceImpl implements DocumentService {
         int totalSentences = targets.length;
         float rateOfDocument = totalRateMatchingCondition / totalSentences;
         //rateOfDocument > 70 &&
-        if (rateOfDocument > Constants.CONSTANT_RATE_DOCUMENT && rateOfDocument > plagiarismDocumentDTO.getRate()) {
+        if (rateOfDocument > constantRateDoc && rateOfDocument > plagiarismDocumentDTO.getRate()) {
             // TODO: Build data store plagiarism info of document
             plagiarismDocumentDTO.setDocumentId(documentMatchingId);
             plagiarismDocumentDTO.setRate(rateOfDocument);
@@ -674,8 +693,13 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private boolean existPlagiarism(PlagiarismDocumentDTO plagiarismDocumentDTO) {
+        float constantRateDoc = Constants.CONSTANT_RATE_DOCUMENT;
+        RateApp rateApp = rateService.findByType(RateType.DOCUMENT.toString());
+        if (rateApp != null) {
+            constantRateDoc = Float.parseFloat(rateApp.getRate().toString()) ;
+        }
         return plagiarismDocumentDTO != null && plagiarismDocumentDTO.getDocumentId() != null
-                && plagiarismDocumentDTO.getRate() > Constants.CONSTANT_RATE_DOCUMENT
+                && plagiarismDocumentDTO.getRate() > constantRateDoc
                 && plagiarismDocumentDTO.getPlagiarism() != null
                 && plagiarismDocumentDTO.getPlagiarism().size() > 0;
     }

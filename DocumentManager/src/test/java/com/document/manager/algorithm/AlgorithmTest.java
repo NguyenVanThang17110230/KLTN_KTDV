@@ -12,26 +12,39 @@ public class AlgorithmTest {
     public void test() {
         String s1 = "Suppose that X represent a algorithm for the rows of the dynamic programming array and Y";
         String s2 = "Suppose that X represent the rows of the dynamic programming array and Y represent the columns";
-        float percent = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
-        //percent = (percent * s2.length())/ (s1.length());
-        Assert.assertEquals(100.0, percent, 2);
+        float percent = Algorithm.runAlgorithm(s1, s2);
+        Assert.assertEquals(59.0, percent, 2);
     }
 
     @Test
     public void testExample() {
         String s1 = "Tôi học ngành công nghệ thông tin";
         String s2 = "Tôi học kế ngành công nghệ thông tin";
-        float percent = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
-        //percent = (percent * s2.length())/ (s1.length());
-        Assert.assertEquals(100.0, percent, 2);
+        float percent = Algorithm.runAlgorithm(s1, s2);
+        Assert.assertEquals(93.0, percent, 2);
     }
 
     @Test
     public void testTwoTheSameSentence() {
         String s1 = "Tôi học ngành công nghệ thông tin";
         String s2 = "Tôi học ngành công nghệ thông tin";
-        float percent = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(s1, s2), s1.length(), s2.length());
-        //percent = (percent * s2.length())/ (s1.length());
+        float percent = Algorithm.runAlgorithm(s1, s2);
         Assert.assertEquals(100.0, percent, 2);
+    }
+
+    @Test
+    public void testExampleInReport() {
+        String s1 = "p q s j t u v";
+        String s2 = "p q r s j t u v";
+        float percent = Algorithm.runAlgorithm(s1, s2);
+        Assert.assertEquals(88.0, percent, 2);
+    }
+
+    @Test
+    public void testExampleTwoInReport() {
+        String s1 = "a b c x d e f g h i";
+        String s2 = "a b c d e f g h";
+        float percent = Algorithm.runAlgorithm(s1, s2);
+        Assert.assertEquals(80.0, percent, 2);
     }
 }
