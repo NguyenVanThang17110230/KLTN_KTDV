@@ -1,26 +1,23 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import moment from "moment";
 import toastr from "toastr";
 import { accountService } from "../../RestConnector";
 import AnimationLoad from "../../../components/Animation/AnimationLoad";
 
-const ViewProfileUserModal = ({ style, value, closeModal,changeBlock }) => {
-  console.log("data-edit-ne", value.isActive);
+const ViewProfileUserModal = ({ style, value, closeModal, changeBlock, changeUnlock }) => {
   const [isCheck, setIsCheck] = useState(false);
   const [isBlock, setIsBlock] = useState(value.isActive);
 
   useEffect(() => {
-    setIsBlock(value.isActive)
-  }, [value])
-  console.log("iss", isBlock);
+    setIsBlock(value.isActive);
+  }, [value]);
   const lockAccount = async () => {
     const { id } = value;
     if (id) {
       setIsCheck(true);
       try {
         const dataAPI = await accountService.lockAccount(id);
-        console.log("sss", dataAPI);
         toastr.success("Lock account success");
         setIsCheck(false);
         setIsBlock(false);
@@ -34,6 +31,29 @@ const ViewProfileUserModal = ({ style, value, closeModal,changeBlock }) => {
         }
         setIsCheck(false);
         toastr.error("Lock account fail!");
+      }
+    }
+  };
+
+  const unLockAccount = async () => {
+    const { id } = value;
+    if (id) {
+      setIsCheck(true);
+      try {
+        await accountService.unLockAccount(id);
+        toastr.success("Unlock account success");
+        setIsCheck(false);
+        setIsBlock(true);
+        changeUnlock(id);
+      } catch (e) {
+        let msg;
+        switch (e.code) {
+          default: {
+            msg = e.message;
+          }
+        }
+        setIsCheck(false);
+        toastr.error("Unlock account fail!");
       }
     }
   };
@@ -155,15 +175,21 @@ const ViewProfileUserModal = ({ style, value, closeModal,changeBlock }) => {
                   />
                 </div>
                 <div className="flex">
-                  {isBlock && (
+                  {isBlock ? (
                     <button
                       className="flex items-center justify-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white py-2 px-10 rounded focus:outline-none focus:shadow-outline font-semibold disabled:cursor-not-allowed mr-2"
                       onClick={() => lockAccount()}
                     >
                       Lock account
                     </button>
+                  ) : (
+                    <button
+                      className="flex items-center justify-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white py-2 px-10 rounded focus:outline-none focus:shadow-outline font-semibold disabled:cursor-not-allowed mr-2"
+                      onClick={() => unLockAccount()}
+                    >
+                      Unlock account
+                    </button>
                   )}
-
                   <button
                     className="flex items-center justify-center bg-gradient-to-r from-green-400 to-blue-500 hover:from-pink-500 hover:to-yellow-500 text-white py-2 px-10 rounded focus:outline-none focus:shadow-outline font-semibold disabled:cursor-not-allowed"
                     onClick={closeModal}

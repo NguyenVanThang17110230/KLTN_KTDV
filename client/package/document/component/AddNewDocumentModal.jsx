@@ -8,37 +8,6 @@ import SinglePdfPage from "./SinglePdf";
 import AnimationCheckDoc from "./AnimationCheckDoc";
 import CompareFileModal from "./CompareFileModal";
 import SameModal from "./SameModal";
-// import { Modal } from 'reactstrap'
-const readFile = (file) => {
-  return new Promise((resolve, reject) => {
-    // Create file reader
-    let reader = new FileReader();
-
-    // Register event listeners
-    reader.addEventListener("loadend", (e) => resolve(e.target.result));
-    reader.addEventListener("error", reject);
-
-    // Read file
-    reader.readAsArrayBuffer(file);
-  });
-};
-
-const readFile2 = (file) =>{
-  
-    console.log(file)
-    var reader = new FileReader();
-
-    reader.onload = (e) =>
-    { 
-      var arrayBuffer = e.target.result;
-      var array = new Uint8Array(arrayBuffer);
-      // this.setState({ firmware_byte_array: array})
-      console.log('array',array);
-    }
-
-    reader.readAsArrayBuffer(file);
-  
-}
 
 const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const [fileDocumentPriview, setFileDocumentPriview] = useState([]);
@@ -59,7 +28,6 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
       data.getAll("multipartFile", "title", "note");
       // data.append("file",document)
       const dataAPI = await documentService.uploadDocument(data);
-      console.log("sss", dataAPI);
       if (dataAPI.data === null) {
         setFileDocumentPriview([]);
         setSubmitting(false);
@@ -104,7 +72,6 @@ const AddNewDocumentModal = ({ closeModal, style, reloadData }) => {
   const previewPDF = (file) => {
     if (file) {
       setFileDocumentPriview(URL.createObjectURL(file));
-      readFile2(file)
     }
   };
 

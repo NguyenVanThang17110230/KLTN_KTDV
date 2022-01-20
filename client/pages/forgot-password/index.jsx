@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import * as Yup from "yup";
 import toastr from "toastr";
 import { Formik, Field, Form } from "formik";
@@ -20,9 +21,7 @@ const ForgotPassword = () => {
     const { email } = values;
     setSubmitting(true);
     try {
-      console.log("values", values);
-      const res = await accountService.forgotPassword(email);
-      console.log("ress-forgot", res);
+      await accountService.forgotPassword(email);
       setIsSendMail(true);
       Cookies.set("check-reset", 0);
       setMailSend(email);
@@ -33,12 +32,6 @@ const ForgotPassword = () => {
       toastr.success("Send email reset success");
       setSubmitting(false);
     } catch (e) {
-      // let msg;
-      // switch (e.code) {
-      //   default: {
-      //     msg = e.message;
-      //   }
-      // }
       toastr.error("This email does not exist in the system");
       setSubmitting(false);
     }
@@ -46,8 +39,7 @@ const ForgotPassword = () => {
   const resendMail = async() =>{
     const email = mailSend
     try {
-      const res = await accountService.forgotPassword(email);
-      console.log("ress-forgot", res);
+      await accountService.forgotPassword(email);
       setIsSendMail(true);
       Cookies.set("check-reset", 0);
       setMailSend(email);
@@ -57,17 +49,15 @@ const ForgotPassword = () => {
       }, 60000);
       toastr.success("Send email reset success");
     } catch (e) {
-      // let msg;
-      // switch (e.code) {
-      //   default: {
-      //     msg = e.message;
-      //   }
-      // }
       toastr.error("This email does not exist in the system");
     }
   }
 
   return (
+    <>
+    <Head>
+        <title>Forgot password</title>
+      </Head>
     <div className="relative z-10 w-full h-full flex items-center justify-center">
       {isSendMail === false ? (
         <div className="p-5 bg-white rounded-md shadow-md min-w-1/4">
@@ -222,6 +212,8 @@ const ForgotPassword = () => {
         </div>
       )}
     </div>
+    </>
+    
   );
 };
 ForgotPassword.getLayout = function getLayout(page) {

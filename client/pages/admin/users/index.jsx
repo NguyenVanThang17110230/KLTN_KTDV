@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useState } from "react";
+import Head from "next/head";
 import { useTable, usePagination, useFilters,useGlobalFilter } from "react-table";
 import AnimationLoad from "../../../components/Animation/AnimationLoad";
 import { AdminLayout } from "../../../layouts/Admin";
@@ -34,7 +35,6 @@ export default function ManagerUsers() {
     setIsGetData(true);
     try {
       const data = await accountService.getListUser();
-      console.log("data", data);
       setListUser(data.data);
       setIsGetData(false);
     } catch (err) {
@@ -44,13 +44,11 @@ export default function ManagerUsers() {
           msg = err.message;
         }
       }
-      console.log("err", msg);
       setIsGetData(false);
     }
   };
 
   const getProfileInfo = (data) => {
-    console.log("data-cell", data.row.original);
     setDataEdit(data.row.original);
     setIsShowInfo(true);
   };
@@ -59,7 +57,13 @@ export default function ManagerUsers() {
     const newList = [...listUser]
     const selectIndex = listUser.findIndex((item)=>item.id === id)
     newList[selectIndex].isActive = false
-    console.log('kkk',selectIndex);
+    setListUser(newList)
+  }
+
+  const reNewDataUnlock = (id) =>{
+    const newList = [...listUser]
+    const selectIndex = listUser.findIndex((item)=>item.id === id)
+    newList[selectIndex].isActive = true
     setListUser(newList)
   }
 
@@ -85,6 +89,9 @@ export default function ManagerUsers() {
 
   return (
     <>
+    <Head>
+        <title>Manager account</title>
+      </Head>
       <div className="px-20 py-10">
         <div className="p-3 bg-white rounded-md shadow">
           <div className="mb-4 text-2xl font-semibold">List account</div>
@@ -93,7 +100,7 @@ export default function ManagerUsers() {
             className=" w-full table text-gray-600 border-separate space-y-6 text-sm"
             {...getTableProps()}
           >
-            <thead className="bg-gray-100 text-gray-500">
+            <thead className="bg-gray-400 text-gray-900">
               {headerGroups.map((headerGroup, index) => (
                 <tr key={index} {...headerGroup.getHeaderGroupProps()}>
                   {headerGroup.headers.map((column, index) => (
@@ -109,11 +116,11 @@ export default function ManagerUsers() {
                 </tr>
               ))}
             </thead>
-            <tbody {...getTableBodyProps()}>
+            <tbody className="text-gray-900" {...getTableBodyProps()}>
               {page.map((row, i) => {
                 prepareRow(row);
                 return (
-                  <tr className="bg-gray-100" key={i} {...row.getRowProps()}>
+                  <tr className="bg-gray-300" key={i} {...row.getRowProps()}>
                     {row.cells.map((cell, index) => {
                       return (
                         <td
@@ -132,34 +139,33 @@ export default function ManagerUsers() {
               })}
             </tbody>
           </table>
-
           <div className="pagination flex items-center justify-center mt-3">
             <button
-              className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-2 rounded-l-lg ro border-yellow-500"
+              className="py-3 px-5 bg-gradient-to-r from-green-400 to-blue-500 disabled:opacity-50 disabled:cursor-default border-2 rounded-l-lg ro border-blue-500"
               onClick={() => gotoPage(0)}
               disabled={!canPreviousPage}
             >
               {"First"}
             </button>{" "}
             <button
-              className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-t-2 border-b-2 border-r-2 border-yellow-500"
+              className="py-3 px-5 bg-gradient-to-r from-green-400 to-blue-500 disabled:opacity-50 disabled:cursor-default border-t-2 border-b-2 border-r-2 border-blue-500"
               onClick={() => previousPage()}
               disabled={!canPreviousPage}
             >
               {"<"}
             </button>{" "}
-            <div className="border-t-2 border-b-2 border-yellow-500">
-              <span className="py-3 border-r-2 border-yellow-500 px-3">
+            <div className="border-t-2 border-b-2 border-blue-300">
+              <span className="py-3 border-r-2 border-blue-300 px-3">
                 Page{" "}
                 <strong>
                   {pageIndex + 1} of {pageOptions.length}
                 </strong>{" "}
               </span>
-              <span className="py-3 border-r-2 border-yellow-500 px-3">
+              <span className="py-3 border-r-2 border-blue-300 px-3">
                 Go to page:{" "}
                 <input
                   type="number"
-                  className="border-2 border-yellow-500 pl-2"
+                  className="border-2 border-blue-300 pl-2"
                   defaultValue={pageIndex + 1}
                   onChange={(e) => {
                     const page = e.target.value
@@ -185,14 +191,14 @@ export default function ManagerUsers() {
               </select>
             </div>
             <button
-              className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-t-2 border-b-2 border-l-2 border-yellow-500"
+              className="py-3 px-5 bg-gradient-to-r from-green-400 to-blue-500 disabled:opacity-50 disabled:cursor-default border-t-2 border-b-2 border-l-2 border-blue-500"
               onClick={() => nextPage()}
               disabled={!canNextPage}
             >
               {">"}
             </button>{" "}
             <button
-              className="py-3 px-5 bg-gradient-to-r from-pink-500 to-yellow-500 disabled:opacity-50 disabled:cursor-default border-2 rounded-r-lg ro border-yellow-500"
+              className="py-3 px-5 bg-gradient-to-r from-green-400 to-blue-500 disabled:opacity-50 disabled:cursor-default border-2 rounded-r-lg ro border-blue-500"
               onClick={() => gotoPage(pageCount - 1)}
               disabled={!canNextPage}
             >
@@ -207,6 +213,7 @@ export default function ManagerUsers() {
           value={dataEdit}
           closeModal={() => setIsShowInfo(false)}
           changeBlock={(id) => reNewData(id)}
+          changeUnlock={(id)=> reNewDataUnlock(id)}
         />
       )}
 

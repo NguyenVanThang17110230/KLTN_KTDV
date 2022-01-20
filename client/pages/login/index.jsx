@@ -32,7 +32,6 @@ const Login = () => {
       })
     );
     window.open(url)
-    console.log('document-test',z);
   }
 
   const handleLogin = async (values, actions) => {
@@ -40,14 +39,12 @@ const Login = () => {
     setSubmitting(true);
     try {
       const res = await accountService.loginAdmin(values);
-      console.log('res-role',res.roles);
       const nextPage = isAdmin(res.roles) ? "/admin" : "/document";
       toastr.success("login success");
       Cookies.set('check-reset', 0)
       setSubmitting(false);
       router.replace(nextPage);
     } catch (e) {
-      console.log('e',e.response);
       toastr.error(e.response.data.message);
       setSubmitting(false);
     }

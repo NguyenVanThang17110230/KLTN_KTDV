@@ -29,7 +29,6 @@ export default class AccountGateway {
   }
 
   async setAccessToken(token) {
-    console.log("token-1", token);
     const { access_token, refresh_token } = token;
     this.restConnector.setAccessToken(access_token);
     Cookies.set(REFRESH_TOKEN_COOKIE, refresh_token);
@@ -80,6 +79,11 @@ export default class AccountGateway {
 
   async lockAccount(id){
     const resp = await this.restConnector.patch(`/user/lock/`+id)
+    return resp
+  }
+
+  async unLockAccount(id){
+    const resp = await this.restConnector.patch(`/user/unlock/`+id)
     return resp
   }
 

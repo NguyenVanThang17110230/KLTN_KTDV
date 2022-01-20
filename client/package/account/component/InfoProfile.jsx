@@ -5,7 +5,7 @@ import toastr from "toastr";
 import moment from "moment";
 import { accountService } from "../../RestConnector";
 
-const InfoProfile = ({user}) => {
+const InfoProfile = ({user,updateProfile}) => {
   const ProfileSchema = Yup.object().shape({
     firstName: Yup.string().required("First name required"),
     lastName: Yup.string().required("Last name required"),
@@ -20,10 +20,10 @@ const InfoProfile = ({user}) => {
     const id = user.id;
     if (id) {
       try {
-        const dataAPI = await accountService.changeProfile(id, values);
-        console.log("sss", dataAPI);
+        await accountService.changeProfile(id, values);
         setSubmitting(false);
         toastr.success("Update info user success");
+        updateProfile(values)
       } catch (e) {
         let msg;
         switch (e.code) {

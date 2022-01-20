@@ -21,7 +21,6 @@ const ViewFileDetail = ({ style, value, closeModal }) => {
     setNumPages(numPages);
     setPageNumber(1);
   }
-  console.log("url", url);
   return (
     <div
       className={

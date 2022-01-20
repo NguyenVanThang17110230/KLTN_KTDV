@@ -1,7 +1,5 @@
 import React from "react";
 const CompareFileModal = ({ style, value, closeModal }) => {
-  console.log("data-similar", value);
-
   return (
     <>
       {value.plagiarism && (
@@ -93,7 +91,6 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                       }
                     }
 
-                    console.log("arrTarget", arrTarget);
                     return (
                       <div key={index} className="grid grid-cols-2 mb-4 gap-1">
                         <div>
@@ -162,7 +159,6 @@ const CompareFileModal = ({ style, value, closeModal }) => {
                                     );
                                   }
                                 } else {
-                                  console.log("ssss-1");
                                   if (arrTarget.length === 1) {
                                     if (data1.startTarget > 0) {
                                       return (

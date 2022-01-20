@@ -35,7 +35,6 @@ const Document = () => {
           msg = err.message;
         }
       }
-      console.log("err", msg);
     }
   };
 

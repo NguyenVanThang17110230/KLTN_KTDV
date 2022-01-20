@@ -10,7 +10,6 @@ export default class AccountService{
 
   async loginAdmin({email,password}) {
     const token = await this.accountGateway.loginAdmin({email,password});
-    console.log('token-2',token);
     await this.accountGateway.setAccessToken(token.data);
     return token.data
   }
@@ -49,6 +48,10 @@ export default class AccountService{
 
   async lockAccount(id){
     return this.accountGateway.lockAccount(id)
+  }
+
+  async unLockAccount(id){
+    return this.accountGateway.unLockAccount(id)
   }
 
   async logout(){

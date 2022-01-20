@@ -41,7 +41,6 @@ const Profile = () => {
   const getDataUser = async () => {
     try {
       const dataAPI = await accountService.getUserAfterLogin();
-      console.log("sss", dataAPI);
       const userData = dataAPI.data;
       setUser(userData);
     } catch (e) {
@@ -69,6 +68,8 @@ const Profile = () => {
     try {
       await accountService.changePassword(data);
       toastr.success("Change password success");
+      actions.setSubmitting(false);
+      actions.resetForm();
     } catch (err) {
       toastr.error("Current password is not correct!");
       actions.setSubmitting(false);
@@ -77,7 +78,6 @@ const Profile = () => {
 
   const setImageAvt = async (file) => {
     if (file) {
-      console.log('file',file);
       setAvt(file);
       setAvtPreview(URL.createObjectURL(file));
       setShowConfirm(true);
@@ -103,8 +103,17 @@ const Profile = () => {
     }
   };
 
-  console.log('preview image',avtPreview);
-
+  const reNew = (values) =>{
+    const newUser = user
+    newUser.dob = values.dob
+    newUser.email = values.email
+    newUser.firstName = values.firstName
+    newUser.gender = values.gender
+    newUser.lastName = values.lastName
+    newUser.phoneNumber = values.phoneNumber
+    newUser.userCode = values.userCode
+    setUser(newUser)
+  }
   const confirmSaveImageModal = () => {
     return (
       <>
@@ -293,7 +302,7 @@ const Profile = () => {
                 </div>
                 {isProfile ? (
                   <div>
-                    <InfoProfile user={user} />
+                    <InfoProfile user={user} updateProfile={(values)=> reNew(values)} />
                   </div>
                 ) : (
                   <div className="mt-3">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -11,16 +12,13 @@ const ConfirmAccount = () => {
   const [isActive, setIsActive] = useState(false);
   const [isReActive, setIsReActive] = useState(false);
   const router = useRouter();
-  console.log("router", router.query);
-  const dataRouter = router.query
+  const dataRouter = router.query;
   useEffect(() => {
     activeNewAccount();
   }, [dataRouter]);
 
   const activeNewAccount = async () => {
     const { id, uuid } = router.query;
-    console.log("id", id);
-    console.log("uuid", uuid);
     setIsCheck(true);
     if ((id, uuid)) {
       try {
@@ -34,7 +32,6 @@ const ConfirmAccount = () => {
             msg = e.message;
           }
         }
-        console.log("errr", e.response);
         setIsCheck(false);
         setIsActive(false);
         setIsReActive(true);
@@ -43,6 +40,9 @@ const ConfirmAccount = () => {
   };
   return (
     <>
+      <Head>
+        <title>Confirm account</title>
+      </Head>
       {isActive && (
         <div className="w-full max-w-md relative z-10">
           <div className="p-20 bg-success flex items-center flex-col">

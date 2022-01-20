@@ -20,7 +20,6 @@ const PreviewModal = ({ document, toggle, setNewDoc }) => {
         setNewDoc(id, values.title, values.note);
         setSubmitting(false);
       } catch (err) {
-        console.log("err", err);
         toastr.error("Update document fail");
         setSubmitting(false);
       }

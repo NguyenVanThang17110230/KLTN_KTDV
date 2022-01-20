@@ -15,7 +15,6 @@ const UserProvider = ({ children }) => {
     user,
     dataLogin
   }
-  console.log('globalData',globalData);
 
   return (
     <UserContext.Provider value={ globalData }>

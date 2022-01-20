@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, createContext } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import toastr from "toastr";
 import PreviewModal from "../../../package/document/component/PreviewModal";
@@ -9,7 +9,6 @@ const FileViewer = dynamic(() => import("react-file-viewer"), {
   ssr: false,
 });
 const DocumentFile = ({ file, flag }) => {
-  console.log("file-sss", file);
   const [listDocument, setListDocument] = useState(file);
   const [document, setDocument] = useState(null);
   const [isDelete, setIsDelete] = useState(false);
@@ -29,27 +28,24 @@ const DocumentFile = ({ file, flag }) => {
   }, [file]);
 
   const setNewDoc = (id, title, note) => {
-    const data = listDocument.find((x) => x.documentId == id);
-    if (data) {
-      data.title = title;
-      data.note = note;
-      setDocument;
-    }
+    const newList = [...listDocument];
+    const data = listDocument.findIndex((item) => item.documentId === id);
+    newList[data].title = title;
+    newList[data].note = note;
+    setDocument(newList);
   };
 
   const handleDeleteDocument = async (id) => {
-    setIsGetDelete(true)
+    setIsGetDelete(true);
     try {
       const res = await documentService.deleteDocument(id);
-      console.log("res-delete", res);
       const listDoc = listDocument.filter((x) => x.documentId !== id);
       setListDocument(listDoc);
-      setIsGetDelete(false)
+      setIsGetDelete(false);
       toastr.success("Delete success");
     } catch (err) {
-      console.log("e", err);
       // let msg = e.response.data.message;
-      setIsGetDelete(false)
+      setIsGetDelete(false);
       toastr.error("Delete fail");
     }
   };
@@ -59,16 +55,15 @@ const DocumentFile = ({ file, flag }) => {
     setIsDelete(true);
   };
 
-  const cancelDelete = () =>{
+  const cancelDelete = () => {
     setDataDelete(null);
     setIsDelete(false);
-  }
+  };
 
-  const deletefile = () =>{
+  const deletefile = () => {
     setIsDelete(false);
-    handleDeleteDocument(dataDelete.documentId)
-  }
-  
+    handleDeleteDocument(dataDelete.documentId);
+  };
 
   const ConfirmDeleteDocumentModal = () => {
     return (
@@ -114,7 +109,6 @@ const DocumentFile = ({ file, flag }) => {
       </>
     );
   };
-  console.log("listdoc", listDocument);
   return (
     <>
       {listDocument.length > 0 ? (

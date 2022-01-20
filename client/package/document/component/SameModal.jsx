@@ -1,7 +1,6 @@
 import React from "react";
 
 const SameModal = ({ style, value, closeModal }) => {
-    console.log('value',value);
   return (
     <div
       className={

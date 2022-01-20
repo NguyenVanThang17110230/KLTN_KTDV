@@ -9,7 +9,6 @@ import { accountService } from "../../package/RestConnector";
 import UserGuest from "../../layouts/UserGuest";
 const SignUp = () => {
   const [isSignUp, setIsSignUp] = useState(false);
-
   const SignupSchema = Yup.object().shape({
     firstName: Yup.string().required("First name required"),
     lastName: Yup.string().required("Last name required"),
@@ -44,7 +43,6 @@ const SignUp = () => {
             msg = e.message;
           }
         }
-        console.log('res',e.response);
         setSubmitting(false);
         toastr.error(e.response.data.message);
       }

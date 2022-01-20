@@ -12,7 +12,6 @@ export function create({ baseUrl }) {
 
   instance.interceptors.request.use(
     (config) => {
-      console.log("config");
       const token = Cookies.get(ACCESS_TOKEN_COOKIE);
       if (token) {
         config.headers[AUTHORIZATION_HEADER] = "Bearer " + token; // for Spring Boot back-end
@@ -28,33 +27,28 @@ export function create({ baseUrl }) {
       return response;
     },
     async (err) => {
-      console.log("errr-123", err);
       if (err.message === "Network Error") {
         err.code = ApplicationError.name;
         err.message = "Network error!!!";
       }
       const originalConfig = err.config;
       if (originalConfig.url !== "/user/sign-in" && err.response) {
-        console.log("errr-11");
         // Access Token was expired
         if (err.response.status === 403 && !originalConfig._retry) {
           originalConfig._retry = true;
           try {
             const refeshToken = Cookies.get(REFRESH_TOKEN_COOKIE);
-            console.log("refresh", refeshToken);
             if (refeshToken) {
               const res = await instance.post("/user/token/refresh", {
                 authorization: `Bearer ${refeshToken}`,
               });
               const newToken = await res.data.data.access_token;
-              console.log("newToken", newToken);
               await Cookies.set(ACCESS_TOKEN_COOKIE, newToken);
               instance.defaults.headers[AUTHORIZATION_HEADER] =
                 await `Bearer ${newToken}`;
               return await instance(originalConfig);
             }
           } catch (_error) {
-            console.log("errr", _error.response);
             return Promise.reject(_error);
           }
         }
@@ -69,7 +63,6 @@ export function create({ baseUrl }) {
    * @param token
    */
   instance.setAccessToken = function (token) {
-    console.log("token-set", token);
     if (token) {
       Cookies.set(ACCESS_TOKEN_COOKIE, token);
       instance.defaults.headers[AUTHORIZATION_HEADER] = `Bearer ${token}`;

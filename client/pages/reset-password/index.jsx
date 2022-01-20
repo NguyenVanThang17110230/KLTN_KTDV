@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Head from "next/head";
 import { Formik, Field, Form } from "formik";
 import Link from "next/link";
 import toastr from "toastr";
@@ -21,12 +22,8 @@ const SignupSchema = Yup.object().shape({
 const ResetPassword = () => {
   const [isReset, setIsReset] = useState(false);
   const [isCheck,setIscheck] = useState(Cookies.get("check-reset"));
-
   const router = useRouter();
   const uuidAndMail = router.query;
-
-  console.log("check", isCheck);
-  console.log("is-re", isReset);
 
   const handleResetPassword = async (values, actions) => {
     const { uuid, email } = uuidAndMail;
@@ -55,6 +52,10 @@ const ResetPassword = () => {
     }
   };
   return (
+    <>
+    <Head>
+        <title>Reset password</title>
+      </Head>
     <div className="relative z-10 w-full h-full flex items-center justify-center">
       {isReset == false && isCheck == 0 && (
         <div className="min-w-1/4 p-14 bg-white rounded-lg shadow-md">
@@ -245,6 +246,8 @@ const ResetPassword = () => {
         </div>
       )}
     </div>
+    </>
+    
   );
 };
 ResetPassword.getLayout = function getLayout(page) {

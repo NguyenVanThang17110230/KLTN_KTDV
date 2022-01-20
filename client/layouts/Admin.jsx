@@ -22,7 +22,6 @@ export const AdminLayout = ({ children }) => {
     try {
       const dataAPI = await accountService.getUserAfterLogin();
       if(!isAdminP(dataAPI.data.roleApps)){
-        console.log('dd',isAdminP(dataAPI.data.roleApps));
         router.replace("/login");
       }
       else{
@@ -30,14 +29,11 @@ export const AdminLayout = ({ children }) => {
       }
       setIsCheck(false)
     } catch (e) {
-      console.log('e',e);
       setIsCheck(false)
       router.replace("/login");
-      
     }
   };
   const isAdminP = (role) => {
-    console.log('role',role);
     const res = role.find((role) => role.name === UserRole.ROLE_ADMIN);
     if (res) return true;
     return false;

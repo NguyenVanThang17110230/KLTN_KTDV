@@ -17,7 +17,6 @@ const UploadDocumentByAdmin = () => {
     setFlag(false);
     try {
       const data = await documentService.getDocument();
-      console.log("res", data);
       setDocument(data.data);
       setFlag(true);
     } catch (err) {
@@ -27,7 +26,6 @@ const UploadDocumentByAdmin = () => {
           msg = err.message;
         }
       }
-      console.log("err", msg);
     }
   };
   return (
