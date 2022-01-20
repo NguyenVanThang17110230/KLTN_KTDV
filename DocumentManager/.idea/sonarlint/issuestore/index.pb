@@ -111,8 +111,6 @@ f
 6src/main/java/com/document/manager/domain/RoleApp.java,4\a\4a7b445a4fd8fe70b87d518dab78e895b87e9b3a
 o
 ?src/main/java/com/document/manager/rest/DocumentController.java,f\4\f42f6641824b2963d367445c2522ab3c68fca866
-k
-;src/main/java/com/document/manager/rest/UserController.java,c\f\cf18aa1c4278ee4854b3ef5b1d16137576bdd72c
 l
 <src/main/java/com/document/manager/dto/ResetPasswordDTO.java,d\0\d0a5aed0b4ff859ca6314e60fb0c69eb193ee742
 h

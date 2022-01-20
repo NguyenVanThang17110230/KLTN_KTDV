@@ -209,7 +209,7 @@ public class DocumentServiceImpl implements DocumentService {
                 } else {
                     plagiarismDocumentDTO.setMessage(PlagiarismStatus.SIMILAR.name());
                 }
-//                this.printResultTest(plagiarismDocumentDTO);
+                this.printResultTest(plagiarismDocumentDTO);
                 return plagiarismDocumentDTO;
             } else {
                 plagiarismDocumentDTO.setMessage(PlagiarismStatus.DIFFERENT.name());

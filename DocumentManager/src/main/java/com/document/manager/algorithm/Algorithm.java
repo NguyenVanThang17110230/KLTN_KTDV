@@ -5,6 +5,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class Algorithm {
 
+    private static final String PUNCTUATION = "[?!.;,!@#$%^&*()_+=-`:<>/|]";
+
     /**
      * Get the Levenshtein Distance for two given strings.
      * @param s1 The first string.
@@ -12,15 +14,14 @@ public class Algorithm {
      * @return Returns the Levenshtein Distance for two strings.
      */
     public int getLevenshteinDistance(String s1, String s2) {
-//        int s1Length = s1.length();
-//        int s2Length = s2.length();
-
-        int s1Length = s1.trim().replaceAll(" ", "").length();
-        int s2Length = s2.trim().replaceAll(" ", "").length();
+        int s1Length = s1.trim().replaceAll(" ", "").replaceAll(PUNCTUATION, "").length();
+        int s2Length = s2.trim().replaceAll(" ", "").replaceAll(PUNCTUATION, "").length();
 
         char[] s1CharArr = stringToChar(s1.toLowerCase());
         char[] s2CharArr = stringToChar(s2.toLowerCase());
         int[][] distanceMatrix = fillLevenshteinMatrix(s1CharArr, s2CharArr);
+//        System.out.println("Matrix 1:");
+//        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
 
         for (int row = 1; row < s1Length + 1; row++) {
             for (int col = 1; col < s2Length + 1; col++) {
@@ -32,7 +33,9 @@ public class Algorithm {
                 }
             }
         }
-        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
+//        System.out.println("----------------------------------------------------");
+//        System.out.println("Matrix 2:");
+//        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
         return distanceMatrix[s1Length][s2Length];
     }
 
