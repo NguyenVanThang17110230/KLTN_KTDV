@@ -16,7 +16,7 @@ const RateSchema = Yup.object().shape({
   rate: Yup.number()
     .required("rate required!")
     .typeError("you must specify a number")
-    .min(0, "Min value 0.")
+    .min(60, "Min value 60.")
     .max(100, "Max value 100."),
   type: Yup.string().required("type required"),
 });
