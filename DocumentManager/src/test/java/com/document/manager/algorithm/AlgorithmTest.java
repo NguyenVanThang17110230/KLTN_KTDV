@@ -34,16 +34,16 @@ public class AlgorithmTest {
 
     @Test
     public void testExampleInReport() {
-        String s1 = "p q s j t u v";
-        String s2 = "p q r s j t u v";
+        String s1 = "a b c d e f g";
+        String s2 = "a b h c k e f g";
         float percent = Algorithm.runAlgorithm(s1, s2);
-        Assert.assertEquals(88.0, percent, 2);
+        Assert.assertEquals(75.0, percent, 2);
     }
 
     @Test
     public void testExampleTwoInReport() {
-        String s1 = "a b c x d e f g h i";
-        String s2 = "a b c d e f g h";
+        String s1 = "a b c d e f g h i";
+        String s2 = "a b c x d e f g h";
         float percent = Algorithm.runAlgorithm(s1, s2);
         Assert.assertEquals(80.0, percent, 2);
     }

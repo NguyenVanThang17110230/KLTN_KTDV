@@ -9,6 +9,7 @@ public class Algorithm {
 
     /**
      * Get the Levenshtein Distance for two given strings.
+     *
      * @param s1 The first string.
      * @param s2 The second string.
      * @return Returns the Levenshtein Distance for two strings.
@@ -20,30 +21,31 @@ public class Algorithm {
         char[] s1CharArr = stringToChar(s1.toLowerCase());
         char[] s2CharArr = stringToChar(s2.toLowerCase());
         int[][] distanceMatrix = fillLevenshteinMatrix(s1CharArr, s2CharArr);
-//        System.out.println("Matrix 1:");
-//        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
+        System.out.println("Matrix 1:");
+        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
 
         for (int row = 1; row < s1Length + 1; row++) {
             for (int col = 1; col < s2Length + 1; col++) {
+                int cost = 1;
                 if (s1CharArr[row - 1] == s2CharArr[col - 1]) {
-                    distanceMatrix[row][col] = distanceMatrix[row - 1][col - 1];
-                } else {
-                    int tmp = Math.min((distanceMatrix[row - 1][col] + 1), (distanceMatrix[row][col -  1] + 1));
-                    distanceMatrix[row][col] = Math.min(tmp, (distanceMatrix[row - 1][col - 1] + 1));
+                    cost = 0;
                 }
+                distanceMatrix[row][col] = minimum(distanceMatrix[row - 1][col] + 1,
+                        distanceMatrix[row][col - 1] + 1, distanceMatrix[row - 1][col - 1] + cost);
             }
         }
-//        System.out.println("----------------------------------------------------");
-//        System.out.println("Matrix 2:");
-//        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
+        System.out.println("----------------------------------------------------");
+        System.out.println("Matrix 2:");
+        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
         return distanceMatrix[s1Length][s2Length];
     }
 
     /**
      * Gets the percentage of similarity between to strings.
+     *
      * @param distance The Levenshtein Distance.
-     * @param len1 The length of the first string.
-     * @param len2 The length of the second string.
+     * @param len1     The length of the first string.
+     * @param len2     The length of the second string.
      * @return The percentage of similarity between two strings.
      */
     public float getPercentageSimilarity(int distance, int len1, int len2) {
@@ -52,6 +54,7 @@ public class Algorithm {
 
     /**
      * Runs the algorithm for computing the similarity of two strings.
+     *
      * @param s1 The first string for comparison.
      * @param s2 The second string for comparison.
      * @return The percentage of similarity between to strings.
@@ -64,6 +67,7 @@ public class Algorithm {
 
     /**
      * Converts Strings to char arrays.
+     *
      * @param s1 String to convert.
      * @return The character array representing the s1.
      */
@@ -79,6 +83,7 @@ public class Algorithm {
 
     /**
      * Prints a character array.
+     *
      * @param charArr The character array to print.
      */
     private void printCharArray(char[] charArr) {
@@ -89,9 +94,10 @@ public class Algorithm {
 
     /**
      * Prints the Levenshtein matrix.
+     *
      * @param arr The Levenshtein matrix.
-     * @param n Rows in the matrix.
-     * @param m Columns in the matrix.
+     * @param n   Rows in the matrix.
+     * @param m   Columns in the matrix.
      */
     private void printLevenshteinMatrix(int[][] arr, int n, int m) {
         for (int row = 0; row < n + 1; row++) {
@@ -104,6 +110,7 @@ public class Algorithm {
 
     /**
      * Fills the Levenshtein matrix.
+     *
      * @param s1 The first character array.
      * @param s2 The second character array.
      * @return Levenshtein matrix.
@@ -120,5 +127,18 @@ public class Algorithm {
         }
 
         return matrix;
+    }
+
+
+    private int minimum(int a, int b, int c) {
+        int mi;
+        mi = a;
+        if (b < mi) {
+            mi = b;
+        }
+        if (c < mi) {
+            mi = c;
+        }
+        return mi;
     }
 }
