@@ -129,3 +129,15 @@ t
 Dsrc/main/java/com/document/manager/service/impl/RateServiceImpl.java,f\1\f1f1d70ab4175a35ecacf8d0a64fde45e2bea618
 j
 :src/main/java/com/document/manager/dto/enums/RateType.java,b\b\bb799728bbc7633e8d49a1fc0bd071cdbf9f47b1
+o
+?src/main/java/com/document/manager/dto/constants/Constants.java,f\8\f83113a9d6fb1f214e8d852e3afc67ea3d6c6f96
+o
+?src/test/java/com/document/manager/algorithm/AlgorithmTest.java,b\0\b0daee1333f87727877181d79af184d2a37aa4fc
+x
+Hsrc/main/java/com/document/manager/service/impl/DocumentServiceImpl.java,7\9\798350de4e8a5962316ff5f3600342d065d2a121
+k
+;src/main/java/com/document/manager/rest/UserController.java,c\f\cf18aa1c4278ee4854b3ef5b1d16137576bdd72c
+f
+6src/main/java/com/document/manager/domain/RateApp.java,2\f\2fdb6c8176e7b576c76cbcb0251d0414d3ae9aa4
+k
+;src/main/java/com/document/manager/algorithm/Algorithm.java,7\5\75498cc36cead07a86f3aff3e1cf5b5c72d3f87d

@@ -646,8 +646,7 @@ public class DocumentServiceImpl implements DocumentService {
                 Sentences sentences = mapSentences.get(position);
 
                 // TODO: Calculate percent plagiarism
-                float percent = Algorithm.getPercentageSimilarity(Algorithm.getLevenshteinDistance(target, sentences.getRawText()),
-                        target.length(), sentences.getRawText().length());
+                float percent = Algorithm.runAlgorithm(target, sentences.getRawText());
 
                 // TODO: Check with constant number
                 plagiarismSentencesDTO.setTarget(target);

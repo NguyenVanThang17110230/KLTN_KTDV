@@ -21,8 +21,6 @@ public class Algorithm {
         char[] s1CharArr = stringToChar(s1.toLowerCase());
         char[] s2CharArr = stringToChar(s2.toLowerCase());
         int[][] distanceMatrix = fillLevenshteinMatrix(s1CharArr, s2CharArr);
-        System.out.println("Matrix 1:");
-        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
 
         for (int row = 1; row < s1Length + 1; row++) {
             for (int col = 1; col < s2Length + 1; col++) {
@@ -34,9 +32,6 @@ public class Algorithm {
                         distanceMatrix[row][col - 1] + 1, distanceMatrix[row - 1][col - 1] + cost);
             }
         }
-        System.out.println("----------------------------------------------------");
-        System.out.println("Matrix 2:");
-        printLevenshteinMatrix(distanceMatrix, s1Length, s2Length);
         return distanceMatrix[s1Length][s2Length];
     }
 
@@ -60,8 +55,8 @@ public class Algorithm {
      * @return The percentage of similarity between to strings.
      */
     public static float runAlgorithm(String s1, String s2) {
-        int s1Length = s1.trim().replaceAll(" ", "").length();
-        int s2Length = s2.trim().replaceAll(" ", "").length();
+        int s1Length = s1.trim().replaceAll(" ", "").replaceAll(PUNCTUATION, "").length();
+        int s2Length = s2.trim().replaceAll(" ", "").replaceAll(PUNCTUATION, "").length();
         return (getPercentageSimilarity(getLevenshteinDistance(s1, s2), s1Length, s2Length));
     }
 
